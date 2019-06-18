@@ -1619,15 +1619,19 @@ If this field is blank the default test level used is NoTestRun."""
                 os.makedirs(outputFileUrl)
             outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'tmp', 'branches.tmp')
             gitFinalUrl = gitPreffix + gitUser + ':' + gitPass + '@' + gitSuffix
-            os.system('git ls-remote --heads --refs ' + gitFinalUrl + ' ' + branchFilter + ' > ' + outputFileUrl)
             branches = []
-            fileOutput = open(outputFileUrl, 'r', encoding='utf8')
-            for line in fileOutput:
+            proc = subprocess.Popen('git ls-remote --heads --refs ' + gitFinalUrl + ' ' + branchFilter, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                    stdin=subprocess.PIPE)
+            # os.system('git ls-remote --heads --refs ' + gitFinalUrl + ' ' + branchFilter + ' > ' + outputFileUrl)
+            # fileOutput = open(outputFileUrl, 'r', encoding='utf8')
+            # for line in fileOutput:
+            for line in proc.stdout:
+                lineStr = line.decode()
                 if self.stop:
                     self.consoleOutputTextCtrl.AppendText("Process stopped.")
                     self.consoleOutputTextCtrl.AppendText(os.linesep)
                     return
-                branchesInFile = line.split('refs/heads/')
+                branchesInFile = lineStr.split('refs/heads/')
                 if len(branchesInFile) > 1:
                     branchName = branchesInFile[1].strip('\r\n')
                     branchName = branchName.strip()

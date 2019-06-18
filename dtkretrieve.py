@@ -631,6 +631,11 @@ class RetrieveMetadataPanel(wx.Panel):
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
+        thread = threading.Thread(target=self.UnzipFile, args=(pathToZipFile))
+        thread.setDaemon(True)
+        thread.start()
+
+    def UnzipFile(self, pathToZipFile):
         retrieveUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'retrieve')
         retrieveMetadataUrl = os.path.join(retrieveUrl, 'metadata')
         zipRef = zipfile.ZipFile(pathToZipFile, 'r')
@@ -640,6 +645,8 @@ class RetrieveMetadataPanel(wx.Panel):
         self.consoleOutputTextCtrl.AppendText("Unzipping files from: " + pathToZipFile + " - To: " + unzippedFolder)
         self.consoleOutputTextCtrl.AppendText(os.linesep)
         zipRef.extractall(unzippedFolder)
+        self.consoleOutputTextCtrl.AppendText("Files unzipped")
+        self.consoleOutputTextCtrl.AppendText(os.linesep)
 
     def RefreshLog(self, event):
         if self.stop:
