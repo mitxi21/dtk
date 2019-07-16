@@ -7,7 +7,6 @@ import wx
 
 
 class AddSandboxPanel(wx.Panel):
-
     def __init__(self, parent):
         super(AddSandboxPanel, self).__init__(parent)
 
@@ -32,17 +31,21 @@ class AddSandboxPanel(wx.Panel):
             self.sandboxOverrideLbl = wx.StaticText(self, label="Sandbox Override Name")
             self.sandboxOverrideLbl.ToolTip = "The sandbox name set here will be added instead of the Sandbox Type."
             self.sandboxOverrideTextCtrl = wx.TextCtrl(self)
-            self.sandboxOverrideTextCtrl.ToolTip = "The sandbox name set here will be added instead of the Sandbox Type."
+            self.sandboxOverrideTextCtrl.ToolTip = (
+                "The sandbox name set here will be added instead of the Sandbox Type."
+            )
 
-        self.btnShowSfdxAliasList = wx.Button(self, label='Show SFDX Alias List')
+        self.btnShowSfdxAliasList = wx.Button(self, label="Show SFDX Alias List")
         self.btnShowSfdxAliasList.Bind(wx.EVT_BUTTON, self.ShowSfdxAliasList)
 
-        self.btnAddSandbox = wx.Button(self, label='Add Sandbox')
+        self.btnAddSandbox = wx.Button(self, label="Add Sandbox")
         self.btnAddSandbox.Bind(wx.EVT_BUTTON, self.AddSandboxButton)
 
         self.consoleOutputLbl = wx.StaticText(self, label="Log")
         self.consoleOutputLbl.ToolTip = "Console output log."
-        self.consoleOutputTextCtrl = wx.TextCtrl(self, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_AUTO_URL|wx.HSCROLL)
+        self.consoleOutputTextCtrl = wx.TextCtrl(
+            self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_AUTO_URL | wx.HSCROLL
+        )
         self.consoleOutputTextCtrl.ToolTip = "Console output log."
 
         row = 0
@@ -51,29 +54,54 @@ class AddSandboxPanel(wx.Panel):
         spanH = 15
 
         self.mainSizer.Add(self.organizationLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.organizationComboBox, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.organizationComboBox,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.sandboxTypeLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.sandboxTypeComboBox, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.sandboxTypeComboBox,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         if dtkglobal.advSetting:
-            self.mainSizer.Add(self.sandboxOverrideLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
-                          border=5)
-            self.mainSizer.Add(self.sandboxOverrideTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                          flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+            self.mainSizer.Add(
+                self.sandboxOverrideLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+            )
+            self.mainSizer.Add(
+                self.sandboxOverrideTextCtrl,
+                pos=(row, col + 1),
+                span=(spanV, spanH),
+                flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+                border=5,
+            )
             row += 1
 
-        self.mainSizer.Add(self.btnShowSfdxAliasList, pos=(row, 0), flag= wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.btnAddSandbox, pos=(row, col + 15), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(self.btnShowSfdxAliasList, pos=(row, 0), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.btnAddSandbox, pos=(row, col + 15), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
-        self.mainSizer.Add(self.consoleOutputLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.consoleOutputLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
-        self.mainSizer.Add(self.consoleOutputTextCtrl, pos=(row, col), span=(spanV + 10, spanH + 1),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.consoleOutputTextCtrl,
+            pos=(row, col),
+            span=(spanV + 10, spanH + 1),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         self.mainSizer.AddGrowableCol(2)
         self.mainSizer.AddGrowableRow(row)
         self.mainSizer.SetEmptyCellSize((0, 0))
@@ -82,8 +110,10 @@ class AddSandboxPanel(wx.Panel):
         self.SetSizer(self.mainSizer)
 
     def ShowSfdxAliasList(self, event):
-        cmd = ['sfdx', 'force:alias:list']
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+        cmd = ["sfdx", "force:alias:list"]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
         self.consoleOutputTextCtrl.AppendText(proc.stdout.read())
         self.consoleOutputTextCtrl.AppendText(os.linesep)
 
@@ -96,42 +126,47 @@ class AddSandboxPanel(wx.Panel):
             if len(sandboxOverride) > 0:
                 sdbxName = sandboxOverride
         if len(orgName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         if len(sdbxName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a sandbox.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select a sandbox.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         sdbxName = sdbxName.rstrip()
         sdbxName = sdbxName.replace(" ", "_")
-        sandboxName = orgName + '_' + sdbxName
+        sandboxName = orgName + "_" + sdbxName
         if sdbxName in dtkglobal.orgDict[orgName]["sandboxes"]:
-            dlg = wx.MessageDialog(self,
-                                   "The sandbox '" + sdbxName + "' already exist for organization '" + orgName + "', please choose another sandbox.",
-                                   "DTK - Add Sandbox", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(
+                self,
+                "The sandbox '"
+                + sdbxName
+                + "' already exist for organization '"
+                + orgName
+                + "', please choose another sandbox.",
+                "DTK - Add Sandbox",
+                wx.OK | wx.ICON_ERROR,
+            )
             dlg.ShowModal()
             dlg.Destroy()
         else:
-            if sdbxName == 'Prod':
-                serverUrl = 'https://login.salesforce.com'
+            if sdbxName == "Prod":
+                serverUrl = "https://login.salesforce.com"
             else:
-                serverUrl = 'https://test.salesforce.com'
+                serverUrl = "https://test.salesforce.com"
             self.consoleOutputTextCtrl.AppendText(
-                "Adding sandbox '" + sdbxName + "' for organization '" + orgName + "'.")
+                "Adding sandbox '" + sdbxName + "' for organization '" + orgName + "'."
+            )
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             self.consoleOutputTextCtrl.AppendText("This needs an online login on the browser to complete the addition.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             self.consoleOutputTextCtrl.AppendText(
-                "If the browser is closed without doing the login the sandbox won't be added.")
+                "If the browser is closed without doing the login the sandbox won't be added."
+            )
             self.consoleOutputTextCtrl.AppendText(os.linesep)
-            thread = threading.Thread(target=self.RunAddSandbox, args=(orgName, sdbxName, sandboxName, serverUrl,))
+            thread = threading.Thread(target=self.RunAddSandbox, args=(orgName, sdbxName, sandboxName, serverUrl))
             thread.setDaemon(True)
             thread.start()
 
@@ -139,8 +174,10 @@ class AddSandboxPanel(wx.Panel):
         self.consoleOutputTextCtrl.AppendText(text)
 
     def RunAddSandbox(self, orgName, sdbxName, sandboxName, serverUrl):
-        cmd = ['sfdx', 'force:auth:web:login', '-a', sandboxName, '-r', serverUrl]
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+        cmd = ["sfdx", "force:auth:web:login", "-a", sandboxName, "-r", serverUrl]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
         for line in proc.stdout:
             wx.CallAfter(self.OnText, line)
         dtkglobal.orgDict[orgName]["sandboxes"].append(sdbxName)
@@ -152,7 +189,6 @@ class AddSandboxPanel(wx.Panel):
 
 
 class ManageSandboxPanel(wx.Panel):
-
     def __init__(self, parent):
         super(ManageSandboxPanel, self).__init__(parent)
 
@@ -173,10 +209,10 @@ class ManageSandboxPanel(wx.Panel):
         self.sandboxesListBox = wx.ListBox(self)
         self.sandboxesListBox.ToolTip = "List of Sandboxes available."
 
-        self.btnOpenSandbox = wx.Button(self, label='Open')
+        self.btnOpenSandbox = wx.Button(self, label="Open")
         self.btnOpenSandbox.Bind(wx.EVT_BUTTON, self.OpenSandboxButton)
 
-        self.btnDeleteSandbox = wx.Button(self, label='Delete Sandbox')
+        self.btnDeleteSandbox = wx.Button(self, label="Delete Sandbox")
         self.btnDeleteSandbox.Bind(wx.EVT_BUTTON, self.DeleteSandboxButton)
 
         row = 0
@@ -185,16 +221,30 @@ class ManageSandboxPanel(wx.Panel):
         spanH = 18
 
         self.mainSizer.Add(self.organizationLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.organizationComboBox, pos=(row, col + 1), span=(spanV, spanH - 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.organizationComboBox,
+            pos=(row, col + 1),
+            span=(spanV, spanH - 1),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.sandboxesLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         row += 1
-        self.mainSizer.Add(self.sandboxesListBox, pos=(row, col), span=(spanV + 10, spanH), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.sandboxesListBox,
+            pos=(row, col),
+            span=(spanV + 10, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 10
 
         self.mainSizer.Add(self.btnOpenSandbox, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.btnDeleteSandbox, pos=(row, col + spanH - 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.btnDeleteSandbox, pos=(row, col + spanH - 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         self.mainSizer.AddGrowableCol(2)
         self.mainSizer.AddGrowableRow(row - 1)
         self.mainSizer.SetEmptyCellSize((0, 0))
@@ -212,72 +262,82 @@ class ManageSandboxPanel(wx.Panel):
     def OpenSandboxButton(self, event):
         orgName = self.organizationComboBox.GetValue()
         if len(orgName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         if self.sandboxesListBox.GetSelection() == -1:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a sandbox.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select a sandbox.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         sdbxName = self.sandboxesListBox.GetString(self.sandboxesListBox.GetSelection())
-        sandboxName = orgName + '_' + sdbxName
+        sandboxName = orgName + "_" + sdbxName
         thread = threading.Thread(target=self.RunOpenSandbox, args=(sandboxName,))
         thread.setDaemon(True)
         thread.start()
 
     def RunOpenSandbox(self, sandboxName):
-        cmd = ['sfdx', 'force:org:open', '-u', sandboxName]
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-        directory = os.path.join(os.path.expanduser('~'), '.dtk', 'log')
+        cmd = ["sfdx", "force:org:open", "-u", sandboxName]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        directory = os.path.join(os.path.expanduser("~"), ".dtk", "log")
         if not os.path.exists(directory):
             os.makedirs(directory)
-        outputFileUrl = os.path.join(directory, 'output.log')
-        outputFile = open(outputFileUrl, 'wb')
+        outputFileUrl = os.path.join(directory, "output.log")
+        outputFile = open(outputFileUrl, "wb")
         outputFile.write(proc.stdout.read())
         outputFile.close()
+        fileOutput = open(outputFileUrl, "r", encoding="utf8")
+        for line in fileOutput:
+            if "ERROR" in line:
+                dlg = wx.MessageDialog(self, line + "\nPlease remove the sandbox and register it again.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy()
+                break
 
     def DeleteSandboxButton(self, event):
         orgName = self.organizationComboBox.GetValue()
         if len(orgName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         if self.sandboxesListBox.GetSelection() == -1:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a sandbox.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select a sandbox.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         sdbxName = self.sandboxesListBox.GetString(self.sandboxesListBox.GetSelection())
-        sandboxName = orgName + '_' + sdbxName
-        dlg = wx.MessageDialog(self,
-                               "The sandbox '" + sdbxName + "' from organization '" + orgName + "' will be removed from DTK. Please confirm.",
-                               "DTK - Delete Sandbox", wx.YES_NO | wx.ICON_WARNING)
+        sandboxName = orgName + "_" + sdbxName
+        dlg = wx.MessageDialog(
+            self,
+            "The sandbox '"
+            + sdbxName
+            + "' from organization '"
+            + orgName
+            + "' will be removed from DTK. Please confirm.",
+            "DTK - Delete Sandbox",
+            wx.YES_NO | wx.ICON_WARNING,
+        )
         result = dlg.ShowModal()
         if result == wx.ID_YES:
-            thread = threading.Thread(target=self.RunDeleteSandbox, args=(orgName, sdbxName, sandboxName,))
+            thread = threading.Thread(target=self.RunDeleteSandbox, args=(orgName, sdbxName, sandboxName))
             thread.setDaemon(True)
             thread.start()
         dlg.Destroy()
 
     def RunDeleteSandbox(self, orgName, sdbxName, sandboxName):
-        cmd = ['sfdx', 'force:alias:set', sandboxName + '=']
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-        directory = os.path.join(os.path.expanduser('~'), '.dtk', 'log')
+        cmd = ["sfdx", "force:alias:set", sandboxName + "="]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        directory = os.path.join(os.path.expanduser("~"), ".dtk", "log")
         if not os.path.exists(directory):
             os.makedirs(directory)
-        outputFileUrl = os.path.join(directory, 'output.log')
-        outputFile = open(outputFileUrl, 'wb')
+        outputFileUrl = os.path.join(directory, "output.log")
+        outputFile = open(outputFileUrl, "wb")
         outputFile.write(proc.stdout.read())
         outputFile.close()
         dtkglobal.orgDict[orgName]["sandboxes"].remove(sdbxName)
@@ -288,8 +348,8 @@ class ManageSandboxPanel(wx.Panel):
         self.sandboxesListBox.Items = sandboxList
         self.Layout()
 
-class ManageOrganizationPanel(wx.Panel):
 
+class ManageOrganizationPanel(wx.Panel):
     def __init__(self, parent):
         super(ManageOrganizationPanel, self).__init__(parent)
 
@@ -330,10 +390,10 @@ class ManageOrganizationPanel(wx.Panel):
         self.scriptFolderTextCtrl = wx.TextCtrl(self)
         self.scriptFolderTextCtrl.ToolTip = "Script Folder."
 
-        self.btnUpdate = wx.Button(self, label='Update')
+        self.btnUpdate = wx.Button(self, label="Update")
         self.btnUpdate.Bind(wx.EVT_BUTTON, self.UpdateButton)
 
-        self.btnDelete = wx.Button(self, label='Delete')
+        self.btnDelete = wx.Button(self, label="Delete")
         self.btnDelete.Bind(wx.EVT_BUTTON, self.DeleteButton)
 
         row = 0
@@ -342,36 +402,71 @@ class ManageOrganizationPanel(wx.Panel):
         spanH = 18
 
         self.mainSizer.Add(self.organizationLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.organizationListBox, pos=(row, col + 1), span=(spanV + 10, spanH), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.organizationListBox,
+            pos=(row, col + 1),
+            span=(spanV + 10, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 10
 
         self.mainSizer.Add(self.gitUrlLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.gitUrlTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.gitUrlTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.gitUserLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.gitUserTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.gitUserTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.gitPassLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.gitPassTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.gitPassTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
-        self.mainSizer.Add(self.metadataFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.metadataFolderTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.metadataFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(
+            self.metadataFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.scriptFolderTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.scriptFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.btnUpdate, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.btnDelete, pos=(row, col + spanH), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.btnDelete, pos=(row, col + spanH), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         self.mainSizer.AddGrowableCol(2)
         self.mainSizer.SetEmptyCellSize((0, 0))
         self.Layout()
@@ -391,7 +486,9 @@ class ManageOrganizationPanel(wx.Panel):
             if len(dtkglobal.orgDict[sdbxName]["gituser"]) > 0:
                 self.gitUserTextCtrl.WriteText(dtkglobal.orgDict[sdbxName]["gituser"])
                 if len(dtkglobal.orgDict[sdbxName]["gitpass"]) > 0:
-                    gitpassDecoded = dtkglobal.Decode(dtkglobal.orgDict[sdbxName]["gituser"], dtkglobal.orgDict[sdbxName]["gitpass"])
+                    gitpassDecoded = dtkglobal.Decode(
+                        dtkglobal.orgDict[sdbxName]["gituser"], dtkglobal.orgDict[sdbxName]["gitpass"]
+                    )
                     self.gitPassTextCtrl.WriteText(gitpassDecoded)
             if len(dtkglobal.orgDict[sdbxName]["metadatafolder"]) > 0:
                 self.metadataFolderTextCtrl.WriteText(dtkglobal.orgDict[sdbxName]["metadatafolder"])
@@ -400,9 +497,7 @@ class ManageOrganizationPanel(wx.Panel):
 
     def UpdateButton(self, event):
         if self.organizationListBox.GetSelection() == -1:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -415,32 +510,41 @@ class ManageOrganizationPanel(wx.Panel):
             dtkglobal.orgDict[sdbxName]["metadatafolder"] = self.metadataFolderTextCtrl.GetValue()
             dtkglobal.orgDict[sdbxName]["script"] = self.scriptFolderTextCtrl.GetValue()
             dtkglobal.StoreOrgs()
-            dlg = wx.MessageDialog(self,
-                                   "The organization '" + sdbxName + "' has been updated.",
-                                   "DTK - Update Organization", wx.OK | wx.ICON_INFORMATION)
+            dlg = wx.MessageDialog(
+                self,
+                "The organization '" + sdbxName + "' has been updated.",
+                "DTK - Update Organization",
+                wx.OK | wx.ICON_INFORMATION,
+            )
             dlg.ShowModal()
             dlg.Destroy()
 
     def DeleteButton(self, event):
         if self.organizationListBox.GetSelection() == -1:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Organizations", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         sdbxName = self.organizationListBox.GetString(self.organizationListBox.GetSelection())
         if sdbxName in dtkglobal.orgDict:
             if len(dtkglobal.orgDict[sdbxName]["sandboxes"]) > 0:
-                dlg = wx.MessageDialog(self,
-                                       "The organization '" + sdbxName + "' can't be deleted, please remove first the sandboxes linked to this organization.",
-                                       "DTK - Delete Organization", wx.OK | wx.ICON_ERROR)
+                dlg = wx.MessageDialog(
+                    self,
+                    "The organization '"
+                    + sdbxName
+                    + "' can't be deleted, please remove first the sandboxes linked to this organization.",
+                    "DTK - Delete Organization",
+                    wx.OK | wx.ICON_ERROR,
+                )
                 dlg.ShowModal()
                 dlg.Destroy()
             else:
-                dlg = wx.MessageDialog(self,
-                                       "The organization '" + sdbxName + "' will be deleted from DTK. Please confirm.",
-                                       "DTK - Delete Organization", wx.YES_NO | wx.ICON_WARNING)
+                dlg = wx.MessageDialog(
+                    self,
+                    "The organization '" + sdbxName + "' will be deleted from DTK. Please confirm.",
+                    "DTK - Delete Organization",
+                    wx.YES_NO | wx.ICON_WARNING,
+                )
                 result = dlg.ShowModal()
                 if result == wx.ID_YES:
                     dtkglobal.orgDict.pop(sdbxName)
@@ -454,7 +558,6 @@ class ManageOrganizationPanel(wx.Panel):
 
 
 class AddOrganizationPanel(wx.Panel):
-
     def __init__(self, parent):
         super(AddOrganizationPanel, self).__init__(parent)
         self.InitUI()
@@ -494,12 +597,14 @@ class AddOrganizationPanel(wx.Panel):
         self.scriptFolderTextCtrl.ToolTip = "Script Folder."
         self.scriptFolderTextCtrl.AppendText(dtkglobal.defaultScriptFolder)
 
-        self.btnAddOrganization = wx.Button(self, label='Add Organization')
+        self.btnAddOrganization = wx.Button(self, label="Add Organization")
         self.btnAddOrganization.Bind(wx.EVT_BUTTON, self.AddOrganizationButton)
 
         self.consoleOutputLbl = wx.StaticText(self, label="Log")
         self.consoleOutputLbl.ToolTip = "Console output log."
-        self.consoleOutputTextCtrl = wx.TextCtrl(self, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_AUTO_URL|wx.HSCROLL)
+        self.consoleOutputTextCtrl = wx.TextCtrl(
+            self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_AUTO_URL | wx.HSCROLL
+        )
         self.consoleOutputTextCtrl.ToolTip = "Console output log."
 
         row = 0
@@ -508,39 +613,82 @@ class AddOrganizationPanel(wx.Panel):
         spanH = 19
 
         self.mainSizer.Add(self.organizationLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.organizationTextCtrl, pos=(row, col + 1), span=(spanV, spanH), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.organizationTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.gitUrlLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.gitUrlTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.gitUrlTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.gitUserLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.gitUserTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.gitUserTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.gitPassLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.gitPassTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.gitPassTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
-        self.mainSizer.Add(self.metadataFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.metadataFolderTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.metadataFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(
+            self.metadataFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.scriptFolderTextCtrl, pos=(row, col + 1), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.scriptFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
-        self.mainSizer.Add(self.btnAddOrganization, pos=(row, col + spanH), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.btnAddOrganization, pos=(row, col + spanH), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
-        self.mainSizer.Add(self.consoleOutputLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,  border=5)
+        self.mainSizer.Add(
+            self.consoleOutputLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
-        self.mainSizer.Add(self.consoleOutputTextCtrl, pos=(row, col), span=(spanV + 9, spanH + 2), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.consoleOutputTextCtrl,
+            pos=(row, col),
+            span=(spanV + 9, spanH + 2),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         self.mainSizer.AddGrowableCol(2)
         self.mainSizer.AddGrowableRow(row)
         self.mainSizer.SetEmptyCellSize((0, 0))
@@ -553,9 +701,9 @@ class AddOrganizationPanel(wx.Panel):
         sdbxName = sdbxName.rstrip()
         sdbxName = sdbxName.replace(" ", "_")
         if len(sdbxName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization name.",
-                                   "DTK - Organizations", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(
+                self, "Please select an organization name.", "DTK - Organizations", wx.OK | wx.ICON_ERROR
+            )
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -566,7 +714,12 @@ class AddOrganizationPanel(wx.Panel):
         script = self.scriptFolderTextCtrl.GetLineText(0)
         gitpassEncoded = dtkglobal.Encode(gituser, gitpass)
         if sdbxName in dtkglobal.orgDict:
-            dlg = wx.MessageDialog(self, "The organization '" + sdbxName + "' already exist, please choose another name", "DTK - Add Organization.", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(
+                self,
+                "The organization '" + sdbxName + "' already exist, please choose another name",
+                "DTK - Add Organization.",
+                wx.OK | wx.ICON_ERROR,
+            )
             dlg.ShowModal()
             dlg.Destroy()
         else:
@@ -579,15 +732,15 @@ class AddOrganizationPanel(wx.Panel):
             sdbxConf["script"] = script
             dtkglobal.orgDict[sdbxName] = sdbxConf
             dtkglobal.StoreOrgs()
-            self.consoleOutputTextCtrl.AppendText('Organization added with name: ' + sdbxName)
+            self.consoleOutputTextCtrl.AppendText("Organization added with name: " + sdbxName)
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             dtkglobal.ReadOrgs()
             self.Parent.GetPage(0).organizationComboBox.Items = dtkglobal.orgList
             self.Parent.GetPage(1).organizationComboBox.Items = dtkglobal.orgList
             self.Parent.GetPage(2).organizationListBox.Items = dtkglobal.orgList
 
-class ManageOrgsFrame(wx.Frame):
 
+class ManageOrgsFrame(wx.Frame):
     def __init__(self, parent=None):
         super(ManageOrgsFrame, self).__init__(parent, title="Organizations")
         myStream = dtkglobal.getImageStream()
@@ -596,7 +749,7 @@ class ManageOrgsFrame(wx.Frame):
         icon = wx.Icon()
         icon.CopyFromBitmap(myBitmap)
         self.SetIcon(icon)
-        #dtkglobal.MakeModal(self, True)
+        # dtkglobal.MakeModal(self, True)
         self.InitUI()
 
     def InitUI(self):
@@ -624,4 +777,8 @@ class ManageOrgsFrame(wx.Frame):
 
         self.Centre()
         self.MinSize = self.Size
+        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.Show()
+
+    def OnCloseWindow(self, event):
+        self.Destroy()

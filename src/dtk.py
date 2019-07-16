@@ -2,15 +2,17 @@ import dtkdeploy
 import dtkglobal
 import dtkorg
 import dtkretrieve
+import dtkmdtemplates
+import dtkqueries
 import tempfile
 import ctypes
 import os
 import wx
 
-pid_file = tempfile.gettempdir() + 'tmp_armor_pid.txt'
+pid_file = tempfile.gettempdir() + "tmp_armor_pid.txt"
+
 
 class MainFrame(wx.Frame):
-
     def __init__(self, parent, title):
         super(MainFrame, self).__init__(parent, title=title)
 
@@ -22,30 +24,31 @@ class MainFrame(wx.Frame):
         self.SetIcon(icon)
         dtkglobal.LoadSettings()
         dtkglobal.LoadOrganizations()
+        dtkglobal.LoadMetadataTemplates()
+        dtkglobal.LoadSOQLTemplates()
         self.InitUI()
         self.Centre()
-
 
     def InitUI(self):
 
         panel = wx.Panel(self)
 
         mainSizer = wx.GridBagSizer(5, 5)
-        environmentsLbl = wx.StaticBox(panel, -1, 'Org Management:')
+        environmentsLbl = wx.StaticBox(panel, -1, "Org Management:")
         environmentSizer = wx.StaticBoxSizer(environmentsLbl, wx.VERTICAL)
 
-        btnManageSandbox = wx.Button(panel, label='Organizations')
+        btnManageSandbox = wx.Button(panel, label="Organizations")
         btnManageSandbox.Bind(wx.EVT_BUTTON, self.ManageSandboxButton)
 
         environmentSizer.Add(btnManageSandbox, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=5)
 
-        releaseLbl = wx.StaticBox(panel, -1, 'Release Management:')
+        releaseLbl = wx.StaticBox(panel, -1, "Release Management:")
         releaseSizer = wx.StaticBoxSizer(releaseLbl, wx.VERTICAL)
 
-        btnRetrieve = wx.Button(panel, label='Retrieve')
+        btnRetrieve = wx.Button(panel, label="Retrieve")
         btnRetrieve.Bind(wx.EVT_BUTTON, self.RetrieveButton)
 
-        btnDeploy = wx.Button(panel, label='Deploy')
+        btnDeploy = wx.Button(panel, label="Deploy")
         btnDeploy.Bind(wx.EVT_BUTTON, self.DeployButton)
 
         releaseSizer.Add(btnRetrieve, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=5)
@@ -59,13 +62,13 @@ class MainFrame(wx.Frame):
         row = 0
         col = 0
 
-        mainSizer.Add(environmentSizer, pos=(row, col), span=(1, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        mainSizer.Add(
+            environmentSizer, pos=(row, col), span=(1, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
         mainSizer.Add(releaseSizer, pos=(row, col), span=(1, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         row += 1
-        mainSizer.Add(btnExit, pos=(row, col +3), span=(1, 1), flag=wx.BOTTOM | wx.RIGHT, border=5)
-        row += 1
-        mainSizer.Add(line,pos=(row, col), span=(1, 5), flag=wx.EXPAND | wx.BOTTOM, border=5)
+        mainSizer.Add(btnExit, pos=(row, col + 3), span=(4, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
 
         mainSizer.AddGrowableCol(2)
         mainSizer.AddGrowableRow(2)
@@ -82,7 +85,8 @@ class MainFrame(wx.Frame):
 
         editmenu = wx.Menu()
         menuSettings = editmenu.Append(wx.ID_EDIT, "&Settings", "DTK Settings")
-
+        menuMetadataTemplates = editmenu.Append(wx.ID_ANY, "&Metadata Templates", "Manage Metadata Templates")
+        menuSOQLTemplates = editmenu.Append(wx.ID_ANY, "&SOQL Templates", "Manage SOQL Templates")
         # Creating the menubar.
         menuBar = wx.MenuBar()
         menuBar.Append(filemenu, "&File")  # Adding the "filemenu" to the MenuBar
@@ -94,9 +98,12 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 
         self.Bind(wx.EVT_MENU, self.OnSettings, menuSettings)
+        self.Bind(wx.EVT_MENU, self.OnMetadataTemplates, menuMetadataTemplates)
+        self.Bind(wx.EVT_MENU, self.OnSOQLTemplates, menuSOQLTemplates)
 
         self.Fit()
         self.MinSize = self.Size
+        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.Show()
 
     def DeployButton(self, event):
@@ -110,21 +117,30 @@ class MainFrame(wx.Frame):
 
     def OnAbout(self, e):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
-        dlg = wx.MessageDialog(self, "Version 1.0 - MPB\nPraise The Sun!", "About DTK", wx.OK)
+        dlg = wx.MessageDialog(self, "Version 1.0 - MPB & JMCM\nPraise The Sun!", "About DTK", wx.OK)
         dlg.ShowModal()  # Show it
         dlg.Destroy()  # finally destroy it when finished.
 
     def OnSettings(self, e):
         frame = EditSettingsFrame()
 
+    def OnMetadataTemplates(self, e):
+        frame = dtkmdtemplates.MetadataTemplatesFrame()
+
+    def OnSOQLTemplates(self, e):
+        frame = dtkqueries.SOQLTemplatesFrame()
+
     def OnExit(self, e):
-        self.Close(True)  # Close the frame.
+        self.Destroy()
+
+    def OnCloseWindow(self, event):
+        self.Destroy()
+
 
 class EditSettingsFrame(wx.Dialog):
-
     def __init__(self, parent=None):
         wx.Dialog.__init__(self, parent=parent, title="Edit Settings")
-        #dtkglobal.MakeModal(self, True)
+        # dtkglobal.MakeModal(self, True)
         self.Centre()
         self.InitUI()
 
@@ -168,7 +184,7 @@ class EditSettingsFrame(wx.Dialog):
         self.defaultApiVersionCtrl = wx.TextCtrl(self.panel)
         self.defaultApiVersionCtrl.ToolTip = "Default API version to be used in the retrieve and deploy. Execute 'sfdx force' in a terminal to see your latest version installed."
 
-        self.btnSaveSettings = wx.Button(self.panel, label='Save')
+        self.btnSaveSettings = wx.Button(self.panel, label="Save")
         self.btnSaveSettings.Bind(wx.EVT_BUTTON, self.SaveSettings)
 
         self.btnCancel = wx.Button(self.panel, label="Cancel")
@@ -182,28 +198,63 @@ class EditSettingsFrame(wx.Dialog):
         row += 1
 
         self.mainSizer.Add(self.unlockLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.unlockCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.unlockCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
 
         self.mainSizer.Add(self.unzipLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.unzipCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
-                           border=5)
+        self.mainSizer.Add(
+            self.unzipCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
 
-        self.mainSizer.Add(self.defaultPackagesToExcludeLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.defaultPackagesToExcludeTextCtrl, pos=(row, col + 1), span=(1,4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.defaultPackagesToExcludeLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(
+            self.defaultPackagesToExcludeTextCtrl,
+            pos=(row, col + 1),
+            span=(1, 4),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
-        self.mainSizer.Add(self.defaultMetadataFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.defaultMetadataFolderTextCtrl, pos=(row, col + 1), span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.defaultMetadataFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(
+            self.defaultMetadataFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(1, 4),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
-        self.mainSizer.Add(self.defaultScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.defaultScriptFolderTextCtrl, pos=(row, col + 1), span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.defaultScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(
+            self.defaultScriptFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(1, 4),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
-        self.mainSizer.Add(self.defaultApiVersionLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.defaultApiVersionCtrl, pos=(row, col + 1), span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.defaultApiVersionLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(
+            self.defaultApiVersionCtrl,
+            pos=(row, col + 1),
+            span=(1, 4),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         self.mainSizer.Add(self.btnSaveSettings, pos=(row, col + 2), span=(1, 1), flag=wx.BOTTOM | wx.RIGHT, border=5)
@@ -229,12 +280,20 @@ class EditSettingsFrame(wx.Dialog):
         self.ShowModal()
 
     def SaveSettings(self, event):
-        dtkglobal.SaveSettings(advSettingIn=self.advCheckBox.GetValue(), unlockSettingIn=self.unlockCheckBox.GetValue(), unzipSettingIn=self.unzipCheckBox.GetValue(), defaultPackagesToExcludeIn=self.defaultPackagesToExcludeTextCtrl.GetLineText(0), defaultMetadataFolderIn=self.defaultMetadataFolderTextCtrl.GetLineText(0),
-                     defaultScriptFolderIn=self.defaultScriptFolderTextCtrl.GetLineText(0), defaultApiVersionIn=self.defaultApiVersionCtrl.GetLineText(0))
+        dtkglobal.SaveSettings(
+            advSettingIn=self.advCheckBox.GetValue(),
+            unlockSettingIn=self.unlockCheckBox.GetValue(),
+            unzipSettingIn=self.unzipCheckBox.GetValue(),
+            defaultPackagesToExcludeIn=self.defaultPackagesToExcludeTextCtrl.GetLineText(0),
+            defaultMetadataFolderIn=self.defaultMetadataFolderTextCtrl.GetLineText(0),
+            defaultScriptFolderIn=self.defaultScriptFolderTextCtrl.GetLineText(0),
+            defaultApiVersionIn=self.defaultApiVersionCtrl.GetLineText(0),
+        )
         self.Close(True)
 
     def OnCancel(self, e):
         self.Close(True)
+
 
 class SingleApp(wx.App):
     """
@@ -248,16 +307,13 @@ class SingleApp(wx.App):
         self.name = "SingleApp-%s".format(wx.GetUserId())
         self.instance = wx.SingleInstanceChecker(self.name)
         if self.instance.IsAnotherRunning():
-            wx.MessageBox(
-                "An instance of the application is already running",
-                "Error",
-                 wx.OK | wx.ICON_WARNING
-            )
+            wx.MessageBox("An instance of the application is already running", "Error", wx.OK | wx.ICON_WARNING)
             return False
         return True
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = SingleApp(redirect=False)
-    frame = MainFrame(None, title='DTK')
+    frame = MainFrame(None, title="DTK")
     app.MainLoop()
 

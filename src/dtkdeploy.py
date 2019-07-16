@@ -9,8 +9,8 @@ import dtkglobal
 import wx
 import zipfile
 
-class ScriptDataPanel(wx.Panel):
 
+class ScriptDataPanel(wx.Panel):
     def __init__(self, parent):
         super(ScriptDataPanel, self).__init__(parent)
         self.logList = dict()
@@ -25,7 +25,7 @@ class ScriptDataPanel(wx.Panel):
         self.fileNameTextCtrl = wx.TextCtrl(self)
         self.fileNameTextCtrl.ToolTip = "File to add to workspace."
 
-        self.btnUploadFile = wx.Button(self, label='Browse')
+        self.btnUploadFile = wx.Button(self, label="Browse")
         self.btnUploadFile.Bind(wx.EVT_BUTTON, self.UploadFile)
 
         self.scriptFileNameLbl = wx.StaticText(self, label="Script File")
@@ -33,7 +33,7 @@ class ScriptDataPanel(wx.Panel):
         self.scriptFileNameTextCtrl = wx.TextCtrl(self)
         self.scriptFileNameTextCtrl.ToolTip = "File to load script."
 
-        self.btnUploadScript = wx.Button(self, label='Browse')
+        self.btnUploadScript = wx.Button(self, label="Browse")
         self.btnUploadScript.Bind(wx.EVT_BUTTON, self.UploadScript)
 
         self.clearLogsLbl = wx.StaticText(self, label="Clear Logs")
@@ -44,21 +44,23 @@ class ScriptDataPanel(wx.Panel):
 
         self.scriptLbl = wx.StaticText(self, label="Script Text")
         self.scriptLbl.ToolTip = "Script Text."
-        self.scriptTextCtrl = wx.TextCtrl(self, style = wx.TE_MULTILINE|wx.TE_AUTO_URL|wx.HSCROLL)
+        self.scriptTextCtrl = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_AUTO_URL | wx.HSCROLL)
         self.scriptTextCtrl.ToolTip = "Script Text."
 
-        self.btnRunScript = wx.Button(self, label='Run Script')
+        self.btnRunScript = wx.Button(self, label="Run Script")
         self.btnRunScript.Bind(wx.EVT_BUTTON, self.RunScriptButton)
 
         self.consoleOutputLbl = wx.StaticText(self, label="Log")
         self.consoleOutputLbl.ToolTip = "Console output log."
-        self.consoleOutputTextCtrl = wx.TextCtrl(self, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_AUTO_URL|wx.HSCROLL)
+        self.consoleOutputTextCtrl = wx.TextCtrl(
+            self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_AUTO_URL | wx.HSCROLL
+        )
         self.consoleOutputTextCtrl.ToolTip = "Console output log."
 
-        self.btnStop = wx.Button(self, label='Stop')
+        self.btnStop = wx.Button(self, label="Stop")
         self.btnStop.Bind(wx.EVT_BUTTON, self.StopButton)
 
-        self.btnRefreshLog = wx.Button(self, label='Refresh Log')
+        self.btnRefreshLog = wx.Button(self, label="Refresh Log")
         self.btnRefreshLog.Bind(wx.EVT_BUTTON, self.RefreshLog)
 
         row = 0
@@ -67,71 +69,88 @@ class ScriptDataPanel(wx.Panel):
         spanH = 50
 
         self.firstSizer = wx.GridBagSizer(1, 1)
-        self.firstSizer.Add(self.fileNameLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.firstSizer.Add(self.fileNameLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
 
         self.fileNameSizer = wx.GridBagSizer(1, 1)
-        self.fileNameSizer.Add(self.fileNameTextCtrl, pos=(0, 0),
-                                   flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
-        self.fileNameSizer.Add(self.btnUploadFile, pos=(0, 1),
-                                   flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
+        self.fileNameSizer.Add(
+            self.fileNameTextCtrl, pos=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.fileNameSizer.Add(self.btnUploadFile, pos=(0, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
         self.fileNameSizer.AddGrowableCol(0)
         self.fileNameSizer.SetEmptyCellSize((0, 0))
-        self.firstSizer.Add(self.fileNameSizer, pos=(row, 1), span=(0, spanH),
-                             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=0)
+        self.firstSizer.Add(
+            self.fileNameSizer,
+            pos=(row, 1),
+            span=(0, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=0,
+        )
 
         row += 1
-        self.firstSizer.Add(self.scriptFileNameLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.firstSizer.Add(
+            self.scriptFileNameLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
 
         self.scriptFileSizer = wx.GridBagSizer(1, 1)
-        self.scriptFileSizer.Add(self.scriptFileNameTextCtrl, pos=(0, 0),
-                               flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
-        self.scriptFileSizer.Add(self.btnUploadScript, pos=(0, 1),
-                               flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
+        self.scriptFileSizer.Add(
+            self.scriptFileNameTextCtrl, pos=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.scriptFileSizer.Add(self.btnUploadScript, pos=(0, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
         self.scriptFileSizer.AddGrowableCol(0)
         self.scriptFileSizer.SetEmptyCellSize((0, 0))
-        self.firstSizer.Add(self.scriptFileSizer, pos=(row, col + 1), span=(0, spanH),
-                            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=0)
+        self.firstSizer.Add(
+            self.scriptFileSizer,
+            pos=(row, col + 1),
+            span=(0, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=0,
+        )
         row += 1
         self.checkSizer = wx.GridBagSizer(1, 1)
-        self.checkSizer.Add(self.clearLogsLbl, pos=(0, 0), flag=wx.TOP | wx.LEFT | wx.RIGHT,
-                            border=5)
-        self.checkSizer.Add(self.clearLogsCheckBox, pos=(0, 1),
-                            flag=wx.TOP | wx.LEFT | wx.RIGHT,
-                            border=5)
+        self.checkSizer.Add(self.clearLogsLbl, pos=(0, 0), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.checkSizer.Add(self.clearLogsCheckBox, pos=(0, 1), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         self.checkSizer.AddGrowableCol(1)
         self.checkSizer.SetEmptyCellSize((0, 0))
 
-        self.firstSizer.Add(self.checkSizer, pos=(row, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
-                            border=0)
+        self.firstSizer.Add(self.checkSizer, pos=(row, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=0)
         row += 1
-        self.firstSizer.Add(self.scriptLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.firstSizer.Add(self.scriptLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         row += 1
-        self.firstSizer.Add(self.scriptTextCtrl, pos=(row, col), span=(spanV, spanH),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.firstSizer.Add(
+            self.scriptTextCtrl,
+            pos=(row, col),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
 
         self.firstSizer.AddGrowableCol(1)
         self.firstSizer.AddGrowableRow(row)
 
         self.logSizer = wx.GridBagSizer(1, 1)
         row = 0
-        self.logSizer.Add(self.consoleOutputLbl, pos=(row, 0), flag=wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.logSizer.Add(self.consoleOutputLbl, pos=(row, 0), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         row += 1
-        self.logSizer.Add(self.consoleOutputTextCtrl, pos=(row, 0), span=(10, 40),
-                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
+        self.logSizer.Add(
+            self.consoleOutputTextCtrl,
+            pos=(row, 0),
+            span=(10, 40),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
 
         self.logSizer.AddGrowableCol(0)
         self.logSizer.AddGrowableRow(row)
 
-        self.mainSizer.Add(self.firstSizer, pos=(0, 0), span=(0, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                     border=5)
-        self.mainSizer.Add(self.btnRunScript, pos=(1, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                     border=5)
-        self.mainSizer.Add(self.logSizer, pos=(2, 0), span=(0, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                     border=5)
-        self.mainSizer.Add(self.btnStop, pos=(3, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                           border=5)
-        self.mainSizer.Add(self.btnRefreshLog, pos=(3, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                     border=5)
+        self.mainSizer.Add(
+            self.firstSizer, pos=(0, 0), span=(0, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(self.btnRunScript, pos=(1, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.logSizer, pos=(2, 0), span=(0, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(self.btnStop, pos=(3, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.mainSizer.Add(self.btnRefreshLog, pos=(3, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
 
         self.mainSizer.AddGrowableCol(0)
         self.mainSizer.AddGrowableRow(2)
@@ -151,18 +170,20 @@ class ScriptDataPanel(wx.Panel):
 
     def UploadFile(self, event):
         if len(self.Parent.Parent.Parent.currentWorkspace) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Workspace not set yet.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Workspace not set yet.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
 
-        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'deploy')
-        deployDataUrl = os.path.join(deployUrl, 'data')
+        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployDataUrl = os.path.join(deployUrl, "data")
 
-        dlg = wx.FileDialog(self, "Select file(s)", wildcard="All files (*.*)|*.*",
-                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
+        dlg = wx.FileDialog(
+            self,
+            "Select file(s)",
+            wildcard="All files (*.*)|*.*",
+            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE,
+        )
 
         if dlg.ShowModal() == wx.ID_CANCEL:
             return
@@ -170,45 +191,42 @@ class ScriptDataPanel(wx.Panel):
         self.fileNameTextCtrl.Clear()
         for pathname in pathnames:
             self.fileNameTextCtrl.AppendText(pathname)
-            self.fileNameTextCtrl.AppendText(';')
+            self.fileNameTextCtrl.AppendText(";")
             shutil.copy(pathname, deployDataUrl)
-            self.consoleOutputTextCtrl.AppendText('File copied into workspace data folder: ' + dtkglobal.PathLeaf(pathname))
+            self.consoleOutputTextCtrl.AppendText(
+                "File copied into workspace data folder: " + dtkglobal.PathLeaf(pathname)
+            )
             self.consoleOutputTextCtrl.AppendText(os.linesep)
 
-
     def UploadScript(self, event):
-        dlg = wx.FileDialog(self, "Select script file", wildcard="All files (*.*)|*.*",
-                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        dlg = wx.FileDialog(
+            self, "Select script file", wildcard="All files (*.*)|*.*", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+        )
 
         if dlg.ShowModal() == wx.ID_CANCEL:
             return
         pathname = dlg.GetPath()
         self.scriptFileNameTextCtrl.Clear()
         self.scriptFileNameTextCtrl.AppendText(pathname)
-        fileScript = open(pathname, 'r', encoding="utf8")
+        fileScript = open(pathname, "r", encoding="utf8")
         self.scriptTextCtrl.AppendText(fileScript.read())
-        self.consoleOutputTextCtrl.AppendText('Script loaded: ' + dtkglobal.PathLeaf(pathname))
+        self.consoleOutputTextCtrl.AppendText("Script loaded: " + dtkglobal.PathLeaf(pathname))
         self.consoleOutputTextCtrl.AppendText(os.linesep)
-
 
     def RunScriptButton(self, event):
         self.stop = False
-        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'deploy')
-        deployDataUrl = os.path.join(deployUrl, 'data')
-        deployStageUrl = os.path.join(deployUrl, 'stage')
+        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployDataUrl = os.path.join(deployUrl, "data")
+        deployStageUrl = os.path.join(deployUrl, "stage")
         orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
         targetName = self.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
         if len(orgName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         if len(targetName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a target.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select a target.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -222,11 +240,11 @@ class ScriptDataPanel(wx.Panel):
 
         if self.clearLogsCheckBox.GetValue():
             self.consoleOutputTextCtrl.Clear()
-            self.consoleOutputTextCtrl.AppendText('Workspace: ' + self.Parent.Parent.Parent.currentWorkspace)
+            self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.currentWorkspace)
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             self.logList.clear()
 
-        scriptUrl = os.path.join(deployDataUrl, 'defaultScript.txt')
+        scriptUrl = os.path.join(deployDataUrl, "defaultScript.txt")
         self.scriptTextCtrl.SaveFile(scriptUrl)
         self.SetButtonState(False)
         thread = threading.Thread(target=self.ProcessScript, args=(deployDataUrl, scriptUrl, deployStageUrl))
@@ -238,52 +256,56 @@ class ScriptDataPanel(wx.Panel):
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        #deployType = self.deploymentTypeComboBox.GetValue()
+        # deployType = self.deploymentTypeComboBox.GetValue()
         orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
-        sdbxNameSource = 'Config'
+        sdbxNameSource = "Config"
         if dtkglobal.advSetting:
             sdbxNameSource = self.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()
         sdbxName = self.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
-        sourceName = orgName + '_' + sdbxNameSource
-        if '_' in sdbxNameSource:
+        sourceName = orgName + "_" + sdbxNameSource
+        if "_" in sdbxNameSource:
             sourceName = sdbxNameSource
         targetName = self.Parent.Parent.Parent.currentTarget
-        scriptFile = open(scriptUrl, 'r', encoding="utf8")
+        scriptFile = open(scriptUrl, "r", encoding="utf8")
         scriptFull = scriptFile.read()
-        if 'SOURCE' in scriptFull and len(sdbxNameSource) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a Source.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+        if "SOURCE" in scriptFull and len(sdbxNameSource) == 0:
+            dlg = wx.MessageDialog(self, "Please select a Source.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
-        if 'TARGET' in scriptFull and len(sdbxName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a Target.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+        if "TARGET" in scriptFull and len(sdbxName) == 0:
+            dlg = wx.MessageDialog(self, "Please select a Target.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         scriptFile.close()
         i = 1
-        scriptFile = open(scriptUrl, 'r', encoding="utf8")
+        scriptFile = open(scriptUrl, "r", encoding="utf8")
         for line in scriptFile:
             if self.stop:
                 self.consoleOutputTextCtrl.AppendText("Process stopped.")
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 return
-            lineStr = line.strip('\r\n')
-            lineSplit = lineStr.split('|')
+            lineStr = line.strip("\r\n")
+            lineSplit = lineStr.split("|")
             if len(lineSplit) > 0:
-                if lineSplit[0] == 'FILE':
-                    self.ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl)
-                if lineSplit[0] == 'SOURCE' or lineSplit[0] == 'TARGET':
-                    self.ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl)
+                if lineSplit[0] == "FILE":
+                    self.ProcessFileScriptLine(
+                        lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
+                    )
+                if lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET":
+                    self.ProcessDataScriptLine(
+                        lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
+                    )
         i += 1
         scriptFile.close()
 
-    def ProcessFileScriptLine(self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl):
-        error, errorMsg, returnMsg = dtkglobal.ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl)
+    def ProcessFileScriptLine(
+        self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+    ):
+        error, errorMsg, returnMsg = dtkglobal.ProcessFileScriptLine(
+            lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+        )
         if self.stop:
             return
         if error:
@@ -293,44 +315,51 @@ class ScriptDataPanel(wx.Panel):
             self.consoleOutputTextCtrl.AppendText(returnMsg)
             self.consoleOutputTextCtrl.AppendText(os.linesep)
 
-    def ProcessDataScriptLine(self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl):
-        error, errorMsg, target, pathString, cmd = dtkglobal.ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl)
+    def ProcessDataScriptLine(
+        self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+    ):
+        error, errorMsg, target, pathString, cmd = dtkglobal.ProcessDataScriptLine(
+            lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+        )
         if self.stop:
             return
         if error:
             self.consoleOutputTextCtrl.AppendText(errorMsg)
             self.consoleOutputTextCtrl.AppendText(os.linesep)
         else:
-            self.RunDataCmd(lineSplit, target, pathString, cmd)
+            self.RunDataCmd(lineSplit, lineStr, target, pathString, cmd)
 
     def OnText(self, text):
         self.consoleOutputTextCtrl.AppendText(text)
 
-    def RunDataCmd(self, lineSplit, target, pathString, cmd):
+    def RunDataCmd(self, lineSplit, lineStr, target, pathString, cmd):
         if self.stop:
             return
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-        if 'SOQLQUERY' in lineSplit:
-            fileOutput = open(pathString, 'wb')
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        if "SOQLQUERY" in lineSplit:
+            fileOutput = open(pathString, "wb")
             fileOutput.write(proc.stdout.read())
             for line in proc.stdout:
                 wx.CallAfter(self.OnText, line)
-            wx.CallAfter(self.OnText, "Exported data to " + pathString + '\n')
+            wx.CallAfter(self.OnText, "Exported data to " + pathString + "\n")
         else:
             for line in proc.stdout:
-                lineStr = line.decode()
-                if 'force:data:bulk:status' in lineStr:
-                    lineSplit = lineStr.split('-i ')
-                    if len(lineSplit) > 1:
-                        lineSplitAgain = lineSplit[1].split(' -b ')
+                lnStr = line.decode()
+                if "force:data:bulk:status" in lnStr:
+                    lnSplit = lnStr.split("-i ")
+                    if len(lnSplit) > 1:
+                        lineSplitAgain = lnSplit[1].split(" -b ")
                         if len(lineSplitAgain) > 1:
                             logEntry = {}
-                            logEntry["type"] = 'Bulk'
-                            logEntry["file"] = ''
-                            jobIdStrip = lineSplitAgain[0].strip('\r\n')
+                            logEntry["type"] = "Bulk"
+                            logEntry["file"] = ""
+                            logEntry["scriptLine"] = lineStr
+                            jobIdStrip = lineSplitAgain[0].strip("\r\n")
                             jobIdStrip = jobIdStrip.strip()
                             logEntry["jobid"] = jobIdStrip
-                            batchIdStrip = lineSplitAgain[1].strip('\r\n')
+                            batchIdStrip = lineSplitAgain[1].strip("\r\n")
                             batchIdStrip = batchIdStrip.strip()
                             logEntry["batchid"] = batchIdStrip
                             logEntry["targetname"] = target
@@ -340,59 +369,114 @@ class ScriptDataPanel(wx.Panel):
         wx.CallAfter(self.SetButtonState, True)
 
     def RefreshLog(self, event):
-        if self.stop:
-            self.consoleOutputTextCtrl.AppendText("Process stopped.")
-            self.consoleOutputTextCtrl.AppendText(os.linesep)
-            return
+        self.stop = False
         if len(self.logList) == 0:
             return
-        self.consoleOutputTextCtrl.AppendText('----------------------------------------------------------------------------------')
+        self.consoleOutputTextCtrl.AppendText(
+            "----------------------------------------------------------------------------------"
+        )
         self.consoleOutputTextCtrl.AppendText(os.linesep)
-        self.consoleOutputTextCtrl.AppendText('Refresh log started at: ' + datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+        self.consoleOutputTextCtrl.AppendText(
+            "Refresh log started at: " + datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        )
         self.consoleOutputTextCtrl.AppendText(os.linesep)
-        waitMinutes = '0'
+        waitMinutes = "0"
         self.SetButtonState(False)
         thread = threading.Thread(target=self.RunRefreshLog, args=(waitMinutes))
         thread.setDaemon(True)
         thread.start()
 
     def RunRefreshLog(self, waitMinutes):
-        if self.stop:
-            self.consoleOutputTextCtrl.AppendText("Process stopped.")
-            self.consoleOutputTextCtrl.AppendText(os.linesep)
-            return
         for jobId in self.logList:
             if self.stop:
                 self.consoleOutputTextCtrl.AppendText("Process stopped.")
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 return
             log = self.logList[jobId]
-            type, file, jobId, batchId, targetName, pathName = log["type"], log["file"], log["jobid"], log["batchid"], \
-                                                               log["targetname"], log["pathname"]
-            if type == 'Retrieve':
-                cmd = ['sfdx', 'force:mdapi:retrieve:report', '--apiversion', dtkglobal.defaultApiVersion, '-u',
-                       targetName,
-                       '-i', jobId, '-r', pathName, '-w', waitMinutes]
-                proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+            type, file, scriptLine, jobId, batchId, targetName, pathName = (
+                log["type"],
+                log["file"],
+                log["scriptLine"],
+                log["jobid"],
+                log["batchid"],
+                log["targetname"],
+                log["pathname"],
+            )
+            if type == "Retrieve":
+                cmd = [
+                    "sfdx",
+                    "force:mdapi:retrieve:report",
+                    "--apiversion",
+                    dtkglobal.defaultApiVersion,
+                    "-u",
+                    targetName,
+                    "-i",
+                    jobId,
+                    "-r",
+                    pathName,
+                    "-w",
+                    waitMinutes,
+                ]
+                proc = subprocess.Popen(
+                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+                )
+                # zipToExtract = self.unZipRetrievedCheckBox.GetValue()
+                zipToExtract = False
+                zipReady = False
+                zipUrl = ""
+                for line in proc.stdout:
+                    lineStr = line.decode()
+                    wx.CallAfter(self.OnText, line)
+                    if zipToExtract:
+                        if "Wrote retrieve zip to " in lineStr:
+                            lineSplit = lineStr.split("Wrote retrieve zip to ")
+                            if len(lineSplit) > 1:
+                                zipUrl = lineSplit[1]
+                                zipUrl = zipUrl.strip("\r\n")
+                                zipUrl = zipUrl.rstrip(".")
+                                zipReady = True
+                if zipToExtract and zipReady:
+                    wx.CallAfter(self.Unzip, zipUrl)
+            if type == "Deploy":
+                cmd = [
+                    "sfdx",
+                    "force:mdapi:deploy:report",
+                    "--apiversion",
+                    dtkglobal.defaultApiVersion,
+                    "-u",
+                    targetName,
+                    "-i",
+                    jobId,
+                ]
+                proc = subprocess.Popen(
+                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+                )
+                self.consoleOutputTextCtrl.AppendText("Metadata Deployment:")
                 for line in proc.stdout:
                     wx.CallAfter(self.OnText, line)
-            if type == 'Deploy':
-                cmd = ['sfdx', 'force:mdapi:deploy:report', '--apiversion', dtkglobal.defaultApiVersion, '-u',
-                       targetName,
-                       '-i', jobId]
-                proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-                for line in proc.stdout:
-                    wx.CallAfter(self.OnText, line)
-            if type == 'Bulk':
-                cmd = ['sfdx', 'force:data:bulk:status', '--apiversion', dtkglobal.defaultApiVersion, '-u', targetName,
-                       '-i', jobId, '-b', batchId]
-                proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+            if type == "Bulk":
+                cmd = [
+                    "sfdx",
+                    "force:data:bulk:status",
+                    "--apiversion",
+                    dtkglobal.defaultApiVersion,
+                    "-u",
+                    targetName,
+                    "-i",
+                    jobId,
+                    "-b",
+                    batchId,
+                ]
+                self.consoleOutputTextCtrl.AppendText("Script Line: " + scriptLine)
+                proc = subprocess.Popen(
+                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+                )
                 for line in proc.stdout:
                     wx.CallAfter(self.OnText, line)
         wx.CallAfter(self.SetButtonState, True)
 
-class DeployMetadataPanel(wx.Panel):
 
+class DeployMetadataPanel(wx.Panel):
     def __init__(self, parent, deployType):
         super(DeployMetadataPanel, self).__init__(parent)
         self.logList = dict()
@@ -403,7 +487,7 @@ class DeployMetadataPanel(wx.Panel):
         self.mainSizer = wx.GridBagSizer(1, 1)
         self.deployTypeSelected = deployType
 
-        #if dtkglobal.advSetting:
+        # if dtkglobal.advSetting:
         self.deploymentTypeLbl = wx.StaticText(self, label="Deployment Type")
         self.deploymentTypeLbl.ToolTip = "Deployment Type: Git, Zip, Folder."
         self.deploymentTypeComboBox = wx.ComboBox(self, style=wx.CB_READONLY)
@@ -423,7 +507,7 @@ class DeployMetadataPanel(wx.Panel):
         self.gitBranchFilterTextCtrl = wx.TextCtrl(self)
         self.gitBranchFilterTextCtrl.ToolTip = "Filter branch by this, wildcards allowed."
 
-        self.btnFilterBranch = wx.Button(self, label='Filter')
+        self.btnFilterBranch = wx.Button(self, label="Filter")
         self.btnFilterBranch.Bind(wx.EVT_BUTTON, self.ChangeGitUrl)
 
         self.gitBranchLbl = wx.StaticText(self, label="Git Branch")
@@ -438,11 +522,15 @@ class DeployMetadataPanel(wx.Panel):
         self.metadataGitFolderTextCtrl.ToolTip = "Specifies the folder in the git repository containing the metadata to be deployed. Manifest package will be overriten here if Generate Manifest is checked."
 
         self.zipFileLbl = wx.StaticText(self, label="Zip File")
-        self.zipFileLbl.ToolTip = "Zip file to be deployed. It needs to be a valid metadata zip file containing a manifest."
+        self.zipFileLbl.ToolTip = (
+            "Zip file to be deployed. It needs to be a valid metadata zip file containing a manifest."
+        )
         self.zipFileTextCtrl = wx.TextCtrl(self)
-        self.zipFileTextCtrl.ToolTip = "Zip file to be deployed. It needs to be a valid metadata zip file containing a manifest."
+        self.zipFileTextCtrl.ToolTip = (
+            "Zip file to be deployed. It needs to be a valid metadata zip file containing a manifest."
+        )
 
-        self.btnZipFile = wx.Button(self, label='Browse')
+        self.btnZipFile = wx.Button(self, label="Browse")
         self.btnZipFile.Bind(wx.EVT_BUTTON, self.SelectZipFile)
 
         self.metadataFolderLbl = wx.StaticText(self, label="Metadata Folder")
@@ -450,7 +538,7 @@ class DeployMetadataPanel(wx.Panel):
         self.metadataFolderTextCtrl = wx.TextCtrl(self)
         self.metadataFolderTextCtrl.ToolTip = "Specifies the folder containing the metadata to be deployed. Manifest package will be overriten here if Generate Manifest is checked."
 
-        self.btnMetadataFolder = wx.Button(self, label='Browse')
+        self.btnMetadataFolder = wx.Button(self, label="Browse")
         self.btnMetadataFolder.Bind(wx.EVT_BUTTON, self.SelectMetadataFolder)
 
         self.scriptFolderLbl = wx.StaticText(self, label="Script File")
@@ -458,7 +546,7 @@ class DeployMetadataPanel(wx.Panel):
         self.scriptFolderTextCtrl = wx.TextCtrl(self)
         self.scriptFolderTextCtrl.ToolTip = "Script file to be executed after metadata deployment."
 
-        self.btnScriptFolder = wx.Button(self, label='Browse')
+        self.btnScriptFolder = wx.Button(self, label="Browse")
         self.btnScriptFolder.Bind(wx.EVT_BUTTON, self.SelectScriptFolder)
 
         self.metadataTemplateLbl = wx.StaticText(self, label="Metadata Template")
@@ -473,6 +561,14 @@ class DeployMetadataPanel(wx.Panel):
         self.metadataTypesListBox = wx.ListBox(self, style=wx.LB_MULTIPLE)
         self.metadataTypesListBox.ToolTip = "List of Metadata Types."
         self.metadataTypesListBox.Items = dtkglobal.metadataTypes
+        self.metadataTypesListBox.Bind(wx.EVT_LISTBOX, self.ShowSelectedMetadataList)
+
+        self.selectedMetadataTypesLbl = wx.StaticText(self, label="Selected Metadata Types")
+        self.selectedMetadataTypesLbl.ToolTip = "Selected Metadata Types."
+        self.selectedMetadataTypesTextCtrl = wx.TextCtrl(
+            self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_AUTO_URL | wx.VSCROLL | wx.TE_WORDWRAP
+        )
+        self.selectedMetadataTypesTextCtrl.ToolTip = "Selected Metadata Types."
 
         self.checkOnlyLbl = wx.StaticText(self, label="Check Only")
         self.checkOnlyLbl.ToolTip = "If checked the deployment will be only validated. No changes will be applied."
@@ -480,14 +576,22 @@ class DeployMetadataPanel(wx.Panel):
         self.checkOnlyCheckBox.ToolTip = "If checked the deployment will be only validated. No changes will be applied."
 
         self.ignoreWarningsLbl = wx.StaticText(self, label="Ignore Warnings")
-        self.ignoreWarningsLbl.ToolTip = "Deployment will ignore warnings if checked. Otherwise the deployment will fail if any warning occurs."
+        self.ignoreWarningsLbl.ToolTip = (
+            "Deployment will ignore warnings if checked. Otherwise the deployment will fail if any warning occurs."
+        )
         self.ignoreWarningsCheckBox = wx.CheckBox(self)
-        self.ignoreWarningsCheckBox.ToolTip = "Deployment will ignore warnings if checked. Otherwise the deployment will fail if any warning occurs."
+        self.ignoreWarningsCheckBox.ToolTip = (
+            "Deployment will ignore warnings if checked. Otherwise the deployment will fail if any warning occurs."
+        )
 
         self.ignoreErrorsLbl = wx.StaticText(self, label="Ignore Errors")
-        self.ignoreErrorsLbl.ToolTip = "Deployment will ignore errors if checked. Otherwise the deployment will fail if any error occurs."
+        self.ignoreErrorsLbl.ToolTip = (
+            "Deployment will ignore errors if checked. Otherwise the deployment will fail if any error occurs."
+        )
         self.ignoreErrorsCheckBox = wx.CheckBox(self)
-        self.ignoreErrorsCheckBox.ToolTip = "Deployment will ignore errors if checked. Otherwise the deployment will fail if any error occurs."
+        self.ignoreErrorsCheckBox.ToolTip = (
+            "Deployment will ignore errors if checked. Otherwise the deployment will fail if any error occurs."
+        )
         if not dtkglobal.advSetting:
             self.ignoreErrorsCheckBox.SetValue(False)
             self.ignoreErrorsCheckBox.Enable(False)
@@ -501,7 +605,9 @@ class DeployMetadataPanel(wx.Panel):
         self.confirmDeployLbl = wx.StaticText(self, label="Confirm Deploy")
         self.confirmDeployLbl.ToolTip = "Confirm deployment, if unchecked only the pull will be done from git branch."
         self.confirmDeployCheckBox = wx.CheckBox(self)
-        self.confirmDeployCheckBox.ToolTip = "Confirm deployment, if unchecked only the pull will be done from git branch."
+        self.confirmDeployCheckBox.ToolTip = (
+            "Confirm deployment, if unchecked only the pull will be done from git branch."
+        )
         self.confirmDeployCheckBox.Value = True
 
         self.clearLogsLbl = wx.StaticText(self, label="Clear Logs")
@@ -535,26 +641,32 @@ RunAllTestsInOrg—All tests in your org are run, including tests of managed pac
 
 If this field is blank the default test level used is NoTestRun."""
         self.testLevelsComboBox.Items = dtkglobal.testLevels
-        self.testLevelsComboBox.SetStringSelection('NoTestRun')
+        self.testLevelsComboBox.SetStringSelection("NoTestRun")
         self.testLevelsComboBox.Bind(wx.EVT_COMBOBOX, self.ChangeTestLevels)
 
         self.specifiedTestsLbl = wx.StaticText(self, label="Specified Tests")
-        self.specifiedTestsLbl.ToolTip = "Lists the Apex classes containing the deployment tests to run. Separate classes names by comma."
+        self.specifiedTestsLbl.ToolTip = (
+            "Lists the Apex classes containing the deployment tests to run. Separate classes names by comma."
+        )
         self.specifiedTestTextCtrl = wx.TextCtrl(self)
-        self.specifiedTestTextCtrl.ToolTip = "Lists the Apex classes containing the deployment tests to run. Separate classes names by comma."
+        self.specifiedTestTextCtrl.ToolTip = (
+            "Lists the Apex classes containing the deployment tests to run. Separate classes names by comma."
+        )
 
-        self.btnDeploy = wx.Button(self, label='Deploy')
+        self.btnDeploy = wx.Button(self, label="Deploy")
         self.btnDeploy.Bind(wx.EVT_BUTTON, self.DeployButton)
 
         self.consoleOutputLbl = wx.StaticText(self, label="Log")
         self.consoleOutputLbl.ToolTip = "Console output log."
-        self.consoleOutputTextCtrl = wx.TextCtrl(self, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_AUTO_URL|wx.HSCROLL)
+        self.consoleOutputTextCtrl = wx.TextCtrl(
+            self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_AUTO_URL | wx.HSCROLL
+        )
         self.consoleOutputTextCtrl.ToolTip = "Console output log."
 
-        self.btnStop = wx.Button(self, label='Stop')
+        self.btnStop = wx.Button(self, label="Stop")
         self.btnStop.Bind(wx.EVT_BUTTON, self.StopButton)
 
-        self.btnRefreshLog = wx.Button(self, label='Refresh Log')
+        self.btnRefreshLog = wx.Button(self, label="Refresh Log")
         self.btnRefreshLog.Bind(wx.EVT_BUTTON, self.RefreshLog)
 
         row = 0
@@ -565,11 +677,20 @@ If this field is blank the default test level used is NoTestRun."""
         self.typeSizer = wx.GridBagSizer(1, 1)
 
         if dtkglobal.advSetting:
-            self.typeSizer.Add(self.deploymentTypeLbl, pos=(row, col),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
+            self.typeSizer.Add(
+                self.deploymentTypeLbl,
+                pos=(row, col),
+                flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                border=5,
+            )
             col += 1
-            self.typeSizer.Add(self.deploymentTypeComboBox, pos=(row, col), span=(0, spanH + 15),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
+            self.typeSizer.Add(
+                self.deploymentTypeComboBox,
+                pos=(row, col),
+                span=(0, spanH + 15),
+                flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                border=5,
+            )
             self.typeSizer.AddGrowableCol(col)
 
         self.typeSizer.AddGrowableRow(row)
@@ -578,70 +699,119 @@ If this field is blank the default test level used is NoTestRun."""
         row = 0
         col = 0
         self.deploySizer = wx.GridBagSizer(1, 1)
-        self.deploySizer.Add(self.gitUrlLbl, pos=(row, col),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
-        self.deploySizer.Add(self.gitUrlComboBox, pos=(row, col + 1), span=(0, spanH + 15),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
+        self.deploySizer.Add(
+            self.gitUrlLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.deploySizer.Add(
+            self.gitUrlComboBox,
+            pos=(row, col + 1),
+            span=(0, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.deploySizer.Add(self.gitBranchFilterLbl, pos=(row, col),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
+        self.deploySizer.Add(
+            self.gitBranchFilterLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
 
         self.filterBranchSizer = wx.GridBagSizer(1, 1)
-        self.filterBranchSizer.Add(self.gitBranchFilterTextCtrl, pos=(0, 0), span=(0, 10),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
-        self.filterBranchSizer.Add(self.btnFilterBranch, pos=(0, 11),
-                             flag=wx.TOP | wx.BOTTOM | wx.RIGHT , border=5)
+        self.filterBranchSizer.Add(
+            self.gitBranchFilterTextCtrl,
+            pos=(0, 0),
+            span=(0, 10),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
+        self.filterBranchSizer.Add(self.btnFilterBranch, pos=(0, 11), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
         self.filterBranchSizer.AddGrowableCol(0)
         self.filterBranchSizer.SetEmptyCellSize((0, 0))
-        self.deploySizer.Add(self.filterBranchSizer, pos=(row, col + 1), span=(0, spanH + 15),
-                             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=0)
+        self.deploySizer.Add(
+            self.filterBranchSizer,
+            pos=(row, col + 1),
+            span=(0, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=0,
+        )
         row += 1
-        self.deploySizer.Add(self.gitBranchLbl, pos=(row, col),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
-        self.deploySizer.Add(self.gitBranchComboBox, pos=(row, col + 1), span=(0, spanH + 15),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
+        self.deploySizer.Add(
+            self.gitBranchLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.deploySizer.Add(
+            self.gitBranchComboBox,
+            pos=(row, col + 1),
+            span=(0, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.deploySizer.Add(self.metadataGitFolderLbl, pos=(row, col),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
-        self.deploySizer.Add(self.metadataGitFolderTextCtrl, pos=(row, col + 1), span=(0, spanH + 15),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
+        self.deploySizer.Add(
+            self.metadataGitFolderLbl,
+            pos=(row, col),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
+        self.deploySizer.Add(
+            self.metadataGitFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(0, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
-        self.deploySizer.Add(self.zipFileLbl, pos=(row, col),
-                             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.deploySizer.Add(
+            self.zipFileLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
         self.zipFileSizer = wx.GridBagSizer(1, 1)
-        self.zipFileSizer.Add(self.zipFileTextCtrl, pos=(0, 0),
-                                 flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
-        self.zipFileSizer.Add(self.btnZipFile, pos=(0, 1),
-                                 flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
+        self.zipFileSizer.Add(
+            self.zipFileTextCtrl, pos=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.zipFileSizer.Add(self.btnZipFile, pos=(0, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
         self.zipFileSizer.AddGrowableCol(0)
         self.zipFileSizer.SetEmptyCellSize((0, 0))
-        self.deploySizer.Add(self.zipFileSizer, pos=(row, col + 1), span=(0, spanH + 15),
-                            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=0)
+        self.deploySizer.Add(
+            self.zipFileSizer,
+            pos=(row, col + 1),
+            span=(0, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=0,
+        )
         row += 1
-        self.deploySizer.Add(self.metadataFolderLbl, pos=(row, col),
-                                flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.deploySizer.Add(
+            self.metadataFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
         self.metadataFolderSizer = wx.GridBagSizer(1, 1)
-        self.metadataFolderSizer.Add(self.metadataFolderTextCtrl, pos=(0, 0),
-                              flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
-        self.metadataFolderSizer.Add(self.btnMetadataFolder, pos=(0, 1),
-                              flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
+        self.metadataFolderSizer.Add(
+            self.metadataFolderTextCtrl, pos=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.metadataFolderSizer.Add(self.btnMetadataFolder, pos=(0, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
         self.metadataFolderSizer.AddGrowableCol(0)
         self.metadataFolderSizer.SetEmptyCellSize((0, 0))
-        self.deploySizer.Add(self.metadataFolderSizer, pos=(row, col + 1), span=(0, spanH + 15),
-                             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=0)
+        self.deploySizer.Add(
+            self.metadataFolderSizer,
+            pos=(row, col + 1),
+            span=(0, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=0,
+        )
         row += 1
-        self.deploySizer.Add(self.scriptFolderLbl, pos=(row, col),
-                           flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.deploySizer.Add(
+            self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
         self.scriptFolderSizer = wx.GridBagSizer(1, 1)
-        self.scriptFolderSizer.Add(self.scriptFolderTextCtrl, pos=(0, 0),
-                                     flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
-        self.scriptFolderSizer.Add(self.btnScriptFolder, pos=(0, 1),
-                                     flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
+        self.scriptFolderSizer.Add(
+            self.scriptFolderTextCtrl, pos=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.scriptFolderSizer.Add(self.btnScriptFolder, pos=(0, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
         self.scriptFolderSizer.AddGrowableCol(0)
         self.scriptFolderSizer.SetEmptyCellSize((0, 0))
-        self.deploySizer.Add(self.scriptFolderSizer, pos=(row, col + 1), span=(0, spanH + 15),
-                             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=0)
+        self.deploySizer.Add(
+            self.scriptFolderSizer,
+            pos=(row, col + 1),
+            span=(0, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=0,
+        )
 
         self.deploySizer.AddGrowableCol(col + 1)
         self.deploySizer.SetEmptyCellSize((0, 0))
@@ -649,115 +819,205 @@ If this field is blank the default test level used is NoTestRun."""
         self.optionsSizer = wx.GridBagSizer(1, 1)
 
         self.metadataSizer = wx.GridBagSizer(1, 1)
+        self.selectedMetadataSizer = wx.GridBagSizer(1, 1)
         col = 0
         row = 0
-        self.metadataSizer.Add(self.testLevelsLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
-                               border=5)
-        self.metadataSizer.Add(self.testLevelsComboBox, pos=(row, col + 1),
-                               flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.metadataSizer.Add(
+            self.testLevelsLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.metadataSizer.Add(
+            self.testLevelsComboBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
-        self.metadataSizer.Add(self.specifiedTestsLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
-                               border=5)
-        self.metadataSizer.Add(self.specifiedTestTextCtrl, pos=(row, col + 1),
-                               flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.metadataSizer.Add(
+            self.specifiedTestsLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.metadataSizer.Add(
+            self.specifiedTestTextCtrl, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
-        self.metadataSizer.Add(self.metadataTemplateLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
-        self.metadataSizer.Add(self.metadataTemplateComboBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.metadataSizer.Add(
+            self.metadataTemplateLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.metadataSizer.Add(
+            self.metadataTemplateComboBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
         row += 1
-        self.metadataSizer.Add(self.metadataTypesLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
-        self.metadataSizer.Add(self.metadataTypesListBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.metadataSizer.Add(
+            self.metadataTypesLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.metadataSizer.Add(
+            self.metadataTypesListBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
 
         self.metadataSizer.AddGrowableCol(col + 1)
         self.metadataSizer.AddGrowableRow(row)
         self.metadataSizer.SetEmptyCellSize((0, 0))
 
+        row = 0
+        col = 0
+        self.selectedMetadataSizer.Add(
+            self.selectedMetadataTypesLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        row += 1
+        self.selectedMetadataSizer.Add(
+            self.selectedMetadataTypesTextCtrl,
+            pos=(row, col),
+            span=(1, 2),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
+        self.selectedMetadataSizer.AddGrowableRow(1)
+        self.selectedMetadataSizer.AddGrowableCol(0)
+        self.selectedMetadataSizer.SetEmptyCellSize((0, 0))
+
         self.checkBoxesOptionsSizer = wx.GridBagSizer(1, 1)
         col = 0
         row = 0
-        self.checkBoxesOptionsSizer.Add(self.checkOnlyLbl, pos=(row, col),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.checkBoxesOptionsSizer.Add(self.checkOnlyCheckBox, pos=(row, col + 1), span=(0, spanH),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.checkBoxesOptionsSizer.Add(
+            self.checkOnlyLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.checkBoxesOptionsSizer.Add(
+            self.checkOnlyCheckBox,
+            pos=(row, col + 1),
+            span=(0, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.checkBoxesOptionsSizer.Add(self.ignoreWarningsLbl, pos=(row, col),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.checkBoxesOptionsSizer.Add(self.ignoreWarningsCheckBox, pos=(row, col + 1), span=(0, spanH),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.checkBoxesOptionsSizer.Add(
+            self.ignoreWarningsLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.checkBoxesOptionsSizer.Add(
+            self.ignoreWarningsCheckBox,
+            pos=(row, col + 1),
+            span=(0, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.checkBoxesOptionsSizer.Add(self.ignoreErrorsLbl, pos=(row, col),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.checkBoxesOptionsSizer.Add(self.ignoreErrorsCheckBox, pos=(row, col + 1), span=(0, spanH),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.checkBoxesOptionsSizer.Add(
+            self.ignoreErrorsLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.checkBoxesOptionsSizer.Add(
+            self.ignoreErrorsCheckBox,
+            pos=(row, col + 1),
+            span=(0, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.checkBoxesOptionsSizer.Add(self.confirmDeployLbl, pos=(row, col),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.checkBoxesOptionsSizer.Add(self.confirmDeployCheckBox, pos=(row, col + 1), span=(0, spanH),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.checkBoxesOptionsSizer.Add(
+            self.confirmDeployLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.checkBoxesOptionsSizer.Add(
+            self.confirmDeployCheckBox,
+            pos=(row, col + 1),
+            span=(0, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.checkBoxesOptionsSizer.Add(self.generateManifestLbl, pos=(row, col),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.checkBoxesOptionsSizer.Add(self.generateManifestCheckBox, pos=(row, col + 1), span=(0, spanH),
-                                        flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.checkBoxesOptionsSizer.Add(
+            self.generateManifestLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.checkBoxesOptionsSizer.Add(
+            self.generateManifestCheckBox,
+            pos=(row, col + 1),
+            span=(0, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.checkBoxesOptionsSizer.Add(self.clearLogsLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT,
-                            border=5)
-        self.checkBoxesOptionsSizer.Add(self.clearLogsCheckBox, pos=(row, col + 1),
-                            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
-                            border=5)
+        self.checkBoxesOptionsSizer.Add(self.clearLogsLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.checkBoxesOptionsSizer.Add(
+            self.clearLogsCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
 
         self.checkBoxesOptionsSizer.SetEmptyCellSize((0, 0))
 
         col = 0
         row = 0
-        self.optionsSizer.Add(self.metadataSizer, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
-                      border=5)
-        self.optionsSizer.Add(self.checkBoxesOptionsSizer, pos=(row, col + 1), flag= wx.TOP | wx.LEFT | wx.RIGHT,
-                      border=5)
+        self.optionsSizer.Add(
+            self.metadataSizer, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.optionsSizer.Add(
+            self.selectedMetadataSizer, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.optionsSizer.Add(
+            self.checkBoxesOptionsSizer, pos=(row, col + 2), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
 
         self.optionsSizer.AddGrowableCol(1)
-        self.optionsSizer.AddGrowableCol(col)
+        self.optionsSizer.AddGrowableCol(0)
+        self.optionsSizer.AddGrowableCol(2)
         self.optionsSizer.AddGrowableRow(row)
         self.optionsSizer.SetEmptyCellSize((0, 0))
 
         self.logSizer = wx.GridBagSizer(1, 1)
         row = 0
-        self.logSizer.Add(self.consoleOutputLbl, pos=(row, 0), span=(0,2), flag= wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.logSizer.Add(self.consoleOutputLbl, pos=(row, 0), span=(0, 2), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         row += 1
-        self.logSizer.Add(self.consoleOutputTextCtrl, pos=(row, 0), span=(10,40),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,border=5)
+        self.logSizer.Add(
+            self.consoleOutputTextCtrl,
+            pos=(row, 0),
+            span=(10, 40),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
 
         self.logSizer.AddGrowableCol(0)
         self.logSizer.AddGrowableRow(row)
 
-        row = 0;
-        self.mainSizer.Add(self.typeSizer, pos=(row, 0), span=(0, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                     border=5)
+        row = 0
+        self.mainSizer.Add(
+            self.typeSizer,
+            pos=(row, 0),
+            span=(0, 5),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.mainSizer.Add(self.deploySizer, pos=(row, 0), span=(0, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                     border=5)
+        self.mainSizer.Add(
+            self.deploySizer,
+            pos=(row, 0),
+            span=(0, 5),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.mainSizer.Add(self.optionsSizer, pos=(row, 0), span=(0,5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                     border=5)
+        self.mainSizer.Add(
+            self.optionsSizer,
+            pos=(row, 0),
+            span=(0, 5),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            border=5,
+        )
         row += 1
-        self.mainSizer.Add(self.btnDeploy, pos=(row, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                      border=5)
+        self.mainSizer.Add(
+            self.btnDeploy, pos=(row, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border=10
+        )
         row += 1
-        self.mainSizer.Add(self.logSizer, pos=(row, 0), span=(0,5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                     border=5)
+        self.mainSizer.Add(
+            self.logSizer, pos=(row, 0), span=(0, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
         row += 1
-        self.mainSizer.Add(self.btnStop, pos=(row, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                           border=5)
-        self.mainSizer.Add(self.btnRefreshLog, pos=(row, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                       border=5)
+        self.mainSizer.Add(self.btnStop, pos=(row, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.btnRefreshLog, pos=(row, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border=10
+        )
 
         self.specifiedTestsLbl.Hide()
         self.specifiedTestTextCtrl.Hide()
 
         if not dtkglobal.advSetting:
-            self.deploymentTypeLbl.Hide();
-            self.deploymentTypeComboBox.Hide();
+            self.deploymentTypeLbl.Hide()
+            self.deploymentTypeComboBox.Hide()
 
-        if self.deployTypeSelected == 'Zip':
+        if self.deployTypeSelected == "Zip":
+
+            self.selectedMetadataTypesLbl.Hide()
+            self.selectedMetadataTypesTextCtrl.Hide()
             self.gitBranchLbl.Hide()
             self.gitBranchComboBox.Hide()
             self.gitBranchFilterLbl.Hide()
@@ -782,7 +1042,7 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataFolderTextCtrl.Hide()
             self.btnMetadataFolder.Hide()
 
-        if self.deployTypeSelected == 'Git':
+        if self.deployTypeSelected == "Git":
             self.zipFileLbl.Hide()
             self.zipFileTextCtrl.Hide()
             self.btnZipFile.Hide()
@@ -791,7 +1051,7 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataFolderTextCtrl.Hide()
             self.btnMetadataFolder.Hide()
 
-        if self.deployTypeSelected == 'Folder':
+        if self.deployTypeSelected == "Folder":
             self.gitBranchLbl.Hide()
             self.gitBranchComboBox.Hide()
             self.gitBranchFilterLbl.Hide()
@@ -827,7 +1087,7 @@ If this field is blank the default test level used is NoTestRun."""
 
     def ChangeDeploymentType(self, event):
         self.deployTypeSelected = self.deploymentTypeComboBox.GetValue()
-        if self.deployTypeSelected == 'Git':
+        if self.deployTypeSelected == "Git":
             self.gitBranchLbl.Show()
             self.gitBranchComboBox.Show()
             self.gitBranchFilterLbl.Show()
@@ -848,16 +1108,19 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataTypesLbl.Show()
             self.metadataTypesListBox.Show()
 
+            self.selectedMetadataTypesLbl.Show()
+            self.selectedMetadataTypesTextCtrl.Show()
+
             self.zipFileLbl.Hide()
             self.zipFileTextCtrl.Hide()
             self.btnZipFile.Hide()
 
-            self.metadataFolderLbl.Hide();
-            self.metadataFolderTextCtrl.Hide();
+            self.metadataFolderLbl.Hide()
+            self.metadataFolderTextCtrl.Hide()
             self.btnMetadataFolder.Hide()
             self.Layout()
 
-        if self.deployTypeSelected == 'Zip':
+        if self.deployTypeSelected == "Zip":
             self.zipFileLbl.Show()
             self.zipFileTextCtrl.Show()
             self.btnZipFile.Show()
@@ -882,12 +1145,15 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataTypesLbl.Hide()
             self.metadataTypesListBox.Hide()
 
+            self.selectedMetadataTypesLbl.Hide()
+            self.selectedMetadataTypesTextCtrl.Hide()
+
             self.metadataFolderLbl.Hide()
             self.metadataFolderTextCtrl.Hide()
             self.btnMetadataFolder.Hide()
             self.Layout()
 
-        if self.deployTypeSelected == 'Folder':
+        if self.deployTypeSelected == "Folder":
             self.metadataFolderLbl.Show()
             self.metadataFolderTextCtrl.Show()
             self.btnMetadataFolder.Show()
@@ -912,6 +1178,9 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataGitFolderLbl.Hide()
             self.metadataGitFolderTextCtrl.Hide()
 
+            self.selectedMetadataTypesLbl.Show()
+            self.selectedMetadataTypesTextCtrl.Show()
+
             self.zipFileLbl.Hide()
             self.zipFileTextCtrl.Hide()
             self.btnZipFile.Hide()
@@ -919,9 +1188,7 @@ If this field is blank the default test level used is NoTestRun."""
 
     def DeployButton(self, event):
         if len(self.Parent.Parent.Parent.currentWorkspace) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Workspace not set yet.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Workspace not set yet.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -931,10 +1198,10 @@ If this field is blank the default test level used is NoTestRun."""
         orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
         sdbxName = self.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
         targetName = self.Parent.Parent.Parent.currentTarget
-        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'deploy')
-        deployMetadataUrl = os.path.join(deployUrl, 'metadata')
-        deployDataUrl = os.path.join(deployUrl, 'data')
-        deployStageUrl = os.path.join(deployUrl, 'stage')
+        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployMetadataUrl = os.path.join(deployUrl, "metadata")
+        deployDataUrl = os.path.join(deployUrl, "data")
+        deployStageUrl = os.path.join(deployUrl, "stage")
         checkOnly = self.checkOnlyCheckBox.GetValue()
         ignoreWarnings = self.ignoreWarningsCheckBox.GetValue()
         ignoreErrors = self.ignoreErrorsCheckBox.GetValue()
@@ -942,7 +1209,7 @@ If this field is blank the default test level used is NoTestRun."""
         generateManifest = self.generateManifestCheckBox.GetValue()
         testLevel = self.testLevelsComboBox.GetValue()
         specifiedTests = self.specifiedTestTextCtrl.GetLineText(0)
-        gitUrl =  self.gitUrlComboBox.GetValue()
+        gitUrl = self.gitUrlComboBox.GetValue()
         gitBranch = self.gitBranchComboBox.GetValue()
         metadataGitFolder = self.metadataGitFolderTextCtrl.GetLineText(0)
         scriptFile = self.scriptFolderTextCtrl.GetLineText(0)
@@ -956,16 +1223,12 @@ If this field is blank the default test level used is NoTestRun."""
         metadataTypes = self.metadataTypesListBox.GetSelections()
 
         if len(orgName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         if len(targetName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a target.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select a target.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -979,105 +1242,190 @@ If this field is blank the default test level used is NoTestRun."""
         if not os.path.exists(deployStageUrl):
             os.makedirs(deployStageUrl)
 
-        if deployType == 'Zip':
+        if deployType == "Zip":
             if not os.path.exists(zipFileUrlSource):
-                dlg = wx.MessageDialog(self,
-                                       "Zip file not found.",
-                                       "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+                dlg = wx.MessageDialog(self, "Zip file not found.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
                 dlg.ShowModal()
                 dlg.Destroy()
                 return
             if self.clearLogsCheckBox.GetValue():
                 self.consoleOutputTextCtrl.Clear()
-                self.consoleOutputTextCtrl.AppendText('Workspace: ' + self.Parent.Parent.Parent.currentWorkspace)
+                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.currentWorkspace)
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.logList.clear()
-            self.consoleOutputTextCtrl.AppendText('Start deployment...')
+            self.consoleOutputTextCtrl.AppendText("Start deployment...")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             self.SetButtonState(False)
-            thread = threading.Thread(target=self.DeployZip,
-                                      args=(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl,
-                                            deployDataUrl, deployStageUrl,
-                                            checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest,
-                                            testLevel, specifiedTests,
-                                            gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace,
-                                            scriptFileWorkspace,
-                                            metadataTypes))
+            thread = threading.Thread(
+                target=self.DeployZip,
+                args=(
+                    deployType,
+                    orgName,
+                    sdbxName,
+                    targetName,
+                    deployUrl,
+                    deployMetadataUrl,
+                    deployDataUrl,
+                    deployStageUrl,
+                    checkOnly,
+                    ignoreWarnings,
+                    ignoreErrors,
+                    confirmDeploy,
+                    generateManifest,
+                    testLevel,
+                    specifiedTests,
+                    gitUrl,
+                    gitBranch,
+                    metadataGitFolder,
+                    metadataFolderSource,
+                    scriptFile,
+                    zipFileUrlSource,
+                    zipFileUrlWorkspace,
+                    scriptFileWorkspace,
+                    metadataTypes,
+                ),
+            )
             thread.setDaemon(True)
             thread.start()
-        if deployType == 'Git':
+        if deployType == "Git":
             if len(metadataTypes) == 0:
-                dlg = wx.MessageDialog(self,
-                                       "No metadata types selected.",
-                                       "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+                dlg = wx.MessageDialog(self, "No metadata types selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
                 dlg.ShowModal()
                 dlg.Destroy()
                 return
             if len(gitUrl) == 0:
-                dlg = wx.MessageDialog(self,
-                                       "No git repository selected.",
-                                       "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+                dlg = wx.MessageDialog(self, "No git repository selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
                 dlg.ShowModal()
                 dlg.Destroy()
                 return
             if len(gitBranch) == 0:
-                dlg = wx.MessageDialog(self,
-                                       "No git branch selected.",
-                                       "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+                dlg = wx.MessageDialog(self, "No git branch selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
                 dlg.ShowModal()
                 dlg.Destroy()
                 return
             if self.clearLogsCheckBox.GetValue():
                 self.consoleOutputTextCtrl.Clear()
-                self.consoleOutputTextCtrl.AppendText('Workspace: ' + self.Parent.Parent.Parent.currentWorkspace)
+                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.currentWorkspace)
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.logList.clear()
-            gitUrlSplit = gitUrl.split('//')
+            gitUrlSplit = gitUrl.split("//")
             if len(gitUrlSplit) > 1:
-                gitPreffix = gitUrlSplit[0] + '//'
+                gitPreffix = gitUrlSplit[0] + "//"
                 gitSuffix = gitUrlSplit[1]
                 gitUser = dtkglobal.orgDict[orgName]["gituser"]
                 gitPass = dtkglobal.Decode(gitUser, dtkglobal.orgDict[orgName]["gitpass"])
-                gitFinalUrl = gitPreffix + gitUser + ':' + gitPass + '@' + gitSuffix
-                self.consoleOutputTextCtrl.AppendText('Start deployment...')
+                gitFinalUrl = gitPreffix + gitUser + ":" + gitPass + "@" + gitSuffix
+                self.consoleOutputTextCtrl.AppendText("Start deployment...")
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.SetButtonState(False)
-                thread = threading.Thread(target=self.RetrieveGitBranch, args=(deployType, orgName, sdbxName, targetName, deployUrl,
-                        deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes, gitUser, gitPass, gitFinalUrl))
+                thread = threading.Thread(
+                    target=self.RetrieveGitBranch,
+                    args=(
+                        deployType,
+                        orgName,
+                        sdbxName,
+                        targetName,
+                        deployUrl,
+                        deployMetadataUrl,
+                        deployDataUrl,
+                        deployStageUrl,
+                        checkOnly,
+                        ignoreWarnings,
+                        ignoreErrors,
+                        confirmDeploy,
+                        generateManifest,
+                        testLevel,
+                        specifiedTests,
+                        gitUrl,
+                        gitBranch,
+                        metadataGitFolder,
+                        metadataFolderSource,
+                        scriptFile,
+                        zipFileUrlSource,
+                        zipFileUrlWorkspace,
+                        scriptFileWorkspace,
+                        metadataTypes,
+                        gitUser,
+                        gitPass,
+                        gitFinalUrl,
+                    ),
+                )
                 thread.setDaemon(True)
                 thread.start()
-        if deployType == 'Folder':
+        if deployType == "Folder":
             if len(metadataTypes) == 0:
-                dlg = wx.MessageDialog(self,
-                                       "No metadata types selected.",
-                                       "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+                dlg = wx.MessageDialog(self, "No metadata types selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
                 dlg.ShowModal()
                 dlg.Destroy()
                 return
             if self.clearLogsCheckBox.GetValue():
                 self.consoleOutputTextCtrl.Clear()
-                self.consoleOutputTextCtrl.AppendText('Workspace: ' + self.Parent.Parent.Parent.currentWorkspace)
+                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.currentWorkspace)
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.logList.clear()
 
-            self.consoleOutputTextCtrl.AppendText('Start deployment...')
+            self.consoleOutputTextCtrl.AppendText("Start deployment...")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             self.SetButtonState(False)
-            thread = threading.Thread(target=self.DeployFolder,
-                                      args=(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes))
+            thread = threading.Thread(
+                target=self.DeployFolder,
+                args=(
+                    deployType,
+                    orgName,
+                    sdbxName,
+                    targetName,
+                    deployUrl,
+                    deployMetadataUrl,
+                    deployDataUrl,
+                    deployStageUrl,
+                    checkOnly,
+                    ignoreWarnings,
+                    ignoreErrors,
+                    confirmDeploy,
+                    generateManifest,
+                    testLevel,
+                    specifiedTests,
+                    gitUrl,
+                    gitBranch,
+                    metadataGitFolder,
+                    metadataFolderSource,
+                    scriptFile,
+                    zipFileUrlSource,
+                    zipFileUrlWorkspace,
+                    scriptFileWorkspace,
+                    metadataTypes,
+                ),
+            )
             thread.setDaemon(True)
             thread.start()
 
-    def DeployFolder(self,deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes):
+    def DeployFolder(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+    ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
@@ -1092,36 +1440,95 @@ If this field is blank the default test level used is NoTestRun."""
             os.makedirs(deployMetadataUrl)
         dtkglobal.CopyDir(metadataFolderSource, deployStageUrl)
         if generateManifest:
-            self.consoleOutputTextCtrl.AppendText('Generating manifest file...')
+            self.consoleOutputTextCtrl.AppendText("Generating manifest file...")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
-            thread = threading.Thread(target=self.GenerateManifestFirst,
-                                      args=(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl,
-                                            deployDataUrl, deployStageUrl,
-                                            checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest,
-                                            testLevel, specifiedTests,
-                                            gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace,
-                                            scriptFileWorkspace,
-                                            metadataTypes))
+            thread = threading.Thread(
+                target=self.GenerateManifestFirst,
+                args=(
+                    deployType,
+                    orgName,
+                    sdbxName,
+                    targetName,
+                    deployUrl,
+                    deployMetadataUrl,
+                    deployDataUrl,
+                    deployStageUrl,
+                    checkOnly,
+                    ignoreWarnings,
+                    ignoreErrors,
+                    confirmDeploy,
+                    generateManifest,
+                    testLevel,
+                    specifiedTests,
+                    gitUrl,
+                    gitBranch,
+                    metadataGitFolder,
+                    metadataFolderSource,
+                    scriptFile,
+                    zipFileUrlSource,
+                    zipFileUrlWorkspace,
+                    scriptFileWorkspace,
+                    metadataTypes,
+                ),
+            )
             thread.setDaemon(True)
             thread.start()
         else:
             dtkglobal.CopyDir(deployStageUrl, deployMetadataUrl)
             if confirmDeploy:
-                self.NewThreadRunDeploy(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl,
-                                        deployStageUrl,
-                                        deployDataUrl, checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy,
-                                        generateManifest, testLevel,
-                                        specifiedTests, gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile,
-                                        zipFileUrlWorkspace, scriptFileWorkspace,
-                                        metadataTypes)
+                self.NewThreadRunDeploy(
+                    deployType,
+                    orgName,
+                    sdbxName,
+                    targetName,
+                    deployUrl,
+                    deployMetadataUrl,
+                    deployStageUrl,
+                    deployDataUrl,
+                    checkOnly,
+                    ignoreWarnings,
+                    ignoreErrors,
+                    confirmDeploy,
+                    generateManifest,
+                    testLevel,
+                    specifiedTests,
+                    gitUrl,
+                    gitBranch,
+                    metadataGitFolder,
+                    metadataFolderSource,
+                    scriptFile,
+                    zipFileUrlWorkspace,
+                    scriptFileWorkspace,
+                    metadataTypes,
+                )
 
-    def DeployZip(self, deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl,
-                                            deployDataUrl, deployStageUrl,
-                                            checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest,
-                                            testLevel, specifiedTests,
-                                            gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace,
-                                            scriptFileWorkspace,
-                                            metadataTypes):
+    def DeployZip(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+    ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
@@ -1132,20 +1539,63 @@ If this field is blank the default test level used is NoTestRun."""
             os.makedirs(deployMetadataUrl)
         shutil.copy(zipFileUrlSource, deployMetadataUrl)
         zipFileUrlWorkspace = os.path.join(deployMetadataUrl, dtkglobal.PathLeaf(zipFileUrlSource))
-        self.NewThreadRunDeploy(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl,
-                                deployStageUrl, checkOnly,
-                                ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel,
-                                specifiedTests, gitUrl,
-                                gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                                metadataTypes)
+        self.NewThreadRunDeploy(
+            deployType,
+            orgName,
+            sdbxName,
+            targetName,
+            deployUrl,
+            deployMetadataUrl,
+            deployDataUrl,
+            deployStageUrl,
+            checkOnly,
+            ignoreWarnings,
+            ignoreErrors,
+            confirmDeploy,
+            generateManifest,
+            testLevel,
+            specifiedTests,
+            gitUrl,
+            gitBranch,
+            metadataGitFolder,
+            metadataFolderSource,
+            scriptFile,
+            zipFileUrlSource,
+            zipFileUrlWorkspace,
+            scriptFileWorkspace,
+            metadataTypes,
+        )
 
-    def RetrieveGitBranch(self, deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl,
-                              deployDataUrl, deployStageUrl,
-                              checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel,
-                              specifiedTests,
-                              gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace,
-                              scriptFileWorkspace,
-                              metadataTypes, gitUser, gitPass, gitFinalUrl):
+    def RetrieveGitBranch(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+        gitUser,
+        gitPass,
+        gitFinalUrl,
+    ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
@@ -1158,29 +1608,102 @@ If this field is blank the default test level used is NoTestRun."""
             shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
-        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'tmp', 'git.tmp')
-        cmd = ['git', 'clone', '--single-branch', '--branch', gitBranch, gitFinalUrl, deployStageUrl]
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp", "git.tmp")
+        cmd = ["git", "clone", "--single-branch", "--branch", gitBranch, gitFinalUrl, deployStageUrl]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
         for line in proc.stdout:
             wx.CallAfter(self.OnText, line)
         if generateManifest:
-            thread = threading.Thread(target=self.GenerateManifestFirst, args=(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes))
+            thread = threading.Thread(
+                target=self.GenerateManifestFirst,
+                args=(
+                    deployType,
+                    orgName,
+                    sdbxName,
+                    targetName,
+                    deployUrl,
+                    deployMetadataUrl,
+                    deployDataUrl,
+                    deployStageUrl,
+                    checkOnly,
+                    ignoreWarnings,
+                    ignoreErrors,
+                    confirmDeploy,
+                    generateManifest,
+                    testLevel,
+                    specifiedTests,
+                    gitUrl,
+                    gitBranch,
+                    metadataGitFolder,
+                    metadataFolderSource,
+                    scriptFile,
+                    zipFileUrlSource,
+                    zipFileUrlWorkspace,
+                    scriptFileWorkspace,
+                    metadataTypes,
+                ),
+            )
             thread.setDaemon(True)
             thread.start()
         else:
             shutil.copytree(deployStageUrl, deployMetadataUrl)
             if confirmDeploy:
-                self.NewThreadRunDeploy(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl, checkOnly,
-            ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests, gitUrl,
-            gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace, metadataTypes)
+                self.NewThreadRunDeploy(
+                    deployType,
+                    orgName,
+                    sdbxName,
+                    targetName,
+                    deployUrl,
+                    deployMetadataUrl,
+                    deployDataUrl,
+                    deployStageUrl,
+                    checkOnly,
+                    ignoreWarnings,
+                    ignoreErrors,
+                    confirmDeploy,
+                    generateManifest,
+                    testLevel,
+                    specifiedTests,
+                    gitUrl,
+                    gitBranch,
+                    metadataGitFolder,
+                    metadataFolderSource,
+                    scriptFile,
+                    zipFileUrlSource,
+                    zipFileUrlWorkspace,
+                    scriptFileWorkspace,
+                    metadataTypes,
+                )
 
-    def GenerateManifestFirst(self, deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes):
+    def GenerateManifestFirst(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+    ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
@@ -1189,51 +1712,162 @@ If this field is blank the default test level used is NoTestRun."""
             shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
-        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'tmp')
+        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp")
         if not os.path.exists(outputFileUrl):
             os.makedirs(outputFileUrl)
-        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'tmp', 'describeMetadata.tmp')
-        thread = threading.Thread(target=self.DescribeMetadata, args=(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes, outputFileUrl))
+        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp", "describeMetadata.tmp")
+        thread = threading.Thread(
+            target=self.DescribeMetadata,
+            args=(
+                deployType,
+                orgName,
+                sdbxName,
+                targetName,
+                deployUrl,
+                deployMetadataUrl,
+                deployDataUrl,
+                deployStageUrl,
+                checkOnly,
+                ignoreWarnings,
+                ignoreErrors,
+                confirmDeploy,
+                generateManifest,
+                testLevel,
+                specifiedTests,
+                gitUrl,
+                gitBranch,
+                metadataGitFolder,
+                metadataFolderSource,
+                scriptFile,
+                zipFileUrlSource,
+                zipFileUrlWorkspace,
+                scriptFileWorkspace,
+                metadataTypes,
+                outputFileUrl,
+            ),
+        )
         thread.setDaemon(True)
         thread.start()
 
-    def DescribeMetadata(self, deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes, outputFileUrl):
+    def DescribeMetadata(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+        outputFileUrl,
+    ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        cmd = ['sfdx', 'force:mdapi:describemetadata', '--apiversion', dtkglobal.defaultApiVersion, '-u', targetName, '-f', outputFileUrl]
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+        cmd = [
+            "sfdx",
+            "force:mdapi:describemetadata",
+            "--apiversion",
+            dtkglobal.defaultApiVersion,
+            "-u",
+            targetName,
+            "-f",
+            outputFileUrl,
+        ]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
         for line in proc.stdout:
             wx.CallAfter(self.OnText, line)
-        thread = threading.Thread(target=self.GenerateManifestSecond, args=(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes, outputFileUrl))
+        thread = threading.Thread(
+            target=self.GenerateManifestSecond,
+            args=(
+                deployType,
+                orgName,
+                sdbxName,
+                targetName,
+                deployUrl,
+                deployMetadataUrl,
+                deployDataUrl,
+                deployStageUrl,
+                checkOnly,
+                ignoreWarnings,
+                ignoreErrors,
+                confirmDeploy,
+                generateManifest,
+                testLevel,
+                specifiedTests,
+                gitUrl,
+                gitBranch,
+                metadataGitFolder,
+                metadataFolderSource,
+                scriptFile,
+                zipFileUrlSource,
+                zipFileUrlWorkspace,
+                scriptFileWorkspace,
+                metadataTypes,
+                outputFileUrl,
+            ),
+        )
         thread.setDaemon(True)
         thread.start()
 
-    def GenerateManifestSecond(self, deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes, outputFileUrl):
+    def GenerateManifestSecond(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+        outputFileUrl,
+    ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        fileOutput = open(outputFileUrl, 'r', encoding='utf8')
+        fileOutput = open(outputFileUrl, "r", encoding="utf8")
         describeMetadataDict = json.loads(fileOutput.read())
-        manifestFileUrl = os.path.join(deployMetadataUrl, 'package.xml')
+        manifestFileUrl = os.path.join(deployMetadataUrl, "package.xml")
         tempStageUrl = deployStageUrl
-        if deployType == 'Git':
+        if deployType == "Git":
             tempStageUrl = os.path.join(deployStageUrl, metadataGitFolder)
-        manifestFile = open(manifestFileUrl, 'wb')
+        manifestFile = open(manifestFileUrl, "wb")
         strContent = '<?xml version="1.0" encoding="UTF-8"?>\n'
         strContent += '<Package xmlns="http://soap.sforce.com/2006/04/metadata">\n'
         metadataTypesSelected = []
@@ -1253,81 +1887,190 @@ If this field is blank the default test level used is NoTestRun."""
             if item["xmlName"] in metadataTypesSelected:
                 metadataTypePath = os.path.join(tempStageUrl, item["directoryName"])
                 deployMetadataTypePath = os.path.join(deployMetadataUrl, item["directoryName"])
-                if (os.path.exists(metadataTypePath)):
+                if os.path.exists(metadataTypePath):
                     oneIncluded = True
                     dtkglobal.CopyDir(metadataTypePath, deployMetadataTypePath)
-                    strContent += '\t<types>\n'
-                    strContent += '\t\t<members>*</members>\n'
-                    strContent += '\t\t<name>' + item["xmlName"] + '</name>\n'
-                    strContent += '\t</types>\n'
+                    strContent += "\t<types>\n"
+                    strContent += "\t\t<members>*</members>\n"
+                    strContent += "\t\t<name>" + item["xmlName"] + "</name>\n"
+                    strContent += "\t</types>\n"
                 else:
-                    self.consoleOutputTextCtrl.AppendText(item["xmlName"] + ": " + metadataTypePath + " doesn't exist, skipped.")
+                    self.consoleOutputTextCtrl.AppendText(
+                        item["xmlName"] + ": " + metadataTypePath + " doesn't exist, skipped."
+                    )
                     self.consoleOutputTextCtrl.AppendText(os.linesep)
         if not oneIncluded:
             self.OnText("No metadata selected to deploy.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             self.SetButtonState(True)
             return
-        strContent += '\t<version>' + dtkglobal.defaultApiVersion + '</version>\n'
-        strContent += '</Package>\n'
+        strContent += "\t<version>" + dtkglobal.defaultApiVersion + "</version>\n"
+        strContent += "</Package>\n"
         bynaryContent = strContent.encode()
         manifestFile.write(bynaryContent)
         manifestFile.close()
-        wx.CallAfter(self.OnText, 'Manifest file generated.')
+        wx.CallAfter(self.OnText, "Manifest file generated.")
         wx.CallAfter(self.OnText, os.linesep)
         if confirmDeploy:
-            self.NewThreadRunDeploy(deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl,
-                           checkOnly, ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                           gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace,
-                           metadataTypes)
+            self.NewThreadRunDeploy(
+                deployType,
+                orgName,
+                sdbxName,
+                targetName,
+                deployUrl,
+                deployMetadataUrl,
+                deployDataUrl,
+                deployStageUrl,
+                checkOnly,
+                ignoreWarnings,
+                ignoreErrors,
+                confirmDeploy,
+                generateManifest,
+                testLevel,
+                specifiedTests,
+                gitUrl,
+                gitBranch,
+                metadataGitFolder,
+                metadataFolderSource,
+                scriptFile,
+                zipFileUrlSource,
+                zipFileUrlWorkspace,
+                scriptFileWorkspace,
+                metadataTypes,
+            )
 
-    def NewThreadRunDeploy(self, deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl, checkOnly,
-            ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests, gitUrl,
-            gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace, metadataTypes):
+    def NewThreadRunDeploy(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+    ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        thread = threading.Thread(target=self.RunDeploy, args=(
-            deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl, checkOnly,
-            ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests, gitUrl,
-            gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace, metadataTypes))
+        thread = threading.Thread(
+            target=self.RunDeploy,
+            args=(
+                deployType,
+                orgName,
+                sdbxName,
+                targetName,
+                deployUrl,
+                deployMetadataUrl,
+                deployDataUrl,
+                deployStageUrl,
+                checkOnly,
+                ignoreWarnings,
+                ignoreErrors,
+                confirmDeploy,
+                generateManifest,
+                testLevel,
+                specifiedTests,
+                gitUrl,
+                gitBranch,
+                metadataGitFolder,
+                metadataFolderSource,
+                scriptFile,
+                zipFileUrlSource,
+                zipFileUrlWorkspace,
+                scriptFileWorkspace,
+                metadataTypes,
+            ),
+        )
         thread.setDaemon(True)
         thread.start()
 
-    def RunDeploy(self, deployType, orgName, sdbxName, targetName, deployUrl, deployMetadataUrl, deployDataUrl, deployStageUrl, checkOnly,
-                  ignoreWarnings, ignoreErrors, confirmDeploy, generateManifest, testLevel, specifiedTests,
-                  gitUrl, gitBranch, metadataGitFolder, metadataFolderSource, scriptFile, zipFileUrlSource, zipFileUrlWorkspace, scriptFileWorkspace, metadataTypes):
+    def RunDeploy(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+    ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        cmd = ['sfdx', 'force:mdapi:deploy', '--apiversion', dtkglobal.defaultApiVersion, '-u', targetName, '-l', testLevel]
-        if (checkOnly):
-            cmd.append('-c')
-        if (ignoreWarnings):
-            cmd.append('-g')
-        if (ignoreErrors):
-            cmd.append('-o')
-        if testLevel == 'RunSpecifiedTests':
-            cmd.append('-r')
+        cmd = [
+            "sfdx",
+            "force:mdapi:deploy",
+            "--apiversion",
+            dtkglobal.defaultApiVersion,
+            "-u",
+            targetName,
+            "-l",
+            testLevel,
+        ]
+        if checkOnly:
+            cmd.append("-c")
+        if ignoreWarnings:
+            cmd.append("-g")
+        if ignoreErrors:
+            cmd.append("-o")
+        if testLevel == "RunSpecifiedTests":
+            cmd.append("-r")
             cmd.append(specifiedTests)
-        if deployType == 'Zip':
-            cmd.append('-f')
+        if deployType == "Zip":
+            cmd.append("-f")
             cmd.append(zipFileUrlWorkspace)
-        if deployType == 'Folder' or deployType == 'Git':
-            cmd.append('-d')
+        if deployType == "Folder" or deployType == "Git":
+            cmd.append("-d")
             cmd.append(deployMetadataUrl)
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
         for line in proc.stdout:
             lineStr = line.decode()
-            if 'jobid:  ' in lineStr:
-                lineSplit = lineStr.split('jobid: ')
+            if "jobid:  " in lineStr:
+                lineSplit = lineStr.split("jobid: ")
                 if len(lineSplit) > 1:
                     logEntry = {}
-                    logEntry["type"] = 'Deploy'
+                    logEntry["type"] = "Deploy"
                     logEntry["file"] = zipFileUrlWorkspace
-                    jobIdStrip = lineSplit[1].strip('\r\n')
+                    logEntry["scriptLine"] = ""
+                    jobIdStrip = lineSplit[1].strip("\r\n")
                     jobIdStrip = jobIdStrip.strip()
                     logEntry["jobid"] = jobIdStrip
                     logEntry["batchid"] = ""
@@ -1345,124 +2088,170 @@ If this field is blank the default test level used is NoTestRun."""
             self.ProcessScript(deployDataUrl, scriptFileWorkspace, deployStageUrl)
             scriptProcessed = True
         if not scriptProcessed and scriptFile != deployStageUrl and len(scriptFile) > 0:
-            wx.CallAfter(self.OnText, 'Script file not found on: ' + scriptFile)
+            wx.CallAfter(self.OnText, "Script file not found on: " + scriptFile)
             wx.CallAfter(self.OnText, os.linesep)
         if not scriptProcessed and scriptFileWorkspace != deployStageUrl and len(scriptFileWorkspace) > 0:
-            wx.CallAfter(self.OnText, 'Script file not found on: ' + scriptFileWorkspace)
+            wx.CallAfter(self.OnText, "Script file not found on: " + scriptFileWorkspace)
             wx.CallAfter(self.OnText, os.linesep)
         wx.CallAfter(self.SetButtonState, True)
 
     def OnText(self, text):
         self.consoleOutputTextCtrl.AppendText(text)
 
-    def RunDataCmd(self, lineSplit, target, pathString, cmd):
+    def RunDataCmd(self, lineSplit, lineStr, target, pathString, cmd):
         if self.stop:
             return
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-        if 'SOQLQUERY' in lineSplit:
-            fileOutput = open(pathString, 'wb')
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        if "SOQLQUERY" in lineSplit:
+            fileOutput = open(pathString, "wb")
             fileOutput.write(proc.stdout.read())
             for line in proc.stdout:
                 wx.CallAfter(self.OnText, line)
-            wx.CallAfter(self.OnText, "Exported data to " + pathString + '\n')
+            wx.CallAfter(self.OnText, "Exported data to " + pathString + "\n")
         else:
             for line in proc.stdout:
-                lineStr = line.decode()
-                if 'force:data:bulk:status' in lineStr:
-                    lineSplit = lineStr.split('-i ')
-                    if len(lineSplit) > 1:
-                        lineSplitAgain = lineSplit[1].split(' -b ')
+                lnStr = line.decode()
+                if "force:data:bulk:status" in lnStr:
+                    lnSplit = lnStr.split("-i ")
+                    if len(lnSplit) > 1:
+                        lineSplitAgain = lnSplit[1].split(" -b ")
                         if len(lineSplitAgain) > 1:
                             logEntry = {}
-                            logEntry["type"] = 'Bulk'
-                            logEntry["file"] = ''
-                            jobIdStrip = lineSplitAgain[0].strip('\r\n')
+                            logEntry["type"] = "Bulk"
+                            logEntry["file"] = ""
+                            logEntry["scriptLine"] = lineStr
+                            jobIdStrip = lineSplitAgain[0].strip("\r\n")
                             jobIdStrip = jobIdStrip.strip()
                             logEntry["jobid"] = jobIdStrip
-                            batchIdStrip = lineSplitAgain[1].strip('\r\n')
+                            batchIdStrip = lineSplitAgain[1].strip("\r\n")
                             batchIdStrip = batchIdStrip.strip()
                             logEntry["batchid"] = batchIdStrip
                             logEntry["targetname"] = target
                             logEntry["pathname"] = pathString
                             self.logList[jobIdStrip] = logEntry
                 wx.CallAfter(self.OnText, line)
+        wx.CallAfter(self.SetButtonState, True)
 
     def Unzip(self, pathToZipFile):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'deploy')
-        deployMetadataUrl = os.path.join(deployUrl, 'metadata')
-        zipRef = zipfile.ZipFile(pathToZipFile, 'r')
+        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployMetadataUrl = os.path.join(deployUrl, "metadata")
+        zipRef = zipfile.ZipFile(pathToZipFile, "r")
         zipName = dtkglobal.PathLeaf(pathToZipFile)
-        zipNameForFolder = zipName.rstrip('.zip')
+        zipNameForFolder = zipName.rstrip(".zip")
         unzippedFolder = os.path.join(deployMetadataUrl, zipNameForFolder)
         self.consoleOutputTextCtrl.AppendText("Unzipping files from: " + pathToZipFile + " - To: " + unzippedFolder)
         self.consoleOutputTextCtrl.AppendText(os.linesep)
         zipRef.extractall(unzippedFolder)
 
     def RefreshLog(self, event):
-        if self.stop:
-            self.consoleOutputTextCtrl.AppendText("Process stopped.")
-            self.consoleOutputTextCtrl.AppendText(os.linesep)
-            return
+        self.stop = False
         if len(self.logList) == 0:
             return
         self.consoleOutputTextCtrl.AppendText(
-            '----------------------------------------------------------------------------------')
+            "----------------------------------------------------------------------------------"
+        )
         self.consoleOutputTextCtrl.AppendText(os.linesep)
         self.consoleOutputTextCtrl.AppendText(
-            'Refresh log started at: ' + datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+            "Refresh log started at: " + datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        )
         self.consoleOutputTextCtrl.AppendText(os.linesep)
-        waitMinutes = '0'
+        waitMinutes = "0"
         self.SetButtonState(False)
         thread = threading.Thread(target=self.RunRefreshLog, args=(waitMinutes))
         thread.setDaemon(True)
         thread.start()
 
     def RunRefreshLog(self, waitMinutes):
-        if self.stop:
-            self.consoleOutputTextCtrl.AppendText("Process stopped.")
-            self.consoleOutputTextCtrl.AppendText(os.linesep)
-            return
         for jobId in self.logList:
+            if self.stop:
+                self.consoleOutputTextCtrl.AppendText("Process stopped.")
+                self.consoleOutputTextCtrl.AppendText(os.linesep)
+                return
             log = self.logList[jobId]
-            type, file, jobId, batchId, targetName, pathName = log["type"], log["file"], log["jobid"], log["batchid"], \
-                                                               log["targetname"], log["pathname"]
-            if type == 'Retrieve':
-                cmd = ['sfdx', 'force:mdapi:retrieve:report', '--apiversion', dtkglobal.defaultApiVersion, '-u',
-                       targetName,
-                       '-i', jobId, '-r', pathName, '-w', waitMinutes]
-                proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+            type, file, scriptLine, jobId, batchId, targetName, pathName = (
+                log["type"],
+                log["file"],
+                log["scriptLine"],
+                log["jobid"],
+                log["batchid"],
+                log["targetname"],
+                log["pathname"],
+            )
+            if type == "Retrieve":
+                cmd = [
+                    "sfdx",
+                    "force:mdapi:retrieve:report",
+                    "--apiversion",
+                    dtkglobal.defaultApiVersion,
+                    "-u",
+                    targetName,
+                    "-i",
+                    jobId,
+                    "-r",
+                    pathName,
+                    "-w",
+                    waitMinutes,
+                ]
+                proc = subprocess.Popen(
+                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+                )
                 # zipToExtract = self.unZipRetrievedCheckBox.GetValue()
                 zipToExtract = False
                 zipReady = False
-                zipUrl = ''
+                zipUrl = ""
                 for line in proc.stdout:
                     lineStr = line.decode()
                     wx.CallAfter(self.OnText, line)
                     if zipToExtract:
-                        if 'Wrote retrieve zip to ' in lineStr:
-                            lineSplit = lineStr.split('Wrote retrieve zip to ')
+                        if "Wrote retrieve zip to " in lineStr:
+                            lineSplit = lineStr.split("Wrote retrieve zip to ")
                             if len(lineSplit) > 1:
                                 zipUrl = lineSplit[1]
-                                zipUrl = zipUrl.strip('\r\n')
-                                zipUrl = zipUrl.rstrip('.')
+                                zipUrl = zipUrl.strip("\r\n")
+                                zipUrl = zipUrl.rstrip(".")
                                 zipReady = True
                 if zipToExtract and zipReady:
                     wx.CallAfter(self.Unzip, zipUrl)
-            if type == 'Deploy':
-                cmd = ['sfdx', 'force:mdapi:deploy:report', '--apiversion', dtkglobal.defaultApiVersion, '-u',
-                       targetName,
-                       '-i', jobId]
-                proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+            if type == "Deploy":
+                cmd = [
+                    "sfdx",
+                    "force:mdapi:deploy:report",
+                    "--apiversion",
+                    dtkglobal.defaultApiVersion,
+                    "-u",
+                    targetName,
+                    "-i",
+                    jobId,
+                ]
+                proc = subprocess.Popen(
+                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+                )
+                self.consoleOutputTextCtrl.AppendText("Metadata Deployment:")
                 for line in proc.stdout:
                     wx.CallAfter(self.OnText, line)
-            if type == 'Bulk':
-                cmd = ['sfdx', 'force:data:bulk:status', '--apiversion', dtkglobal.defaultApiVersion, '-u', targetName,
-                       '-i', jobId, '-b', batchId]
-                proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+            if type == "Bulk":
+                cmd = [
+                    "sfdx",
+                    "force:data:bulk:status",
+                    "--apiversion",
+                    dtkglobal.defaultApiVersion,
+                    "-u",
+                    targetName,
+                    "-i",
+                    jobId,
+                    "-b",
+                    batchId,
+                ]
+                self.consoleOutputTextCtrl.AppendText("Script Line: " + scriptLine)
+                proc = subprocess.Popen(
+                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+                )
                 for line in proc.stdout:
                     wx.CallAfter(self.OnText, line)
         wx.CallAfter(self.SetButtonState, True)
@@ -1476,50 +2265,54 @@ If this field is blank the default test level used is NoTestRun."""
         if not os.path.exists(deployDataUrl):
             os.makedirs(deployDataUrl)
         orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
-        sdbxNameSource = 'Config'
+        sdbxNameSource = "Config"
         if dtkglobal.advSetting:
             sdbxNameSource = self.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()
         sdbxName = self.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
-        sourceName = orgName + '_' + sdbxNameSource
-        if '_' in sdbxNameSource:
+        sourceName = orgName + "_" + sdbxNameSource
+        if "_" in sdbxNameSource:
             sourceName = sdbxNameSource
         targetName = self.Parent.Parent.Parent.currentTarget
-        scriptFile = open(scriptUrl, 'r', encoding="utf8")
+        scriptFile = open(scriptUrl, "r", encoding="utf8")
         scriptFull = scriptFile.read()
-        if 'SOURCE' in scriptFull and len(sdbxNameSource) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a Source.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+        if "SOURCE" in scriptFull and len(sdbxNameSource) == 0:
+            dlg = wx.MessageDialog(self, "Please select a Source.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
-        if 'TARGET' in scriptFull and len(sdbxName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select a Target.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+        if "TARGET" in scriptFull and len(sdbxName) == 0:
+            dlg = wx.MessageDialog(self, "Please select a Target.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
         scriptFile.close()
         i = 1
-        scriptFile = open(scriptUrl, 'r', encoding="utf8")
+        scriptFile = open(scriptUrl, "r", encoding="utf8")
         for line in scriptFile:
             if self.stop:
                 self.consoleOutputTextCtrl.AppendText("Process stopped.")
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 return
-            lineStr = line.strip('\r\n')
-            lineSplit = lineStr.split('|')
+            lineStr = line.strip("\r\n")
+            lineSplit = lineStr.split("|")
             if len(lineSplit) > 0:
-                if lineSplit[0] == 'FILE':
-                    self.ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl)
-                if lineSplit[0] == 'SOURCE' or lineSplit[0] == 'TARGET':
-                    self.ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl)
+                if lineSplit[0] == "FILE":
+                    self.ProcessFileScriptLine(
+                        lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
+                    )
+                if lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET":
+                    self.ProcessDataScriptLine(
+                        lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
+                    )
         i += 1
         scriptFile.close()
 
-    def ProcessFileScriptLine(self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl):
-        error, errorMsg, returnMsg = dtkglobal.ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl)
+    def ProcessFileScriptLine(
+        self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+    ):
+        error, errorMsg, returnMsg = dtkglobal.ProcessFileScriptLine(
+            lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+        )
         if self.stop:
             return
         if error:
@@ -1529,19 +2322,24 @@ If this field is blank the default test level used is NoTestRun."""
             self.consoleOutputTextCtrl.AppendText(returnMsg)
             self.consoleOutputTextCtrl.AppendText(os.linesep)
 
-    def ProcessDataScriptLine(self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl):
-        error, errorMsg, target, pathString, cmd = dtkglobal.ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl)
+    def ProcessDataScriptLine(
+        self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+    ):
+        error, errorMsg, target, pathString, cmd = dtkglobal.ProcessDataScriptLine(
+            lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+        )
         if self.stop:
             return
         if error:
             self.consoleOutputTextCtrl.AppendText(errorMsg)
             self.consoleOutputTextCtrl.AppendText(os.linesep)
         else:
-            self.RunDataCmd(lineSplit, target, pathString, cmd)
+            self.RunDataCmd(lineSplit, lineStr, target, pathString, cmd)
 
     def SelectZipFile(self, event):
-        dlg = wx.FileDialog(self, "Select zip file", wildcard="Zip files (*.zip)|*.zip",
-                      style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        dlg = wx.FileDialog(
+            self, "Select zip file", wildcard="Zip files (*.zip)|*.zip", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+        )
 
         if dlg.ShowModal() == wx.ID_CANCEL:
             return
@@ -1550,8 +2348,7 @@ If this field is blank the default test level used is NoTestRun."""
         self.zipFileTextCtrl.AppendText(pathname)
 
     def SelectMetadataFolder(self, event):
-        dlg = wx.DirDialog(None, "Choose metadata folder", "",
-                           wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
+        dlg = wx.DirDialog(None, "Choose metadata folder", "", wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
         if dlg.ShowModal() == wx.ID_CANCEL:
             return
         pathname = dlg.GetPath()
@@ -1559,8 +2356,9 @@ If this field is blank the default test level used is NoTestRun."""
         self.metadataFolderTextCtrl.AppendText(pathname)
 
     def SelectScriptFolder(self, event):
-        dlg = wx.FileDialog(self, "Select script file", wildcard="All files (*.*)|*.*",
-                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        dlg = wx.FileDialog(
+            self, "Select script file", wildcard="All files (*.*)|*.*", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+        )
 
         if dlg.ShowModal() == wx.ID_CANCEL:
             return
@@ -1569,7 +2367,7 @@ If this field is blank the default test level used is NoTestRun."""
         self.scriptFolderTextCtrl.AppendText(pathname)
 
     def ChangeTestLevels(self, event):
-        if self.testLevelsComboBox.GetValue() == 'RunSpecifiedTests':
+        if self.testLevelsComboBox.GetValue() == "RunSpecifiedTests":
             self.specifiedTestsLbl.Show()
             self.specifiedTestTextCtrl.Show()
         else:
@@ -1577,14 +2375,31 @@ If this field is blank the default test level used is NoTestRun."""
             self.specifiedTestTextCtrl.Hide()
         self.Layout()
 
+    def ShowSelectedMetadataList(self, event):
+        self.selectedMetadataTypesTextCtrl.SetValue("")
+        for line in self.metadataTypesListBox.Selections:
+            if self.selectedMetadataTypesTextCtrl.GetValue() != "":
+                self.selectedMetadataTypesTextCtrl.AppendText(", " + self.metadataTypesListBox.Items[line])
+            else:
+                self.selectedMetadataTypesTextCtrl.AppendText(self.metadataTypesListBox.Items[line])
+
     def ChangeMetadataTemplate(self, event):
         self.metadataTypesListBox.SetSelection(-1)
-        if self.metadataTemplateComboBox.GetValue() == 'All':
-            for i in range(self.metadataTypesListBox.GetCount()):
-                self.metadataTypesListBox.SetSelection(i)
+        self.selectedMetadataTypesTextCtrl.SetValue("")
+        if self.metadataTemplateComboBox.GetValue() == "All":
+            for i in self.metadataTypesListBox.GetStrings():
+                self.metadataTypesListBox.SetStringSelection(i)
+                if self.selectedMetadataTypesTextCtrl.GetValue() != "":
+                    self.selectedMetadataTypesTextCtrl.AppendText(", " + i)
+                else:
+                    self.selectedMetadataTypesTextCtrl.AppendText(i)
         if self.metadataTemplateComboBox.GetValue() in dtkglobal.metadataTemplatesSelection:
             for line in dtkglobal.metadataTemplatesSelection[self.metadataTemplateComboBox.GetValue()]:
                 self.metadataTypesListBox.SetStringSelection(line)
+                if self.selectedMetadataTypesTextCtrl.GetValue() != "":
+                    self.selectedMetadataTypesTextCtrl.AppendText(", " + line)
+                else:
+                    self.selectedMetadataTypesTextCtrl.AppendText(line)
 
     def ChangeGitUrl(self, event):
         self.stop = False
@@ -1594,9 +2409,9 @@ If this field is blank the default test level used is NoTestRun."""
 
         if len(gitUrl) > 0:
             if orgName in dtkglobal.orgDict:
-                self.consoleOutputTextCtrl.AppendText('Fetching branches...')
+                self.consoleOutputTextCtrl.AppendText("Fetching branches...")
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
-                thread = threading.Thread(target=self.RetrieveBranches, args=(orgName, gitUrl, branchFilter,))
+                thread = threading.Thread(target=self.RetrieveBranches, args=(orgName, gitUrl, branchFilter))
                 thread.setDaemon(True)
                 thread.start()
         else:
@@ -1607,21 +2422,26 @@ If this field is blank the default test level used is NoTestRun."""
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        gitUrlSplit =  gitUrl.split('//')
+        gitUrlSplit = gitUrl.split("//")
         if len(gitUrlSplit) > 1:
             self.gitBranchComboBox.Enable(False)
-            gitPreffix = gitUrlSplit[0] + '//'
+            gitPreffix = gitUrlSplit[0] + "//"
             gitSuffix = gitUrlSplit[1]
             gitUser = dtkglobal.orgDict[orgName]["gituser"]
             gitPass = dtkglobal.Decode(gitUser, dtkglobal.orgDict[orgName]["gitpass"])
-            outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'tmp')
+            outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp")
             if not os.path.exists(outputFileUrl):
                 os.makedirs(outputFileUrl)
-            outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, 'tmp', 'branches.tmp')
-            gitFinalUrl = gitPreffix + gitUser + ':' + gitPass + '@' + gitSuffix
+            outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp", "branches.tmp")
+            gitFinalUrl = gitPreffix + gitUser + ":" + gitPass + "@" + gitSuffix
             branches = []
-            proc = subprocess.Popen('git ls-remote --heads --refs ' + gitFinalUrl + ' ' + branchFilter, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                    stdin=subprocess.PIPE)
+            proc = subprocess.Popen(
+                "git ls-remote --heads --refs " + gitFinalUrl + " " + branchFilter,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                stdin=subprocess.PIPE,
+            )
             # os.system('git ls-remote --heads --refs ' + gitFinalUrl + ' ' + branchFilter + ' > ' + outputFileUrl)
             # fileOutput = open(outputFileUrl, 'r', encoding='utf8')
             # for line in fileOutput:
@@ -1631,9 +2451,9 @@ If this field is blank the default test level used is NoTestRun."""
                     self.consoleOutputTextCtrl.AppendText("Process stopped.")
                     self.consoleOutputTextCtrl.AppendText(os.linesep)
                     return
-                branchesInFile = lineStr.split('refs/heads/')
+                branchesInFile = lineStr.split("refs/heads/")
                 if len(branchesInFile) > 1:
-                    branchName = branchesInFile[1].strip('\r\n')
+                    branchName = branchesInFile[1].strip("\r\n")
                     branchName = branchName.strip()
                     branches.append(branchName)
             branches = sorted(branches, key=lambda s: s.casefold())
@@ -1642,11 +2462,11 @@ If this field is blank the default test level used is NoTestRun."""
     def FillBranches(self, branches):
         self.gitBranchComboBox.Enable(True)
         self.gitBranchComboBox.Items = branches
-        self.consoleOutputTextCtrl.AppendText('Fetching branches finished.')
+        self.consoleOutputTextCtrl.AppendText("Fetching branches finished.")
         self.consoleOutputTextCtrl.AppendText(os.linesep)
 
-class DeployFrame(wx.Frame):
 
+class DeployFrame(wx.Frame):
     def __init__(self, parent=None):
         super(DeployFrame, self).__init__(parent, title="Deploy")
         myStream = dtkglobal.getImageStream()
@@ -1668,8 +2488,6 @@ class DeployFrame(wx.Frame):
         spanV = 0
         spanH = 2
 
-        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
-
         self.organizationLbl = wx.StaticText(self.panel, label="Organization")
         self.organizationLbl.ToolTip = "List of Organizations available."
         self.organizationComboBox = wx.ComboBox(self.panel, style=wx.CB_READONLY)
@@ -1686,7 +2504,7 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
             self.sandboxTypeSourceTextCtrl.ToolTip = """Sandbox Source: Add the sandbox name to be used as Source when executing data scripts.
 The Organization set will be set as preffix. Ex: Organization=MyOrg | Source=MySand >> MyOrg_MySand
 If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: Organization=MyOrg | Source=MyOtherOrg_My_Sand >> MyOtherOrg_My_Sand"""
-            self.sandboxTypeSourceTextCtrl.AppendText('Config')
+            self.sandboxTypeSourceTextCtrl.AppendText("Config")
 
         self.sandboxTypeTargetLbl = wx.StaticText(self.panel, label="Target")
         self.sandboxTypeTargetLbl.ToolTip = "Sandbox Type: Config, QA, UAT or Prod."
@@ -1696,27 +2514,41 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
         self.sandboxTypeTargetComboBox.Enable(False)
 
         self.nb = wx.Notebook(self.panel)
-        self.nb.AddPage(DeployMetadataPanel(self.nb, deployType='Git'), "Metadata")
+        self.nb.AddPage(DeployMetadataPanel(self.nb, deployType="Git"), "Metadata")
         self.nb.AddPage(ScriptDataPanel(self.nb), "Script Data")
 
-        self.mainSizer.Add(self.organizationLbl, pos=(row, col), flag= wx.TOP | wx.LEFT | wx.RIGHT,border=5)
-        self.mainSizer.Add(self.organizationComboBox, pos=(row, col + 1), span=(0, 3),
-                      flag= wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.mainSizer.Add(self.organizationLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.organizationComboBox,
+            pos=(row, col + 1),
+            span=(0, 3),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
         if dtkglobal.unlockSetting:
-            self.mainSizer.Add(self.sandboxTypeSourceLbl, pos=(row, col), flag= wx.TOP | wx.LEFT | wx.RIGHT,border=5)
-            self.mainSizer.Add(self.sandboxTypeSourceTextCtrl, pos=(row, col + 1), span=(0, 3),
-                          flag= wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+            self.mainSizer.Add(self.sandboxTypeSourceLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+            self.mainSizer.Add(
+                self.sandboxTypeSourceTextCtrl,
+                pos=(row, col + 1),
+                span=(0, 3),
+                flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+                border=5,
+            )
             row += 1
 
-        self.mainSizer.Add(self.sandboxTypeTargetLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT,border=5)
-        self.mainSizer.Add(self.sandboxTypeTargetComboBox, pos=(row, col + 1), span=(0, 3),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.mainSizer.Add(self.sandboxTypeTargetLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.sandboxTypeTargetComboBox,
+            pos=(row, col + 1),
+            span=(0, 3),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
         row += 1
 
-        self.mainSizer.Add(self.nb, pos=(row, col), span=(0, 6),
-                      flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,border=5)
+        self.mainSizer.Add(self.nb, pos=(row, col), span=(0, 6), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
 
         self.mainSizer.AddGrowableRow(row)
         self.mainSizer.AddGrowableCol(2)
@@ -1728,6 +2560,7 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
 
         self.Centre()
         self.MinSize = self.Size
+        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.Show()
 
     def OrganizationSelected(self, event):
@@ -1744,60 +2577,62 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
             self.sandboxTypeTargetComboBox.Items = sandboxList
             if dtkglobal.unlockSetting:
                 self.sandboxTypeSourceTextCtrl.Clear()
-                self.sandboxTypeSourceTextCtrl.AppendText('Config')
+                self.sandboxTypeSourceTextCtrl.AppendText("Config")
             gitList = [dtkglobal.orgDict[orgName]["giturl"]]
             self.nb.GetPage(0).gitUrlComboBox.Items = gitList
             self.nb.GetPage(0).metadataGitFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["metadatafolder"])
             self.nb.GetPage(0).scriptFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["script"])
-            self.Title = 'Deploy: ' + orgName
+            self.Title = "Deploy: " + orgName
             self.sandboxTypeTargetComboBox.Enable(True)
-
 
     def TargetSelected(self, event):
         orgName = self.organizationComboBox.GetValue()
         sdbxName = self.sandboxTypeTargetComboBox.GetValue()
-        if sdbxName == 'Prod' or sdbxName == 'UAT':
-            self.nb.GetPage(0).testLevelsComboBox.SetStringSelection('RunLocalTests')
+        if sdbxName == "Prod" or sdbxName == "UAT":
+            self.nb.GetPage(0).testLevelsComboBox.SetStringSelection("RunLocalTests")
         else:
-            self.nb.GetPage(0).testLevelsComboBox.SetStringSelection('NoTestRun')
+            self.nb.GetPage(0).testLevelsComboBox.SetStringSelection("NoTestRun")
         if len(orgName) == 0:
-            dlg = wx.MessageDialog(self,
-                                   "Please select an organization.",
-                                   "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
-        if self.currentTarget == orgName + '_' + sdbxName:
+        if self.currentTarget == orgName + "_" + sdbxName:
             return
         else:
             if self.currentTarget in dtkglobal.targets:
                 dtkglobal.targets.remove(self.currentTarget)
             if self.currentWorkspace in dtkglobal.workspaces:
                 dtkglobal.workspaces.remove(self.currentWorkspace)
-        self.currentTarget = orgName + '_' + sdbxName
+        self.currentTarget = orgName + "_" + sdbxName
         if self.currentTarget in dtkglobal.targets:
             i = 1
             exit = False
-            if (os.path.join(os.path.expanduser('~'), '.dtk', self.currentTarget) not in dtkglobal.workspaces):
-                self.currentWorkspace = os.path.join(os.path.expanduser('~'), '.dtk', self.currentTarget)
+            if os.path.join(os.path.expanduser("~"), ".dtk", self.currentTarget) not in dtkglobal.workspaces:
+                self.currentWorkspace = os.path.join(os.path.expanduser("~"), ".dtk", self.currentTarget)
                 exit = True
             while not exit:
-                if (os.path.join(os.path.expanduser('~'), '.dtk', self.currentTarget + '_' + str(i)) not in dtkglobal.workspaces):
-                    self.currentWorkspace = os.path.join(os.path.expanduser('~'), '.dtk', self.currentTarget + '_' + str(i))
+                if (
+                    os.path.join(os.path.expanduser("~"), ".dtk", self.currentTarget + "_" + str(i))
+                    not in dtkglobal.workspaces
+                ):
+                    self.currentWorkspace = os.path.join(
+                        os.path.expanduser("~"), ".dtk", self.currentTarget + "_" + str(i)
+                    )
                     exit = True
                 else:
                     i += 1
         else:
-            self.currentWorkspace = os.path.join(os.path.expanduser('~'), '.dtk', self.currentTarget)
+            self.currentWorkspace = os.path.join(os.path.expanduser("~"), ".dtk", self.currentTarget)
         dtkglobal.targets.append(self.currentTarget)
         dtkglobal.workspaces.append(self.currentWorkspace)
         if not os.path.exists(self.currentWorkspace):
             os.makedirs(self.currentWorkspace)
-        self.nb.GetPage(0).consoleOutputTextCtrl.AppendText('Workspace changed to: ' + self.currentWorkspace)
+        self.nb.GetPage(0).consoleOutputTextCtrl.AppendText("Workspace changed to: " + self.currentWorkspace)
         self.nb.GetPage(0).consoleOutputTextCtrl.AppendText(os.linesep)
-        self.nb.GetPage(1).consoleOutputTextCtrl.AppendText('Workspace changed to: ' + self.currentWorkspace)
+        self.nb.GetPage(1).consoleOutputTextCtrl.AppendText("Workspace changed to: " + self.currentWorkspace)
         self.nb.GetPage(1).consoleOutputTextCtrl.AppendText(os.linesep)
-        self.Title = 'Deploy: ' + orgName + ' - ' + sdbxName
+        self.Title = "Deploy: " + orgName + " - " + sdbxName
 
     def OnCloseWindow(self, event):
         if self.currentTarget in dtkglobal.targets:
