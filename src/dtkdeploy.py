@@ -293,12 +293,17 @@ class ScriptDataPanel(wx.Panel):
                     self.ProcessFileScriptLine(
                         lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
                     )
-                if lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET":
+                if (lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET") and (lineSplit[1] != "DEPLOYZIP" and lineSplit[1] != "DEPLOYFOLDER"):
                     self.ProcessDataScriptLine(
+                        lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
+                    )
+                if (lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET") and (lineSplit[1] == "DEPLOYZIP" or lineSplit[1] == "DEPLOYFOLDER"):
+                    self.ProcessMetadataScriptLine(
                         lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
                     )
         i += 1
         scriptFile.close()
+        wx.CallAfter(self.SetButtonState, True)
 
     def ProcessFileScriptLine(
         self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
@@ -329,9 +334,172 @@ class ScriptDataPanel(wx.Panel):
         else:
             self.RunDataCmd(lineSplit, lineStr, target, pathString, cmd)
 
+    def ProcessMetadataScriptLine(
+        self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+    ):  
+        deployType = None,
+        orgName = None,
+        sdbxName = None,
+        deployUrl = None,
+        deployMetadataUrl = None,
+        confirmDeploy = None,
+        generateManifest = None,
+        ignoreErrors = None,
+        specifiedTests = None,
+        gitUrl = None,
+        gitBranch = None,
+        metadataGitFolder = None,
+        metadataFolderSource = None,
+        preScriptFile = None,
+        scriptFile = None,
+        zipFileUrlSource = None,
+        zipFileUrlWorkspace = None
+        preScriptFileWorkspace = None,
+        scriptFileWorkspace = None,
+        metadataTypes = None,
+
+        error, errorMsg, target, pathString, cmd = dtkglobal.ProcessMetadataScriptLine(
+            lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+        )
+
+        
+        if self.stop:
+            return
+        if error:
+            self.consoleOutputTextCtrl.AppendText(errorMsg)
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+        else:
+            if lineSplit[1] == "DEPLOYZIP":
+                fileTarget = lineSplit[2]
+                testLevel = lineSplit[3]
+                checkOnly = False
+                if lineSplit[4] == "YES":
+                    checkOnly = True
+                ignoreWarnings = False
+                if lineSplit[5] == "YES":
+                    ignoreWarnings = True
+                waitParam = lineSplit[6]
+                deployType = "Zip"
+                zipFileUrlWorkspace = pathString
+                fromScript = True
+                self.RunDeploy(
+                        deployType,
+                        orgName,
+                        sdbxName,
+                        targetName,
+                        deployUrl,
+                        deployMetadataUrl,
+                        deployDataUrl,
+                        deployStageUrl,
+                        checkOnly,
+                        ignoreWarnings,
+                        ignoreErrors,
+                        confirmDeploy,
+                        generateManifest,
+                        testLevel,
+                        specifiedTests,
+                        gitUrl,
+                        gitBranch,
+                        metadataGitFolder,
+                        metadataFolderSource,
+                        preScriptFile,
+                        scriptFile,
+                        zipFileUrlSource,
+                        zipFileUrlWorkspace,
+                        preScriptFileWorkspace,
+                        scriptFileWorkspace,
+                        metadataTypes,
+                        fromScript,
+                        waitParam,
+                    
+                    )
+
     def OnText(self, text):
         self.consoleOutputTextCtrl.AppendText(text)
-
+    
+    def RunDeploy(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        preScriptFile,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        preScriptFileWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+        fromScript,
+        waitParam,
+    ):
+        if self.stop:
+            self.consoleOutputTextCtrl.AppendText("Process stopped.")
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+            return
+        cmd = [
+            "sfdx",
+            "force:mdapi:deploy",
+            "--apiversion",
+            dtkglobal.defaultApiVersion,
+            "-u",
+            targetName,
+            "-l",
+            testLevel,
+            "-w",
+            waitParam
+        ]
+        if checkOnly:
+            cmd.append("-c")
+        if ignoreWarnings:
+            cmd.append("-g")
+        if ignoreErrors:
+            cmd.append("-o")
+        if testLevel == "RunSpecifiedTests":
+            cmd.append("-r")
+            cmd.append(specifiedTests)
+        if deployType == "Zip":
+            cmd.append("-f")
+            cmd.append(zipFileUrlWorkspace)
+        if deployType == "Folder" or deployType == "Git":
+            cmd.append("-d")
+            cmd.append(deployMetadataUrl)
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        for line in proc.stdout:
+            lineStr = line.decode()
+            if "jobid:  " in lineStr:
+                lineSplit = lineStr.split("jobid: ")
+                if len(lineSplit) > 1:
+                    logEntry = {}
+                    logEntry["type"] = "Deploy"
+                    logEntry["file"] = zipFileUrlWorkspace
+                    logEntry["scriptLine"] = ""
+                    jobIdStrip = lineSplit[1].strip("\r\n")
+                    jobIdStrip = jobIdStrip.strip()
+                    logEntry["jobid"] = jobIdStrip
+                    logEntry["batchid"] = ""
+                    logEntry["targetname"] = targetName
+                    logEntry["pathname"] = deployMetadataUrl
+                    self.logList[jobIdStrip] = logEntry
+            wx.CallAfter(self.OnText, lineStr)
+        
     def RunDataCmd(self, lineSplit, lineStr, target, pathString, cmd):
         if self.stop:
             return
@@ -451,6 +619,7 @@ class ScriptDataPanel(wx.Panel):
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
+                self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.consoleOutputTextCtrl.AppendText("Metadata Deployment:")
                 for line in proc.stdout:
                     wx.CallAfter(self.OnText, line)
@@ -467,6 +636,7 @@ class ScriptDataPanel(wx.Panel):
                     "-b",
                     batchId,
                 ]
+                self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.consoleOutputTextCtrl.AppendText("Script Line: " + scriptLine)
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
@@ -541,10 +711,18 @@ class DeployMetadataPanel(wx.Panel):
         self.btnMetadataFolder = wx.Button(self, label="Browse")
         self.btnMetadataFolder.Bind(wx.EVT_BUTTON, self.SelectMetadataFolder)
 
-        self.scriptFolderLbl = wx.StaticText(self, label="Script File")
+        self.preScriptFolderLbl = wx.StaticText(self, label="Pre Deploy Script File")
+        self.preScriptFolderLbl.ToolTip = "Script file to be executed before metadata deployment."
+        self.preScriptFolderTextCtrl = wx.TextCtrl(self)
+        self.preScriptFolderTextCtrl.ToolTip = "Script file to be executed before metadata deployment."
+
+        self.scriptFolderLbl = wx.StaticText(self, label="Post Deploy Script File")
         self.scriptFolderLbl.ToolTip = "Script file to be executed after metadata deployment."
         self.scriptFolderTextCtrl = wx.TextCtrl(self)
         self.scriptFolderTextCtrl.ToolTip = "Script file to be executed after metadata deployment."
+
+        self.btnPreScriptFolder = wx.Button(self, label="Browse")
+        self.btnPreScriptFolder.Bind(wx.EVT_BUTTON, self.selectPreScriptFolder)
 
         self.btnScriptFolder = wx.Button(self, label="Browse")
         self.btnScriptFolder.Bind(wx.EVT_BUTTON, self.SelectScriptFolder)
@@ -615,6 +793,12 @@ class DeployMetadataPanel(wx.Panel):
         self.clearLogsCheckBox = wx.CheckBox(self)
         self.clearLogsCheckBox.ToolTip = "Clear log output and asynchronous jobs."
         self.clearLogsCheckBox.SetValue(True)
+
+        self.waitParamLbl = wx.StaticText(self, label="Wait time")
+        self.waitParamLbl.ToolTip = "Wait time for SFDX Deploy (minutes)."
+        self.waitParamNumCtrl = wx.TextCtrl(self, size = (-1,-1),style = wx.TE_RIGHT)
+        self.waitParamNumCtrl.ToolTip = "Wait time for SFDX Deploy. DTK will wait for the input minutes. If the deploy finishes before, then DTK wil stop waiting. For Unlimited waiting use '-1'"
+        self.waitParamNumCtrl.SetValue('-1')
 
         self.testLevelsLbl = wx.StaticText(self, label="Test Levels")
         self.testLevelsLbl.ToolTip = """Specifies which level of deployment tests to run. Valid values are:
@@ -796,20 +980,39 @@ If this field is blank the default test level used is NoTestRun."""
         )
         row += 1
         self.deploySizer.Add(
-            self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+            self.preScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM , border=5
+        )        
+        row += 1
+        self.deploySizer.Add(
+            self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM , border=5
         )
+        self.preScriptFolderSizer = wx.GridBagSizer(1, 1)
         self.scriptFolderSizer = wx.GridBagSizer(1, 1)
-        self.scriptFolderSizer.Add(
-            self.scriptFolderTextCtrl, pos=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+
+        self.preScriptFolderSizer.Add(
+            self.preScriptFolderTextCtrl, pos=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
         )
-        self.scriptFolderSizer.Add(self.btnScriptFolder, pos=(0, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
+        self.preScriptFolderSizer.Add(self.btnPreScriptFolder, pos=(0, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
+        self.scriptFolderSizer.Add(
+            self.scriptFolderTextCtrl, pos=(1, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
+        )
+        self.scriptFolderSizer.Add(self.btnScriptFolder, pos=(1, 1), flag=wx.TOP | wx.BOTTOM | wx.RIGHT, border=5)
+        self.preScriptFolderSizer.AddGrowableCol(0)
         self.scriptFolderSizer.AddGrowableCol(0)
+        self.preScriptFolderSizer.SetEmptyCellSize((0, 0))
         self.scriptFolderSizer.SetEmptyCellSize((0, 0))
+        self.deploySizer.Add(
+            self.preScriptFolderSizer,
+            pos=(row-1, col + 1),
+            span=(1, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.RIGHT,
+            border=0,
+        )
         self.deploySizer.Add(
             self.scriptFolderSizer,
             pos=(row, col + 1),
-            span=(0, spanH + 15),
-            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+            span=(1, spanH + 15),
+            flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.RIGHT,
             border=0,
         )
 
@@ -929,12 +1132,16 @@ If this field is blank the default test level used is NoTestRun."""
             border=5,
         )
         row += 1
-        self.checkBoxesOptionsSizer.Add(self.clearLogsLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.checkBoxesOptionsSizer.Add(self.clearLogsLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT , border=5)
         self.checkBoxesOptionsSizer.Add(
             self.clearLogsCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
         )
 
         self.checkBoxesOptionsSizer.SetEmptyCellSize((0, 0))
+        self.waitTimeSizer = wx.GridBagSizer(1, 1)
+        self.waitTimeSizer.Add(self.waitParamLbl, pos=(0, 0))
+        self.waitTimeSizer.Add(
+            self.waitParamNumCtrl, pos=(0, 2))
 
         col = 0
         row = 0
@@ -968,6 +1175,15 @@ If this field is blank the default test level used is NoTestRun."""
 
         self.logSizer.AddGrowableCol(0)
         self.logSizer.AddGrowableRow(row)
+        row = 0
+        self.btnDeploySizer= wx.GridBagSizer(1,1)
+        self.btnDeploySizer.Add(
+                self.waitTimeSizer,
+                pos=(row,0),
+                flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT,
+                border=10,
+        )
+        self.btnDeploySizer.Add(self.btnDeploy, pos=(row, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border=10)
 
         row = 0
         self.mainSizer.Add(
@@ -995,7 +1211,7 @@ If this field is blank the default test level used is NoTestRun."""
         )
         row += 1
         self.mainSizer.Add(
-            self.btnDeploy, pos=(row, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border=10
+            self.btnDeploySizer, pos=(row, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT
         )
         row += 1
         self.mainSizer.Add(
@@ -1212,15 +1428,22 @@ If this field is blank the default test level used is NoTestRun."""
         gitUrl = self.gitUrlComboBox.GetValue()
         gitBranch = self.gitBranchComboBox.GetValue()
         metadataGitFolder = self.metadataGitFolderTextCtrl.GetLineText(0)
+        preScriptFile = self.preScriptFolderTextCtrl.GetLineText(0)
         scriptFile = self.scriptFolderTextCtrl.GetLineText(0)
         zipFileUrlSource = self.zipFileTextCtrl.GetLineText(0)
         zipFileUrlWorkspace = ""
+        preScriptFileSource = self.preScriptFolderTextCtrl.GetLineText(0)
         scriptFileSource = self.scriptFolderTextCtrl.GetLineText(0)
+        preScriptFileWorkspace = os.path.join(deployStageUrl, preScriptFileSource)
         scriptFileWorkspace = os.path.join(deployStageUrl, scriptFileSource)
+        if len(preScriptFileSource) == 0:
+            preScriptFileWorkspace = deployStageUrl
         if len(scriptFileSource) == 0:
             scriptFileWorkspace = deployStageUrl
         metadataFolderSource = self.metadataFolderTextCtrl.GetLineText(0)
         metadataTypes = self.metadataTypesListBox.GetSelections()
+        waitParam = self.waitParamNumCtrl.GetLineText(0)
+        fromScript = False
 
         if len(orgName) == 0:
             dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
@@ -1235,10 +1458,16 @@ If this field is blank the default test level used is NoTestRun."""
 
         if not os.path.exists(deployUrl):
             os.makedirs(deployUrl)
+        if os.path.exists(deployMetadataUrl):
+            shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
+        if os.path.exists(deployDataUrl):
+            shutil.rmtree(deployDataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployDataUrl):
             os.makedirs(deployDataUrl)
+        if os.path.exists(deployStageUrl):
+            shutil.rmtree(deployStageUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployStageUrl):
             os.makedirs(deployStageUrl)
 
@@ -1278,11 +1507,15 @@ If this field is blank the default test level used is NoTestRun."""
                     gitBranch,
                     metadataGitFolder,
                     metadataFolderSource,
+                    preScriptFile,
                     scriptFile,
                     zipFileUrlSource,
                     zipFileUrlWorkspace,
+                    preScriptFileWorkspace,
                     scriptFileWorkspace,
                     metadataTypes,
+                    fromScript,
+                    waitParam
                 ),
             )
             thread.setDaemon(True)
@@ -1340,14 +1573,18 @@ If this field is blank the default test level used is NoTestRun."""
                         gitBranch,
                         metadataGitFolder,
                         metadataFolderSource,
+                        preScriptFile,
                         scriptFile,
                         zipFileUrlSource,
-                        zipFileUrlWorkspace,
+                        zipFileUrlWorkspace,                        
+                        preScriptFileWorkspace,
                         scriptFileWorkspace,
                         metadataTypes,
                         gitUser,
                         gitPass,
                         gitFinalUrl,
+                        fromScript,
+                        waitParam
                     ),
                 )
                 thread.setDaemon(True)
@@ -1389,11 +1626,15 @@ If this field is blank the default test level used is NoTestRun."""
                     gitBranch,
                     metadataGitFolder,
                     metadataFolderSource,
+                    preScriptFile,
                     scriptFile,
                     zipFileUrlSource,
                     zipFileUrlWorkspace,
+                    preScriptFileWorkspace,
                     scriptFileWorkspace,
                     metadataTypes,
+                    fromScript,
+                    waitParam
                 ),
             )
             thread.setDaemon(True)
@@ -1420,22 +1661,26 @@ If this field is blank the default test level used is NoTestRun."""
         gitBranch,
         metadataGitFolder,
         metadataFolderSource,
+        preScriptFile,
         scriptFile,
         zipFileUrlSource,
         zipFileUrlWorkspace,
+        preScriptFileWorkspace,
         scriptFileWorkspace,
         metadataTypes,
+        fromScript,
+        waitParam,
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        if os.path.exists(deployStageUrl):
-            shutil.rmtree(deployStageUrl, onerror=dtkglobal.RemoveReadonly)
+        # if os.path.exists(deployStageUrl):
+        #     shutil.rmtree(deployStageUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployStageUrl):
-            os.makedirs(deployStageUrl)
-        if os.path.exists(deployMetadataUrl):
-            shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
+           os.makedirs(deployStageUrl)
+        # if os.path.exists(deployMetadataUrl):
+        #     shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
         dtkglobal.CopyDir(metadataFolderSource, deployStageUrl)
@@ -1464,11 +1709,15 @@ If this field is blank the default test level used is NoTestRun."""
                     gitBranch,
                     metadataGitFolder,
                     metadataFolderSource,
+                    preScriptFile,
                     scriptFile,
                     zipFileUrlSource,
                     zipFileUrlWorkspace,
+                    preScriptFileWorkspace,
                     scriptFileWorkspace,
                     metadataTypes,
+                    fromScript,
+                    waitParam
                 ),
             )
             thread.setDaemon(True)
@@ -1496,10 +1745,14 @@ If this field is blank the default test level used is NoTestRun."""
                     gitBranch,
                     metadataGitFolder,
                     metadataFolderSource,
+                    preScriptFile,
                     scriptFile,
                     zipFileUrlWorkspace,
+                    preScriptFileWorkspace,
                     scriptFileWorkspace,
                     metadataTypes,
+                    fromScript,
+                    waitParam
                 )
 
     def DeployZip(
@@ -1522,19 +1775,23 @@ If this field is blank the default test level used is NoTestRun."""
         gitUrl,
         gitBranch,
         metadataGitFolder,
-        metadataFolderSource,
+        metadataFolderSource,        
+        preScriptFile,
         scriptFile,
         zipFileUrlSource,
         zipFileUrlWorkspace,
+        preScriptFileWorkspace,
         scriptFileWorkspace,
         metadataTypes,
+        fromScript,
+        waitParam,
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        if os.path.exists(deployMetadataUrl):
-            shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
+        # if os.path.exists(deployMetadataUrl):
+        #     shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
         shutil.copy(zipFileUrlSource, deployMetadataUrl)
@@ -1559,11 +1816,15 @@ If this field is blank the default test level used is NoTestRun."""
             gitBranch,
             metadataGitFolder,
             metadataFolderSource,
+            preScriptFile,
             scriptFile,
             zipFileUrlSource,
             zipFileUrlWorkspace,
+            preScriptFileWorkspace,
             scriptFileWorkspace,
             metadataTypes,
+            fromScript,
+            waitParam
         )
 
     def RetrieveGitBranch(
@@ -1587,25 +1848,29 @@ If this field is blank the default test level used is NoTestRun."""
         gitBranch,
         metadataGitFolder,
         metadataFolderSource,
+        preScriptFile,
         scriptFile,
         zipFileUrlSource,
         zipFileUrlWorkspace,
+        preScriptFileWorkspace,
         scriptFileWorkspace,
         metadataTypes,
         gitUser,
         gitPass,
         gitFinalUrl,
+        fromScript,
+        waitParam,
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        if os.path.exists(deployStageUrl):
-            shutil.rmtree(deployStageUrl, onerror=dtkglobal.RemoveReadonly)
+        # if os.path.exists(deployStageUrl):
+        #     shutil.rmtree(deployStageUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployStageUrl):
             os.makedirs(deployStageUrl)
-        if os.path.exists(deployMetadataUrl):
-            shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
+        # if os.path.exists(deployMetadataUrl):
+        #     shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
         outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp", "git.tmp")
@@ -1638,11 +1903,15 @@ If this field is blank the default test level used is NoTestRun."""
                     gitBranch,
                     metadataGitFolder,
                     metadataFolderSource,
+                    preScriptFile,
                     scriptFile,
                     zipFileUrlSource,
                     zipFileUrlWorkspace,
+                    preScriptFileWorkspace,
                     scriptFileWorkspace,
                     metadataTypes,
+                    fromScript,
+                    waitParam
                 ),
             )
             thread.setDaemon(True)
@@ -1670,11 +1939,15 @@ If this field is blank the default test level used is NoTestRun."""
                     gitBranch,
                     metadataGitFolder,
                     metadataFolderSource,
+                    preScriptFile,
                     scriptFile,
                     zipFileUrlSource,
                     zipFileUrlWorkspace,
+                    preScriptFileWorkspace,
                     scriptFileWorkspace,
                     metadataTypes,
+                    fromScript,
+                    waitParam
                 )
 
     def GenerateManifestFirst(
@@ -1698,18 +1971,22 @@ If this field is blank the default test level used is NoTestRun."""
         gitBranch,
         metadataGitFolder,
         metadataFolderSource,
+        preScriptFile,
         scriptFile,
         zipFileUrlSource,
         zipFileUrlWorkspace,
+        preScriptFileWorkspace,
         scriptFileWorkspace,
         metadataTypes,
+        fromScript,
+        waitParam
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        if os.path.exists(deployMetadataUrl):
-            shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
+        # if os.path.exists(deployMetadataUrl):
+        #     shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
         outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp")
@@ -1738,12 +2015,16 @@ If this field is blank the default test level used is NoTestRun."""
                 gitBranch,
                 metadataGitFolder,
                 metadataFolderSource,
+                preScriptFile,
                 scriptFile,
                 zipFileUrlSource,
                 zipFileUrlWorkspace,
+                preScriptFileWorkspace,
                 scriptFileWorkspace,
                 metadataTypes,
                 outputFileUrl,
+                fromScript,
+                waitParam
             ),
         )
         thread.setDaemon(True)
@@ -1770,12 +2051,16 @@ If this field is blank the default test level used is NoTestRun."""
         gitBranch,
         metadataGitFolder,
         metadataFolderSource,
+        preScriptFile,
         scriptFile,
         zipFileUrlSource,
         zipFileUrlWorkspace,
+        preScriptFileWorkspace,
         scriptFileWorkspace,
         metadataTypes,
         outputFileUrl,
+        fromScript,
+        waitParam
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -1818,12 +2103,16 @@ If this field is blank the default test level used is NoTestRun."""
                 gitBranch,
                 metadataGitFolder,
                 metadataFolderSource,
+                preScriptFile,
                 scriptFile,
                 zipFileUrlSource,
                 zipFileUrlWorkspace,
+                preScriptFileWorkspace,
                 scriptFileWorkspace,
                 metadataTypes,
                 outputFileUrl,
+                fromScript,
+                waitParam
             ),
         )
         thread.setDaemon(True)
@@ -1850,12 +2139,16 @@ If this field is blank the default test level used is NoTestRun."""
         gitBranch,
         metadataGitFolder,
         metadataFolderSource,
+        preScriptFile,
         scriptFile,
         zipFileUrlSource,
         zipFileUrlWorkspace,
+        preScriptFileWorkspace,
         scriptFileWorkspace,
         metadataTypes,
         outputFileUrl,
+        fromScript,
+        waitParam
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -1876,7 +2169,7 @@ If this field is blank the default test level used is NoTestRun."""
             metadataTypesSelected.append(self.metadataTypesListBox.GetString(i))
         for item in describeMetadataDict["metadataObjects"]:
             if self.stop:
-                self.stopself.consoleOutputTextCtrl.AppendText("Process stopped.")
+                self.consoleOutputTextCtrl.AppendText("Process stopped.")
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 return
             if not "xmlName" in item:
@@ -1932,11 +2225,15 @@ If this field is blank the default test level used is NoTestRun."""
                 gitBranch,
                 metadataGitFolder,
                 metadataFolderSource,
+                preScriptFile,
                 scriptFile,
                 zipFileUrlSource,
                 zipFileUrlWorkspace,
+                preScriptFileWorkspace,
                 scriptFileWorkspace,
                 metadataTypes,
+                fromScript,
+                waitParam
             )
 
     def NewThreadRunDeploy(
@@ -1960,11 +2257,15 @@ If this field is blank the default test level used is NoTestRun."""
         gitBranch,
         metadataGitFolder,
         metadataFolderSource,
+        preScriptFile,
         scriptFile,
         zipFileUrlSource,
         zipFileUrlWorkspace,
+        preScriptFileWorkspace,
         scriptFileWorkspace,
         metadataTypes,
+        fromScript,
+        waitParam,
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -1992,11 +2293,15 @@ If this field is blank the default test level used is NoTestRun."""
                 gitBranch,
                 metadataGitFolder,
                 metadataFolderSource,
+                preScriptFile,                
                 scriptFile,
                 zipFileUrlSource,
                 zipFileUrlWorkspace,
+                preScriptFileWorkspace,
                 scriptFileWorkspace,
                 metadataTypes,
+                fromScript,
+                waitParam
             ),
         )
         thread.setDaemon(True)
@@ -2023,16 +2328,38 @@ If this field is blank the default test level used is NoTestRun."""
         gitBranch,
         metadataGitFolder,
         metadataFolderSource,
+        preScriptFile,
         scriptFile,
         zipFileUrlSource,
         zipFileUrlWorkspace,
+        preScriptFileWorkspace,
         scriptFileWorkspace,
         metadataTypes,
+        fromScript,
+        waitParam,
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
+        if not fromScript:
+            preScriptProcessed = False
+            if os.path.exists(preScriptFile) and preScriptFile != deployStageUrl:
+                shutil.copy(preScriptFile, deployDataUrl)
+                self.ProcessScript(deployDataUrl, preScriptFile, deployStageUrl)
+                preScriptProcessed = True
+            if os.path.exists(preScriptFileWorkspace) and preScriptFileWorkspace != deployStageUrl:
+                shutil.copy(preScriptFileWorkspace, deployDataUrl)
+                self.ProcessScript(deployDataUrl, preScriptFileWorkspace, deployStageUrl)
+                preScriptProcessed = True
+            if not preScriptProcessed and preScriptFile != deployStageUrl and len(preScriptFile) > 0:
+                wx.CallAfter(self.OnText, "Script file not found on: " + preScriptFile)
+                wx.CallAfter(self.OnText, os.linesep)
+            if not preScriptProcessed and preScriptFileWorkspace != deployStageUrl and len(preScriptFileWorkspace) > 0:
+                wx.CallAfter(self.OnText, "Script file not found on: " + preScriptFileWorkspace)
+                wx.CallAfter(self.OnText, os.linesep)
+            wx.CallAfter(self.SetButtonState, True)
+
         cmd = [
             "sfdx",
             "force:mdapi:deploy",
@@ -2042,6 +2369,8 @@ If this field is blank the default test level used is NoTestRun."""
             targetName,
             "-l",
             testLevel,
+            "-w",
+            waitParam
         ]
         if checkOnly:
             cmd.append("-c")
@@ -2078,22 +2407,23 @@ If this field is blank the default test level used is NoTestRun."""
                     logEntry["pathname"] = deployMetadataUrl
                     self.logList[jobIdStrip] = logEntry
             wx.CallAfter(self.OnText, lineStr)
-        scriptProcessed = False
-        if os.path.exists(scriptFile) and scriptFile != deployStageUrl:
-            shutil.copy(scriptFile, deployDataUrl)
-            self.ProcessScript(deployDataUrl, scriptFile, deployStageUrl)
-            scriptProcessed = True
-        if os.path.exists(scriptFileWorkspace) and scriptFileWorkspace != deployStageUrl:
-            shutil.copy(scriptFileWorkspace, deployDataUrl)
-            self.ProcessScript(deployDataUrl, scriptFileWorkspace, deployStageUrl)
-            scriptProcessed = True
-        if not scriptProcessed and scriptFile != deployStageUrl and len(scriptFile) > 0:
-            wx.CallAfter(self.OnText, "Script file not found on: " + scriptFile)
-            wx.CallAfter(self.OnText, os.linesep)
-        if not scriptProcessed and scriptFileWorkspace != deployStageUrl and len(scriptFileWorkspace) > 0:
-            wx.CallAfter(self.OnText, "Script file not found on: " + scriptFileWorkspace)
-            wx.CallAfter(self.OnText, os.linesep)
-        wx.CallAfter(self.SetButtonState, True)
+        if not fromScript:
+            scriptProcessed = False
+            if os.path.exists(scriptFile) and scriptFile != deployStageUrl:
+                shutil.copy(scriptFile, deployDataUrl)
+                self.ProcessScript(deployDataUrl, scriptFile, deployStageUrl)
+                scriptProcessed = True
+            if os.path.exists(scriptFileWorkspace) and scriptFileWorkspace != deployStageUrl:
+                shutil.copy(scriptFileWorkspace, deployDataUrl)
+                self.ProcessScript(deployDataUrl, scriptFileWorkspace, deployStageUrl)
+                scriptProcessed = True
+            if not scriptProcessed and scriptFile != deployStageUrl and len(scriptFile) > 0:
+                wx.CallAfter(self.OnText, "Script file not found on: " + scriptFile)
+                wx.CallAfter(self.OnText, os.linesep)
+            if not scriptProcessed and scriptFileWorkspace != deployStageUrl and len(scriptFileWorkspace) > 0:
+                wx.CallAfter(self.OnText, "Script file not found on: " + scriptFileWorkspace)
+                wx.CallAfter(self.OnText, os.linesep)
+            wx.CallAfter(self.SetButtonState, True)
 
     def OnText(self, text):
         self.consoleOutputTextCtrl.AppendText(text)
@@ -2153,6 +2483,7 @@ If this field is blank the default test level used is NoTestRun."""
         self.stop = False
         if len(self.logList) == 0:
             return
+        self.consoleOutputTextCtrl.AppendText(os.linesep)
         self.consoleOutputTextCtrl.AppendText(
             "----------------------------------------------------------------------------------"
         )
@@ -2232,6 +2563,7 @@ If this field is blank the default test level used is NoTestRun."""
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
+                self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.consoleOutputTextCtrl.AppendText("Metadata Deployment:")
                 for line in proc.stdout:
                     wx.CallAfter(self.OnText, line)
@@ -2248,6 +2580,7 @@ If this field is blank the default test level used is NoTestRun."""
                     "-b",
                     batchId,
                 ]
+                self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.consoleOutputTextCtrl.AppendText("Script Line: " + scriptLine)
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
@@ -2261,7 +2594,7 @@ If this field is blank the default test level used is NoTestRun."""
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        shutil.rmtree(deployDataUrl, onerror=dtkglobal.RemoveReadonly)
+        # shutil.rmtree(deployDataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployDataUrl):
             os.makedirs(deployDataUrl)
         orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
@@ -2300,8 +2633,12 @@ If this field is blank the default test level used is NoTestRun."""
                     self.ProcessFileScriptLine(
                         lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
                     )
-                if lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET":
+                if (lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET") and (lineSplit[1] != "DEPLOYZIP" and lineSplit[1] != "DEPLOYFOLDER"):
                     self.ProcessDataScriptLine(
+                        lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
+                    )
+                if (lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET") and (lineSplit[1] == "DEPLOYZIP" or lineSplit[1] == "DEPLOYFOLDER"):
+                    self.ProcessMetadataScriptLine(
                         lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
                     )
         i += 1
@@ -2335,6 +2672,86 @@ If this field is blank the default test level used is NoTestRun."""
             self.consoleOutputTextCtrl.AppendText(os.linesep)
         else:
             self.RunDataCmd(lineSplit, lineStr, target, pathString, cmd)
+    
+    def ProcessMetadataScriptLine(
+            self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+        ):  
+            deployType = None,
+            orgName = None,
+            sdbxName = None,
+            deployUrl = None,
+            deployMetadataUrl = None,
+            confirmDeploy = None,
+            generateManifest = None,
+            ignoreErrors = None,
+            specifiedTests = None,
+            gitUrl = None,
+            gitBranch = None,
+            metadataGitFolder = None,
+            metadataFolderSource = None,
+            preScriptFile = None,
+            scriptFile = None,
+            zipFileUrlSource = None,
+            zipFileUrlWorkspace = None
+            preScriptFileWorkspace = None,
+            scriptFileWorkspace = None,
+            metadataTypes = None,
+
+            error, errorMsg, target, pathString, cmd = dtkglobal.ProcessMetadataScriptLine(
+                lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+            )
+        
+            if self.stop:
+                return
+            if error:
+                self.consoleOutputTextCtrl.AppendText(errorMsg)
+                self.consoleOutputTextCtrl.AppendText(os.linesep)
+            else:
+                if lineSplit[1] == "DEPLOYZIP":
+                    fileTarget = lineSplit[2]
+                    testLevel = lineSplit[3]
+                    checkOnly = False
+                    if lineSplit[4] == "YES":
+                        checkOnly = True
+                    ignoreWarnings = False
+                    if lineSplit[5] == "YES":
+                        ignoreWarnings = True
+                    waitParam = lineSplit[6]
+                    deployType = "Zip"
+                    zipFileUrlWorkspace = pathString
+                    fromScript = True
+                    self.RunDeploy(
+                            deployType,
+                            orgName,
+                            sdbxName,
+                            targetName,
+                            deployUrl,
+                            deployMetadataUrl,
+                            deployDataUrl,
+                            deployStageUrl,
+                            checkOnly,
+                            ignoreWarnings,
+                            ignoreErrors,
+                            confirmDeploy,
+                            generateManifest,
+                            testLevel,
+                            specifiedTests,
+                            gitUrl,
+                            gitBranch,
+                            metadataGitFolder,
+                            metadataFolderSource,
+                            preScriptFile,
+                            scriptFile,
+                            zipFileUrlSource,
+                            zipFileUrlWorkspace,
+                            preScriptFileWorkspace,
+                            scriptFileWorkspace,
+                            metadataTypes,
+                            fromScript,
+                            waitParam,
+                        
+                    )
+
 
     def SelectZipFile(self, event):
         dlg = wx.FileDialog(
@@ -2355,6 +2772,17 @@ If this field is blank the default test level used is NoTestRun."""
         self.metadataFolderTextCtrl.Clear()
         self.metadataFolderTextCtrl.AppendText(pathname)
 
+    def selectPreScriptFolder(self, event):
+        dlg = wx.FileDialog(
+            self, "Select Pre Script file", wildcard="All files (*.*)|*.*", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+        )
+
+        if dlg.ShowModal() == wx.ID_CANCEL:
+            return
+        pathname = dlg.GetPath()
+        self.preScriptFolderTextCtrl.Clear()
+        self.preScriptFolderTextCtrl.AppendText(pathname)    
+    
     def SelectScriptFolder(self, event):
         dlg = wx.FileDialog(
             self, "Select script file", wildcard="All files (*.*)|*.*", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
@@ -2566,7 +2994,8 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
     def OrganizationSelected(self, event):
         orgName = self.organizationComboBox.GetValue()
         self.nb.GetPage(0).gitUrlComboBox.Clear()
-        self.nb.GetPage(0).metadataGitFolderTextCtrl.Clear()
+        self.nb.GetPage(0).metadataGitFolderTextCtrl.Clear()        
+        self.nb.GetPage(0).preScriptFolderTextCtrl.Clear()
         self.nb.GetPage(0).scriptFolderTextCtrl.Clear()
         self.sandboxTypeTargetComboBox.Enable(False)
         if len(orgName) == 0:
@@ -2581,6 +3010,8 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
             gitList = [dtkglobal.orgDict[orgName]["giturl"]]
             self.nb.GetPage(0).gitUrlComboBox.Items = gitList
             self.nb.GetPage(0).metadataGitFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["metadatafolder"])
+            if "preScript" in dtkglobal.orgDict[orgName]:
+                self.nb.GetPage(0).preScriptFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["preScript"])
             self.nb.GetPage(0).scriptFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["script"])
             self.Title = "Deploy: " + orgName
             self.sandboxTypeTargetComboBox.Enable(True)

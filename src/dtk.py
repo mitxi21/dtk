@@ -117,7 +117,7 @@ class MainFrame(wx.Frame):
 
     def OnAbout(self, e):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
-        dlg = wx.MessageDialog(self, "Version 1.0 - MPB & JMCM\nPraise The Sun!", "About DTK", wx.OK)
+        dlg = wx.MessageDialog(self, "Version 1.4 - MPB & JMCM\nPraise The Sun!", "About DTK", wx.OK)
         dlg.ShowModal()  # Show it
         dlg.Destroy()  # finally destroy it when finished.
 
@@ -174,10 +174,15 @@ class EditSettingsFrame(wx.Dialog):
         self.defaultMetadataFolderTextCtrl = wx.TextCtrl(self.panel)
         self.defaultMetadataFolderTextCtrl.ToolTip = "Default metadata folder to be included when deploying from git."
 
-        self.defaultScriptFolderLbl = wx.StaticText(self.panel, label="Default Data Script")
-        self.defaultScriptFolderLbl.ToolTip = "Default data script to be included when deploying from git."
+        self.defaultPreScriptFolderLbl = wx.StaticText(self.panel, label="Default Pre-deploy Data Script")
+        self.defaultPreScriptFolderLbl.ToolTip = "Default pre-deploy data script to be included when deploying from git."
+        self.defaultPreScriptFolderTextCtrl = wx.TextCtrl(self.panel)
+        self.defaultPreScriptFolderTextCtrl.ToolTip = "Default pre-deploy data script to be included when deploying from git."
+
+        self.defaultScriptFolderLbl = wx.StaticText(self.panel, label="Default Post-deploy Data Script")
+        self.defaultScriptFolderLbl.ToolTip = "Default post-deploy data script to be included when deploying from git."
         self.defaultScriptFolderTextCtrl = wx.TextCtrl(self.panel)
-        self.defaultScriptFolderTextCtrl.ToolTip = "Default data script to be included when deploying from git."
+        self.defaultScriptFolderTextCtrl.ToolTip = "Default post-deploy data script to be included when deploying from git."
 
         self.defaultApiVersionLbl = wx.StaticText(self.panel, label="Default API Version")
         self.defaultApiVersionLbl.ToolTip = "Default API version to be used in the retrieve and deploy. Execute 'sfdx force' in a terminal to see your latest version installed."
@@ -234,6 +239,18 @@ class EditSettingsFrame(wx.Dialog):
         row += 1
 
         self.mainSizer.Add(
+            self.defaultPreScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(
+            self.defaultPreScriptFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(1, 4),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
+        row += 1
+
+        self.mainSizer.Add(
             self.defaultScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
         )
         self.mainSizer.Add(
@@ -270,6 +287,7 @@ class EditSettingsFrame(wx.Dialog):
         self.unzipCheckBox.SetValue(dtkglobal.unzipSetting)
         self.defaultPackagesToExcludeTextCtrl.write(dtkglobal.defaultPackagesToExclude)
         self.defaultMetadataFolderTextCtrl.write(dtkglobal.defaultMetadataFolder)
+        self.defaultPreScriptFolderTextCtrl.write(dtkglobal.defaultPreScriptFolder)
         self.defaultScriptFolderTextCtrl.write(dtkglobal.defaultScriptFolder)
         self.defaultApiVersionCtrl.write(dtkglobal.defaultApiVersion)
 
@@ -288,11 +306,12 @@ class EditSettingsFrame(wx.Dialog):
             defaultMetadataFolderIn=self.defaultMetadataFolderTextCtrl.GetLineText(0),
             defaultScriptFolderIn=self.defaultScriptFolderTextCtrl.GetLineText(0),
             defaultApiVersionIn=self.defaultApiVersionCtrl.GetLineText(0),
+            defaultPreScriptFolderIn=self.defaultPreScriptFolderTextCtrl.GetLineText(0),
         )
-        self.Close(True)
+        self.Destroy()
 
     def OnCancel(self, e):
-        self.Close(True)
+        self.Destroy()
 
 
 class SingleApp(wx.App):

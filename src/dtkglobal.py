@@ -8,18 +8,20 @@ import subprocess
 import threading
 import base64
 import io
-
+import csv
 import wx
 
 advSetting = False
 unlockSetting = False
 unzipSetting = False
 defaultPackagesToExclude = "et4ae5"
-defaultScriptFolder = "data\\scripts\\releaseScript.txt"
+defaultPreScriptFolder = "data\\scripts\\PreReleaseScript.txt"
+defaultScriptFolder = "data\\scripts\\PostReleaseScript.txt"
 defaultMetadataFolder = "sfdc\\src\\"
 defaultApiVersion = "45.0"
 defaultSandboxTypes = ["Config", "QA", "UAT", "Prod"]
 deploymentTypes = ["Folder", "Git", "Zip"]
+testRunTypes = ["NoTestRun","RunSpecifiedTests","RunLocalTests","RunAllTestsInOrg"]
 retrieveTypes = ["Manifest File", "Metadata Retrieve"]
 metadataTypes = [
     "ApexClass",
@@ -69,8 +71,10 @@ metadataTypes = [
     "Settings",
     "SharingRules",
     "StandardValueSet",
+    "StandardValueSetTranslation",
     "StaticResource",
     "Territory",
+    "TopicsForObjects",
     "Translations",
     "Workflow",
 ]
@@ -131,6 +135,7 @@ def SaveSettings(
     unzipSettingIn,
     defaultPackagesToExcludeIn,
     defaultMetadataFolderIn,
+    defaultPreScriptFolderIn,
     defaultScriptFolderIn,
     defaultApiVersionIn,
 ):
@@ -154,6 +159,9 @@ def SaveSettings(
     global defaultMetadataFolder
     defaultMetadataFolder = defaultMetadataFolderIn
     shelfFile["defaultMetadataFolder"] = defaultMetadataFolderIn
+    global defaultPreScriptFolder
+    defaultPreScriptFolder = defaultPreScriptFolderIn
+    shelfFile["defaultPreScriptFolder"] = defaultPreScriptFolderIn
     global defaultScriptFolder
     defaultScriptFolder = defaultScriptFolderIn
     shelfFile["defaultScriptFolder"] = defaultScriptFolderIn
@@ -184,6 +192,9 @@ def LoadSettings():
     if "defaultMetadataFolder" in shelfFile:
         global defaultMetadataFolder
         defaultMetadataFolder = shelfFile["defaultMetadataFolder"]
+    if "defaultPreScriptFolder" in shelfFile:
+        global defaultPreScriptFolder
+        defaultPreScriptFolder = shelfFile["defaultPreScriptFolder"]
     if "defaultScriptFolder" in shelfFile:
         global defaultScriptFolder
         defaultScriptFolder = shelfFile["defaultScriptFolder"]
@@ -246,6 +257,7 @@ def CreateOrgsFromSfdx():
                         sdbxConf["gituser"] = ""
                         sdbxConf["gitpass"] = ""
                         sdbxConf["metadatafolder"] = defaultMetadataFolder
+                        sdbxConf["preScript"] = defaultPreScriptFolder
                         sdbxConf["script"] = defaultScriptFolder
                         orgDict[sdbxName] = sdbxConf
         i += 1
@@ -352,7 +364,22 @@ def ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
             matchFieldSplit = matchFieldGrand.split("+")
             for matchField in matchFieldSplit:
                 matchFieldList.append(matchField)
-            pathStringFileSource = os.path.join(deployDataUrl, fileSource)
+            ##
+            fileSourceUrl = fileSource
+            if "{gitroot}" in fileSource:
+                splitFileSourceUrl = fileSource.split("{gitroot}")
+                if len(splitFileSourceUrl) > 1:
+                    fileSourceUrl = os.path.join(deployStageUrl, splitFileSourceUrl[1])
+                    pathStringFileSource = os.path.join(deployDataUrl, PathLeaf(fileSourceUrl))
+                    if not os.path.exists(fileSourceUrl):
+                        error = True
+                        errorMsg = "File " + fileSourceUrl + " not found."
+                        return error, errorMsg, returnMsg
+                    if not os.path.exists(pathStringFileSource):
+                        shutil.copy(fileSourceUrl, deployDataUrl)
+            pathStringFileSource = os.path.join(deployDataUrl, PathLeaf(fileSourceUrl))    
+            #pathStringFileSource = os.path.join(deployDataUrl, fileSource)
+
             if not os.path.exists(pathStringFileSource):
                 error = True
                 errorMsg = "File " + pathStringFileSource + " not found."
@@ -368,8 +395,21 @@ def ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                     colReplaceIndexInSource = i
                 i += 1
             sourceFile.close()
-
-            pathStringFileTarget = os.path.join(deployDataUrl, fileTarget)
+            ##
+            fileTargetUrl = fileTarget
+            if "{gitroot}" in fileTarget:
+                splitFileTargetUrl = fileTarget.split("{gitroot}")
+                if len(splitFileTargetUrl) > 1:
+                    fileTargetUrl = os.path.join(deployStageUrl, splitFileTargetUrl[1])
+                    pathStringFileTarget = os.path.join(deployDataUrl, PathLeaf(fileTargetUrl))
+                    if not os.path.exists(fileTargetUrl):
+                        error = True
+                        errorMsg = "File " + fileTargetUrl + " not found."
+                        return error, errorMsg, returnMsg
+                    if not os.path.exists(pathStringFileTarget):
+                        shutil.copy(fileTargetUrl, deployDataUrl)
+            pathStringFileTarget = os.path.join(deployDataUrl, PathLeaf(fileTargetUrl))
+            #pathStringFileTarget = os.path.join(deployDataUrl, fileTarget)
             if not os.path.exists(pathStringFileTarget):
                 error = True
                 errorMsg = "File " + pathStringFileTarget + " not found."
@@ -427,10 +467,9 @@ def ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                     fileToReplaceContentUrl = os.path.join(deployStageUrl, splitFileToReplaceContentUrl[1])
                     pathStringFileToReplaceContent = os.path.join(deployDataUrl, PathLeaf(fileToReplaceContentUrl))
                     if not os.path.exists(fileToReplaceContentUrl):
-                        if not os.path.exists(fileToReplaceContentUrl):
-                            error = True
-                            errorMsg = "File " + fileToReplaceContentUrl + " not found."
-                            return error, errorMsg, returnMsg
+                        error = True
+                        errorMsg = "File " + fileToReplaceContentUrl + " not found."
+                        return error, errorMsg, returnMsg
                     if not os.path.exists(pathStringFileToReplaceContent):
                         shutil.copy(fileToReplaceContentUrl, deployDataUrl)
             pathStringFileToReplaceContent = os.path.join(deployDataUrl, PathLeaf(fileToReplaceContentUrl))
@@ -464,9 +503,171 @@ def ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                     + replaceField
                     + "."
                 )
+            if not replaced:
+                returnMsg = (
+                    "No values replaced from file "
+                    + pathStringFileToReplaceContent
+                    + "."
+                )
     else:
         error = True
-        errorMsg = "Expected more values in script at line " + lineNumber + ": " + lineStr
+    if len(lineSplit) >= 8:
+        if lineSplit[1] == "COPY":
+            colCopyIndexInSource = 0
+            colCopyIndexInTarget = 0
+            fileToCopyContent = lineSplit[2]
+            fileSource = lineSplit[3]
+            fileTarget = lineSplit[4]
+            sourceCopyFieldGrand = lineSplit[5]
+            targetCopyField = lineSplit[6]
+            matchFieldGrand = lineSplit[7]
+
+            sourceCopyFieldList = []
+            sourceCopyFieldListIndexSource = []
+            sourceCopyFieldSplit = sourceCopyFieldGrand.split("+")
+            for sourceCopyField in sourceCopyFieldSplit:
+                sourceCopyFieldList.append(sourceCopyField)
+
+            matchFieldList = []
+            matchFieldListIndexSource = []
+            matchFieldListIndexTarget = []
+            matchFieldSplit = matchFieldGrand.split("+")
+            for matchField in matchFieldSplit:
+                matchFieldList.append(matchField)
+            # SOURCE FILE PARSED FOR COLUMN INDEX
+            pathStringFileSource = os.path.join(deployDataUrl, fileSource)
+            if not os.path.exists(pathStringFileSource):
+                error = True
+                errorMsg = "File " + pathStringFileSource + " not found."
+                return error, errorMsg, returnMsg
+            sourceFile = open(pathStringFileSource, "r", encoding="utf8")
+            firstLine = sourceFile.readline()
+            columns = firstLine.split(",")
+            i = 0
+            for col in columns:
+                value = col.strip("\r\n")
+                if value in matchFieldList:
+                    matchFieldListIndexSource.append(i)
+                if value in sourceCopyFieldList:
+                    sourceCopyFieldListIndexSource.append(i)
+                i += 1
+            sourceFile.close()
+
+            pathStringFileTarget = os.path.join(deployDataUrl, fileTarget)
+            if not os.path.exists(pathStringFileTarget):
+                error = True
+                errorMsg = "File " + pathStringFileTarget + " not found."
+                return error, errorMsg, returnMsg
+            targetFile = open(pathStringFileTarget, "r", encoding="utf8")
+            firstLine = targetFile.readline()
+            columns = firstLine.split(",")
+            i = 0
+            for col in columns:
+                value = col.strip("\r\n")
+                if value in matchFieldList:
+                    matchFieldListIndexTarget.append(i)
+                if targetCopyField == value:
+                    colCopyIndexInTarget = i
+                i += 1
+            targetFile.close()
+
+            # SOURCE FILE PARSED FOR CONTENT
+            dictSource = dict()
+            sourceFile = open(pathStringFileSource, "r", encoding="utf8")
+            for line in sourceFile:
+                splitLine = line.split(",")
+                if len(splitLine) > 1:
+                    dictKey = ""
+                    dictValue = ""
+                    first = True
+                    for index in matchFieldListIndexSource:
+                        if first:
+                            dictKey = splitLine[index].strip("\r\n")
+                            first = False
+                        else:
+                            dictKey += "_" + splitLine[index].strip("\r\n")
+                    first = True
+                    for index in sourceCopyFieldListIndexSource:
+                        if first:
+                            dictValue = splitLine[index].strip("\r\n")
+                            first = False
+                        else:
+                            dictValue += "_" + splitLine[index].strip("\r\n")
+                    dictSource[dictKey] = dictValue
+            sourceFile.close()
+
+            copied = False
+            fileToCopyContentUrl = fileToCopyContent
+            pathStringFileToCopyContent = ""
+            if "{gitroot}" in fileToCopyContent:
+                splitFileToCopyContentUrl = fileToCopyContent.split("{gitroot}")
+                if len(splitFileToCopyContentUrl) > 1:
+                    fileToCopyContentUrl = os.path.join(deployStageUrl, splitFileCopyContentUrl[1])
+                    pathStringFileToCopyContent = os.path.join(deployDataUrl, PathLeaf(fileToCopyContentUrl))
+                    # if not os.path.exists(fileToCopyContentUrl):
+                    #     error = True
+                    #     errorMsg = "File " + fileToCopyContentUrl + " not found."
+                    if not os.path.exists(pathStringFileToCopyContent):
+                        shutil.copy(fileToCopyContentUrl, deployDataUrl)
+            pathStringFileToCopyContent = os.path.join(deployDataUrl, PathLeaf(fileToCopyContentUrl))
+            if not os.path.exists(pathStringFileToCopyContent):
+                error = True
+                errorMsg = "File " + pathStringFileToCopyContent + " not found."
+            if not os.path.exists(pathStringFileTarget):
+                error = True
+                errorMsg = "File " + pathStringFileTarget + " not found."
+                return error, errorMsg
+            # LOOP
+            targetFile = open(pathStringFileTarget, "r", encoding="utf8")
+            resultsFile = open(pathStringFileToCopyContent, "w", encoding="utf8")
+            headerLine = targetFile.readline()
+            resultsFile.write(headerLine)
+            for line in targetFile:
+                splitLine = line.split(",")
+                resultsSplit = splitLine
+                if len(splitLine) > 1:
+                    dictKey = ""
+                    first = True
+                    for index in matchFieldListIndexTarget:
+                        if first:
+                            dictKey = splitLine[index].strip("\r\n")
+                            first = False
+                        else:
+                            dictKey += "_" + splitLine[index].strip("\r\n")
+                    if dictKey in dictSource:
+                        copied = True
+                        resultsSplit[colCopyIndexInTarget] = dictSource[dictKey]
+                    resultsLine = ",".join(resultsSplit)
+                    if not resultsLine.endswith("\n"):
+                        resultsLine = resultsLine + "\n"
+                    resultsFile.write(resultsLine)
+            resultsFile.close()
+            targetFile.close()
+
+            if copied:
+                returnMsg = (
+                    "Copied values in file "
+                    + pathStringFileToCopyContent
+                    + " using "
+                    + pathStringFileSource
+                    + " as source and "
+                    + pathStringFileTarget
+                    + " as target. Match fields: "
+                    + matchFieldGrand
+                    + ". Copy fields: "
+                    + sourceCopyFieldGrand
+                    + " into field:"
+                    + targetCopyField
+                    + "."
+                )
+            if not copied:
+                returnMsg = (
+                    "No values copied in file "
+                    + pathStringFileToCopyContent
+                    + "."
+                )
+    if error:
+        errorMsg = "Expected more values in script at line " + str(lineNumber) + ": " + lineStr
     return error, errorMsg, returnMsg
 
 
@@ -504,12 +705,13 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 + " -r csv"
             )
         if lineSplit[1] == "BULKDELETE":
-            if len(lineSplit) < 4:
+            if len(lineSplit) < 5:
                 error = True
                 errorMsg = "Expected more values in script at line " + lineNumber + ": " + lineStr
                 return error, errorMsg, target, pathString, cmd
             customObject = lineSplit[2]
-            fileTarget = lineSplit[3]
+            fileTarget = lineSplit[3]            
+            waitTime = lineSplit[4]
             fileToReplaceContentUrl = fileTarget
             if "{gitroot}" in fileTarget:
                 splitFileToReplaceContentUrl = fileTarget.split("{gitroot}")
@@ -534,15 +736,18 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 customObject,
                 "-f",
                 pathString,
+                "-w",
+                waitTime
             ]
         if lineSplit[1] == "BULKUPSERT":
-            if len(lineSplit) < 5:
+            if len(lineSplit) < 6:
                 error = True
                 errorMsg = "Expected more values in script at line " + lineNumber + ": " + lineStr
                 return error, errorMsg, target, pathString, cmd
             customObject = lineSplit[2]
             fileTarget = lineSplit[3]
             externalId = lineSplit[4]
+            waitTime = lineSplit[5]
             fileToReplaceContentUrl = fileTarget
             if "{gitroot}" in fileTarget:
                 splitFileToReplaceContentUrl = fileTarget.split("{gitroot}")
@@ -569,6 +774,8 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 externalId,
                 "-f",
                 pathString,
+                "-w",
+                waitTime
             ]
         if lineSplit[1] == "RECORDCREATE":
             if len(lineSplit) < 4:
@@ -678,6 +885,61 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
         error = True
         errorMsg = "Expected more values in script at line " + lineNumber + ": " + lineStr
     return error, errorMsg, target, pathString, cmd
+
+
+def ProcessMetadataScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl):
+    error = False
+    errorMsg = ""
+    cmd = []
+    target = ""
+    pathString = ""
+    if len(lineSplit) >= 1:
+        if lineSplit[0] == "SOURCE":
+            target = sourceName
+        if lineSplit[0] == "TARGET":
+            target = targetName
+    else:
+        error = True
+        errorMsg = "Expected more values in script at line " + lineNumber + ": " + lineStr
+        return error, errorMsg, target, pathString, cmd
+
+    if lineSplit[1] == "DEPLOYZIP":
+        if len(lineSplit) < 7:
+            error = True
+            errorMsg = "Expected more values in script at line " + lineNumber + ": " + lineStr
+            return error, errorMsg, target, pathString, cmd
+        fileTarget = lineSplit[2]
+        testLevel = lineSplit[3]
+        checkOnly = lineSplit[4]
+        ignoreWarnings = lineSplit[5]
+        waitParam = lineSplit[6]
+        deployType = "Zip"
+        zipFileToDeployUrl = fileTarget
+        if "{gitroot}" in fileTarget:
+            splitZipFileToDeployUrl = fileTarget.split("{gitroot}")
+            if len(splitZipFileToDeployUrl) > 1:
+                zipFileToDeployUrl = os.path.join(deployStageUrl, splitZipFileToDeployUrl[1])
+                pathString = os.path.join(deployDataUrl, PathLeaf(zipFileToDeployUrl))
+                if not os.path.exists(pathString):
+                    shutil.copy(zipFileToDeployUrl, deployDataUrl)
+        pathString = os.path.join(deployDataUrl, PathLeaf(zipFileToDeployUrl))
+        if not os.path.exists(pathString):
+            error = True
+            errorMsg = "File specified not found on line " + str(lineNumber) + ": " + lineStr
+            return error, errorMsg, target, pathString, cmd
+        if testLevel not in testRunTypes:
+            error = True
+            errorMsg = "TestRun type not supported on line " + str(lineNumber) + ": " + lineStr
+            return error, errorMsg, target, pathString, cmd
+        if checkOnly not in ["YES","NO"]:
+            error = True
+            errorMsg = "Check only (YES,NO) not supported on line " + str(lineNumber) + ": " + lineStr
+            return error, errorMsg, target, pathString, cmd
+        if ignoreWarnings not in ["YES","NO"]:
+            error = True
+            errorMsg = "Ignore warnings (YES,NO) not supported on line " + str(lineNumber) + ": " + lineStr
+            return error, errorMsg, target, pathString, cmd        
+    return error, errorMsg, target, pathString, cmd        
 
 
 def getImageStream():
