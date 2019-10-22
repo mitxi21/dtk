@@ -98,8 +98,19 @@ class RetrieveMetadataPanel(wx.Panel):
         self.btnRefreshLog = wx.Button(self, label="Refresh Log")
         self.btnRefreshLog.Bind(wx.EVT_BUTTON, self.RefreshLog)
 
+        self.waitParamLbl = wx.StaticText(self, label="Wait time")
+        self.waitParamLbl.ToolTip = "Wait time for SFDX Deploy (minutes)."
+        self.waitParamNumCtrl = wx.TextCtrl(self, size = (-1,-1),style = wx.TE_RIGHT)
+        self.waitParamNumCtrl.ToolTip = "Wait time for SFDX Deploy. DTK will wait for the input minutes. If the deploy finishes before, then DTK wil stop waiting. For Unlimited waiting use '-1'"
+        self.waitParamNumCtrl.SetValue('-1')
+
         row = 0
         col = 0
+
+        self.waitTimeSizer = wx.GridBagSizer(1, 1)
+        self.waitTimeSizer.Add(self.waitParamLbl, pos=(0, 0))
+        self.waitTimeSizer.Add(
+        self.waitParamNumCtrl, pos=(0, 2))
 
         self.retrieveTypeSizer = wx.GridBagSizer(1, 1)
 
@@ -213,6 +224,17 @@ class RetrieveMetadataPanel(wx.Panel):
         self.secondSizer.AddGrowableRow(1)
         self.secondSizer.SetEmptyCellSize((0, 0))
 
+        row = 0
+        self.btnRetrieveSizer= wx.GridBagSizer(1,1)
+        self.btnRetrieveSizer.Add(
+                self.waitTimeSizer,
+                pos=(row,0),
+                flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT,
+                border=10,
+        )
+        self.btnRetrieveSizer.Add(self.btnRetrieve, pos=(row, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border=10)
+
+
         self.mainSizer.Add(
             self.retrieveTypeSizer,
             pos=(0, 0),
@@ -231,7 +253,7 @@ class RetrieveMetadataPanel(wx.Panel):
             self.firstSizer, pos=(2, 0), span=(0, 5), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
         )
         self.mainSizer.Add(
-            self.btnRetrieve, pos=(3, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border=10
+            self.btnRetrieveSizer, pos=(3, 4), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT
         )
         self.mainSizer.Add(
             self.secondSizer,
@@ -413,7 +435,7 @@ class RetrieveMetadataPanel(wx.Panel):
         retrieveMetadataUrl = os.path.join(retrieveUrl, "metadata")
         retrieveDataUrl = os.path.join(retrieveUrl, "data")
         manifestFileUrl = self.manifestFileTextCtrl.GetValue()
-        waitMinutes = "0"
+        waitMinutes = self.waitParamNumCtrl.GetValue()
         self.SetButtonState(False)
         if not os.path.exists(retrieveUrl):
             os.makedirs(retrieveUrl)
@@ -479,6 +501,10 @@ class RetrieveMetadataPanel(wx.Panel):
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
         jobIdStrip = ""
+        zipToExtract = self.unZipRetrievedCheckBox.GetValue()
+        # zipToExtract = False
+        zipReady = False
+        zipUrl = ""
         for line in proc.stdout:
             lineStr = line.decode()
             if "jobid:  " in lineStr:
@@ -495,6 +521,17 @@ class RetrieveMetadataPanel(wx.Panel):
                     logEntry["pathname"] = retrieveMetadataUrl
                     self.logList[jobIdStrip] = logEntry
             wx.CallAfter(self.OnText, lineStr)
+            if waitMinutes != 0:
+                if zipToExtract:
+                    if "Wrote retrieve zip to " in lineStr:
+                        lineSplit = lineStr.split("Wrote retrieve zip to ")
+                        if len(lineSplit) > 1:
+                            zipUrl = lineSplit[1]
+                            zipUrl = zipUrl.strip("\r\n")
+                            zipUrl = zipUrl.rstrip(".")
+                            zipReady = True
+                if zipToExtract and zipReady:
+                    wx.CallAfter(self.Unzip, zipUrl)
         wx.CallAfter(self.SetButtonState, True)
 
     def GenerateManifestFirst(
@@ -1181,7 +1218,7 @@ class ExportDataPanel(wx.Panel):
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        shutil.rmtree(retrieveDataUrl, onerror=dtkglobal.RemoveReadonly)
+        #shutil.rmtree(retrieveDataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(retrieveDataUrl):
             os.makedirs(retrieveDataUrl)
         orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()

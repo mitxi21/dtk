@@ -385,10 +385,15 @@ class ManageOrganizationPanel(wx.Panel):
         self.metadataFolderTextCtrl = wx.TextCtrl(self)
         self.metadataFolderTextCtrl.ToolTip = "Metadata Folder."
 
-        self.scriptFolderLbl = wx.StaticText(self, label="Script")
-        self.scriptFolderLbl.ToolTip = "Script Folder."
+        self.preScriptFolderLbl = wx.StaticText(self, label="Pre-deploy Script")
+        self.preScriptFolderLbl.ToolTip = "Pre-deploy Script Folder."
+        self.preScriptFolderTextCtrl = wx.TextCtrl(self)
+        self.preScriptFolderTextCtrl.ToolTip = "Pre-deploy Script Folder."
+
+        self.scriptFolderLbl = wx.StaticText(self, label="Post-deploy Script")
+        self.scriptFolderLbl.ToolTip = "Post-deploy Script Folder."
         self.scriptFolderTextCtrl = wx.TextCtrl(self)
-        self.scriptFolderTextCtrl.ToolTip = "Script Folder."
+        self.scriptFolderTextCtrl.ToolTip = "Post-deploy Script Folder."
 
         self.btnUpdate = wx.Button(self, label="Update")
         self.btnUpdate.Bind(wx.EVT_BUTTON, self.UpdateButton)
@@ -453,6 +458,16 @@ class ManageOrganizationPanel(wx.Panel):
         )
         row += 1
 
+        self.mainSizer.Add(self.preScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.preScriptFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
+        row += 1
+
         self.mainSizer.Add(self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         self.mainSizer.Add(
             self.scriptFolderTextCtrl,
@@ -479,6 +494,7 @@ class ManageOrganizationPanel(wx.Panel):
         self.gitUserTextCtrl.Clear()
         self.gitPassTextCtrl.Clear()
         self.metadataFolderTextCtrl.Clear()
+        self.preScriptFolderTextCtrl.Clear()
         self.scriptFolderTextCtrl.Clear()
         if sdbxName in dtkglobal.orgDict:
             if len(dtkglobal.orgDict[sdbxName]["giturl"]) > 0:
@@ -492,6 +508,9 @@ class ManageOrganizationPanel(wx.Panel):
                     self.gitPassTextCtrl.WriteText(gitpassDecoded)
             if len(dtkglobal.orgDict[sdbxName]["metadatafolder"]) > 0:
                 self.metadataFolderTextCtrl.WriteText(dtkglobal.orgDict[sdbxName]["metadatafolder"])
+            if "preScript" in dtkglobal.orgDict[sdbxName]:
+                if len(dtkglobal.orgDict[sdbxName]["preScript"]) > 0:
+                    self.preScriptFolderTextCtrl.WriteText(dtkglobal.orgDict[sdbxName]["preScript"])
             if len(dtkglobal.orgDict[sdbxName]["script"]) > 0:
                 self.scriptFolderTextCtrl.WriteText(dtkglobal.orgDict[sdbxName]["script"])
 
@@ -508,6 +527,7 @@ class ManageOrganizationPanel(wx.Panel):
             gitpassEncoded = dtkglobal.Encode(self.gitUserTextCtrl.GetValue(), self.gitPassTextCtrl.GetValue())
             dtkglobal.orgDict[sdbxName]["gitpass"] = gitpassEncoded
             dtkglobal.orgDict[sdbxName]["metadatafolder"] = self.metadataFolderTextCtrl.GetValue()
+            dtkglobal.orgDict[sdbxName]["preScript"] = self.preScriptFolderTextCtrl.GetValue()
             dtkglobal.orgDict[sdbxName]["script"] = self.scriptFolderTextCtrl.GetValue()
             dtkglobal.StoreOrgs()
             dlg = wx.MessageDialog(
@@ -591,10 +611,16 @@ class AddOrganizationPanel(wx.Panel):
         self.metadataFolderTextCtrl.ToolTip = "Metadata Folder."
         self.metadataFolderTextCtrl.AppendText(dtkglobal.defaultMetadataFolder)
 
-        self.scriptFolderLbl = wx.StaticText(self, label="Script")
-        self.scriptFolderLbl.ToolTip = "Script Folder."
+        self.preScriptFolderLbl = wx.StaticText(self, label="Pre-deploy Script")
+        self.preScriptFolderLbl.ToolTip = "Pre-deploy Script Folder."
+        self.preScriptFolderTextCtrl = wx.TextCtrl(self)
+        self.preScriptFolderTextCtrl.ToolTip = "Pre-deploy Script Folder."
+        self.preScriptFolderTextCtrl.AppendText(dtkglobal.defaultPreScriptFolder)
+
+        self.scriptFolderLbl = wx.StaticText(self, label="Post-deploy Script")
+        self.scriptFolderLbl.ToolTip = "Post-deploy Script Folder."
         self.scriptFolderTextCtrl = wx.TextCtrl(self)
-        self.scriptFolderTextCtrl.ToolTip = "Script Folder."
+        self.scriptFolderTextCtrl.ToolTip = "Post-deploy Script Folder."
         self.scriptFolderTextCtrl.AppendText(dtkglobal.defaultScriptFolder)
 
         self.btnAddOrganization = wx.Button(self, label="Add Organization")
@@ -664,6 +690,16 @@ class AddOrganizationPanel(wx.Panel):
         )
         row += 1
 
+        self.mainSizer.Add(self.preScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        self.mainSizer.Add(
+            self.preScriptFolderTextCtrl,
+            pos=(row, col + 1),
+            span=(spanV, spanH),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
+        )
+        row += 1
+
         self.mainSizer.Add(self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         self.mainSizer.Add(
             self.scriptFolderTextCtrl,
@@ -711,6 +747,7 @@ class AddOrganizationPanel(wx.Panel):
         gituser = self.gitUserTextCtrl.GetLineText(0)
         gitpass = self.gitPassTextCtrl.GetLineText(0)
         metadatafolder = self.metadataFolderTextCtrl.GetLineText(0)
+        preScript = self.preScriptFolderTextCtrl.GetLineText(0)
         script = self.scriptFolderTextCtrl.GetLineText(0)
         gitpassEncoded = dtkglobal.Encode(gituser, gitpass)
         if sdbxName in dtkglobal.orgDict:
@@ -729,6 +766,7 @@ class AddOrganizationPanel(wx.Panel):
             sdbxConf["gituser"] = gituser
             sdbxConf["gitpass"] = gitpassEncoded
             sdbxConf["metadatafolder"] = metadatafolder
+            sdbxConf["preScript"] = preScript
             sdbxConf["script"] = script
             dtkglobal.orgDict[sdbxName] = sdbxConf
             dtkglobal.StoreOrgs()
