@@ -904,7 +904,7 @@ def ProcessMetadataScriptLine(lineSplit, lineStr, targetName, sourceName, deploy
         return error, errorMsg, target, pathString, cmd
 
     if lineSplit[1] == "DEPLOYZIP":
-        if len(lineSplit) < 7:
+        if len(lineSplit) < 8:
             error = True
             errorMsg = "Expected more values in script at line " + lineNumber + ": " + lineStr
             return error, errorMsg, target, pathString, cmd
@@ -912,7 +912,8 @@ def ProcessMetadataScriptLine(lineSplit, lineStr, targetName, sourceName, deploy
         testLevel = lineSplit[3]
         checkOnly = lineSplit[4]
         ignoreWarnings = lineSplit[5]
-        waitParam = lineSplit[6]
+        ignoreErrors = lineSplit[6]
+        waitParam = lineSplit[7]
         deployType = "Zip"
         zipFileToDeployUrl = fileTarget
         if "{gitroot}" in fileTarget:
@@ -938,7 +939,11 @@ def ProcessMetadataScriptLine(lineSplit, lineStr, targetName, sourceName, deploy
         if ignoreWarnings not in ["YES","NO"]:
             error = True
             errorMsg = "Ignore warnings (YES,NO) not supported on line " + str(lineNumber) + ": " + lineStr
-            return error, errorMsg, target, pathString, cmd        
+            return error, errorMsg, target, pathString, cmd
+        if ignoreErrors not in ["YES","NO"]:
+            error = True
+            errorMsg = "Ignore errors (YES,NO) not supported on line " + str(lineNumber) + ": " + lineStr
+            return error, errorMsg, target, pathString, cmd  
     return error, errorMsg, target, pathString, cmd        
 
 

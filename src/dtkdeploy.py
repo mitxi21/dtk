@@ -344,7 +344,8 @@ class ScriptDataPanel(wx.Panel):
         deployMetadataUrl = None,
         confirmDeploy = None,
         generateManifest = None,
-        ignoreErrors = None,
+        ignoreErrors = False,
+        ignoreWarnings = False,
         specifiedTests = None,
         gitUrl = None,
         gitBranch = None,
@@ -378,7 +379,10 @@ class ScriptDataPanel(wx.Panel):
                 ignoreWarnings = False
                 if lineSplit[5] == "YES":
                     ignoreWarnings = True
-                waitParam = lineSplit[6]
+                ignoreErrors = False
+                if lineSplit[6] == "YES":
+                    ignoreErrors = True
+                waitParam = lineSplit[7]
                 deployType = "Zip"
                 zipFileUrlWorkspace = pathString
                 fromScript = True
@@ -2684,6 +2688,7 @@ If this field is blank the default test level used is NoTestRun."""
             confirmDeploy = None,
             generateManifest = None,
             ignoreErrors = None,
+            ignoreWarnings = None,
             specifiedTests = None,
             gitUrl = None,
             gitBranch = None,
@@ -2716,7 +2721,10 @@ If this field is blank the default test level used is NoTestRun."""
                     ignoreWarnings = False
                     if lineSplit[5] == "YES":
                         ignoreWarnings = True
-                    waitParam = lineSplit[6]
+                    ignoreErrors = False
+                    if lineSplit[6] == "YES":
+                        ignoreErrors = True
+                    waitParam = lineSplit[7]
                     deployType = "Zip"
                     zipFileUrlWorkspace = pathString
                     fromScript = True
