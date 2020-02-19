@@ -602,7 +602,7 @@ def ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
             if "{gitroot}" in fileToCopyContent:
                 splitFileToCopyContentUrl = fileToCopyContent.split("{gitroot}")
                 if len(splitFileToCopyContentUrl) > 1:
-                    fileToCopyContentUrl = os.path.join(deployStageUrl, splitFileCopyContentUrl[1])
+                    fileToCopyContentUrl = os.path.join(deployStageUrl, splitFileToCopyContentUrl[1])
                     pathStringFileToCopyContent = os.path.join(deployDataUrl, PathLeaf(fileToCopyContentUrl))
                     # if not os.path.exists(fileToCopyContentUrl):
                     #     error = True

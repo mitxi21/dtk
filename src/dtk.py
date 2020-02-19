@@ -117,7 +117,7 @@ class MainFrame(wx.Frame):
 
     def OnAbout(self, e):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
-        dlg = wx.MessageDialog(self, "Version 1.4 - MPB & JMCM\nPraise The Sun!", "About DTK", wx.OK)
+        dlg = wx.MessageDialog(self, "Version 1.5 - MPB & JMCM\nPraise The Sun!", "About DTK", wx.OK)
         dlg.ShowModal()  # Show it
         dlg.Destroy()  # finally destroy it when finished.
 

@@ -483,6 +483,7 @@ class ScriptDataPanel(wx.Panel):
         if deployType == "Folder" or deployType == "Git":
             cmd.append("-d")
             cmd.append(deployMetadataUrl)
+        os.environ["SFDX_USE_PROGRESS_BAR"] = "false"
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -507,6 +508,9 @@ class ScriptDataPanel(wx.Panel):
     def RunDataCmd(self, lineSplit, lineStr, target, pathString, cmd):
         if self.stop:
             return
+        wx.CallAfter(self.OnText, os.linesep)
+        wx.CallAfter(self.OnText, "Processing: " + lineStr)
+        wx.CallAfter(self.OnText, os.linesep)
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -1526,10 +1530,16 @@ If this field is blank the default test level used is NoTestRun."""
             thread.start()
         if deployType == "Git":
             if len(metadataTypes) == 0:
-                dlg = wx.MessageDialog(self, "No metadata types selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
-                dlg.ShowModal()
-                dlg.Destroy()
-                return
+                dlg = wx.MessageDialog(
+                    self,
+                    "No metadata types selected. Are you sure you want to continue with the deployment?",
+                    "DTK - Deploy",
+                    wx.YES_NO | wx.ICON_WARNING,
+                )
+                result = dlg.ShowModal()
+                if result == wx.ID_NO:
+                    dlg.Destroy()
+                    return
             if len(gitUrl) == 0:
                 dlg = wx.MessageDialog(self, "No git repository selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
                 dlg.ShowModal()
@@ -2363,7 +2373,6 @@ If this field is blank the default test level used is NoTestRun."""
                 wx.CallAfter(self.OnText, "Script file not found on: " + preScriptFileWorkspace)
                 wx.CallAfter(self.OnText, os.linesep)
             wx.CallAfter(self.SetButtonState, True)
-
         cmd = [
             "sfdx",
             "force:mdapi:deploy",
@@ -2391,8 +2400,9 @@ If this field is blank the default test level used is NoTestRun."""
         if deployType == "Folder" or deployType == "Git":
             cmd.append("-d")
             cmd.append(deployMetadataUrl)
+        os.environ["SFDX_USE_PROGRESS_BAR"] = "false"
         proc = subprocess.Popen(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE
         )
         for line in proc.stdout:
             lineStr = line.decode()
@@ -2435,6 +2445,9 @@ If this field is blank the default test level used is NoTestRun."""
     def RunDataCmd(self, lineSplit, lineStr, target, pathString, cmd):
         if self.stop:
             return
+        wx.CallAfter(self.OnText, os.linesep)
+        wx.CallAfter(self.OnText, "Processing: " + lineStr)
+        wx.CallAfter(self.OnText, os.linesep)
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
