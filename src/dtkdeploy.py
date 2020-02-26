@@ -7,6 +7,7 @@ import threading
 
 import dtkglobal
 import wx
+import wx.lib.scrolledpanel as scrolled
 import zipfile
 
 
@@ -2931,7 +2932,10 @@ class DeployFrame(wx.Frame):
     def InitUI(self):
         self.mainSizer = wx.GridBagSizer(1, 1)
 
-        self.panel = wx.Panel(self)
+        self.panelParent = wx.Panel(self)
+        self.panel = scrolled.ScrolledPanel(self.panelParent, -1, name="panel1")
+        self.panel.SetAutoLayout(1)
+        self.panel.SetupScrolling()
         row = 0
         col = 0
         spanV = 0
@@ -3004,6 +3008,11 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
         self.panel.SetSizerAndFit(self.mainSizer)
         self.mainSizer.SetEmptyCellSize((0, 0))
         self.mainSizer.Fit(self)
+
+        self.panelSizer = wx.BoxSizer(wx.VERTICAL)
+        self.panelSizer.Add(self.panel, 1, wx.EXPAND)
+        self.panelParent.SetSizer(self.panelSizer)
+        
         self.Layout()
         self.Fit()
 

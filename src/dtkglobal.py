@@ -133,6 +133,7 @@ def SaveSettings(
     advSettingIn,
     unlockSettingIn,
     unzipSettingIn,
+    metadataTypesSettingIn,
     defaultPackagesToExcludeIn,
     defaultMetadataFolderIn,
     defaultPreScriptFolderIn,
@@ -153,6 +154,10 @@ def SaveSettings(
     global unzipSetting
     unzipSetting = unzipSettingIn
     shelfFile["unzipSetting"] = unzipSettingIn
+    global metadataTypes
+    metadataTypes = metadataTypesSettingIn.split(",")
+    metadataTypes.sort()
+    shelfFile["metadataTypes"] = metadataTypes
     global defaultPackagesToExclude
     defaultPackagesToExclude = defaultPackagesToExcludeIn
     shelfFile["defaultPackagesToExclude"] = defaultPackagesToExcludeIn
@@ -186,6 +191,9 @@ def LoadSettings():
     if "unzipSetting" in shelfFile:
         global unzipSetting
         unzipSetting = shelfFile["unzipSetting"]
+    if "metadataTypes" in shelfFile:
+        global metadataTypes
+        metadataTypes = shelfFile["metadataTypes"]
     if "defaultPackagesToExclude" in shelfFile:
         global defaultPackagesToExclude
         defaultPackagesToExclude = shelfFile["defaultPackagesToExclude"]

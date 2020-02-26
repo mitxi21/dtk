@@ -117,7 +117,7 @@ class MainFrame(wx.Frame):
 
     def OnAbout(self, e):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
-        dlg = wx.MessageDialog(self, "Version 1.5 - MPB & JMCM\nPraise The Sun!", "About DTK", wx.OK)
+        dlg = wx.MessageDialog(self, "Version 1.6 - MPB & JMCM\nPraise The Sun!", "About DTK", wx.OK)
         dlg.ShowModal()  # Show it
         dlg.Destroy()  # finally destroy it when finished.
 
@@ -163,6 +163,11 @@ class EditSettingsFrame(wx.Dialog):
         self.unzipLbl.ToolTip = "Check this to unzip the file rerieved."
         self.unzipCheckBox = wx.CheckBox(self.panel)
         self.unzipCheckBox.ToolTip = "Check this to unzip the file rerieved."
+
+        self.metadataTypesLbl = wx.StaticText(self.panel, label="Metadata Types")
+        self.metadataTypesLbl.ToolTip = "Metadata types to be used in retrievals and deployments. Separate new additions by comma. Check Metadata type names on https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_types_list.htm"
+        self.metadataTypesTextCtrl = wx.TextCtrl(self.panel)
+        self.metadataTypesTextCtrl.ToolTip = "Metadata types to be used in retrievals and deployments. Separate new additions by comma. Check Metadata type names on https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_types_list.htm"
 
         self.defaultPackagesToExcludeLbl = wx.StaticText(self.panel, label="Prefix(es) to Exclude Package(s)")
         self.defaultPackagesToExcludeLbl.ToolTip = "Prefix of the package to exclude when retrieving metadata. Separate it by comma if more than one needs to be set."
@@ -211,6 +216,18 @@ class EditSettingsFrame(wx.Dialog):
         self.mainSizer.Add(self.unzipLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         self.mainSizer.Add(
             self.unzipCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        row += 1
+
+        self.mainSizer.Add(
+            self.metadataTypesLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        )
+        self.mainSizer.Add(
+            self.metadataTypesTextCtrl,
+            pos=(row, col + 1),
+            span=(1, 4),
+            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+            border=5,
         )
         row += 1
 
@@ -285,6 +302,7 @@ class EditSettingsFrame(wx.Dialog):
         self.advCheckBox.SetValue(dtkglobal.advSetting)
         self.unlockCheckBox.SetValue(dtkglobal.unlockSetting)
         self.unzipCheckBox.SetValue(dtkglobal.unzipSetting)
+        self.metadataTypesTextCtrl.write(','.join(dtkglobal.metadataTypes))
         self.defaultPackagesToExcludeTextCtrl.write(dtkglobal.defaultPackagesToExclude)
         self.defaultMetadataFolderTextCtrl.write(dtkglobal.defaultMetadataFolder)
         self.defaultPreScriptFolderTextCtrl.write(dtkglobal.defaultPreScriptFolder)
@@ -302,6 +320,7 @@ class EditSettingsFrame(wx.Dialog):
             advSettingIn=self.advCheckBox.GetValue(),
             unlockSettingIn=self.unlockCheckBox.GetValue(),
             unzipSettingIn=self.unzipCheckBox.GetValue(),
+            metadataTypesSettingIn=self.metadataTypesTextCtrl.GetLineText(0),
             defaultPackagesToExcludeIn=self.defaultPackagesToExcludeTextCtrl.GetLineText(0),
             defaultMetadataFolderIn=self.defaultMetadataFolderTextCtrl.GetLineText(0),
             defaultScriptFolderIn=self.defaultScriptFolderTextCtrl.GetLineText(0),
