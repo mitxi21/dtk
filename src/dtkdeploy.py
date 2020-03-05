@@ -170,13 +170,13 @@ class ScriptDataPanel(wx.Panel):
             self.btnRefreshLog.Disable()
 
     def UploadFile(self, event):
-        if len(self.Parent.Parent.Parent.currentWorkspace) == 0:
+        if len(self.Parent.Parent.Parent.Parent.currentWorkspace) == 0:
             dlg = wx.MessageDialog(self, "Workspace not set yet.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
             return
 
-        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy")
         deployDataUrl = os.path.join(deployUrl, "data")
 
         dlg = wx.FileDialog(
@@ -216,11 +216,11 @@ class ScriptDataPanel(wx.Panel):
 
     def RunScriptButton(self, event):
         self.stop = False
-        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy")
         deployDataUrl = os.path.join(deployUrl, "data")
         deployStageUrl = os.path.join(deployUrl, "stage")
-        orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
-        targetName = self.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
+        orgName = self.Parent.Parent.Parent.Parent.organizationComboBox.GetValue()
+        targetName = self.Parent.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
         if len(orgName) == 0:
             dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
@@ -241,7 +241,7 @@ class ScriptDataPanel(wx.Panel):
 
         if self.clearLogsCheckBox.GetValue():
             self.consoleOutputTextCtrl.Clear()
-            self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.currentWorkspace)
+            self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.Parent.currentWorkspace)
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             self.logList.clear()
 
@@ -258,15 +258,15 @@ class ScriptDataPanel(wx.Panel):
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
         # deployType = self.deploymentTypeComboBox.GetValue()
-        orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
+        orgName = self.Parent.Parent.Parent.Parent.organizationComboBox.GetValue()
         sdbxNameSource = "Config"
         if dtkglobal.advSetting:
-            sdbxNameSource = self.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()
-        sdbxName = self.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
+            sdbxNameSource = self.Parent.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()
+        sdbxName = self.Parent.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
         sourceName = orgName + "_" + sdbxNameSource
         if "_" in sdbxNameSource:
             sourceName = sdbxNameSource
-        targetName = self.Parent.Parent.Parent.currentTarget
+        targetName = self.Parent.Parent.Parent.Parent.currentTarget
         scriptFile = open(scriptUrl, "r", encoding="utf8")
         scriptFull = scriptFile.read()
         if "SOURCE" in scriptFull and len(sdbxNameSource) == 0:
@@ -1412,7 +1412,7 @@ If this field is blank the default test level used is NoTestRun."""
             self.Layout()
 
     def DeployButton(self, event):
-        if len(self.Parent.Parent.Parent.currentWorkspace) == 0:
+        if len(self.Parent.Parent.Parent.Parent.currentWorkspace) == 0:
             dlg = wx.MessageDialog(self, "Workspace not set yet.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
@@ -1420,10 +1420,10 @@ If this field is blank the default test level used is NoTestRun."""
         self.stop = False
 
         deployType = self.deploymentTypeComboBox.GetValue()
-        orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
-        sdbxName = self.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
-        targetName = self.Parent.Parent.Parent.currentTarget
-        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "deploy")
+        orgName = self.Parent.Parent.Parent.Parent.organizationComboBox.GetValue()
+        sdbxName = self.Parent.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
+        targetName = self.Parent.Parent.Parent.Parent.currentTarget
+        deployUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy")
         deployMetadataUrl = os.path.join(deployUrl, "metadata")
         deployDataUrl = os.path.join(deployUrl, "data")
         deployStageUrl = os.path.join(deployUrl, "stage")
@@ -1488,7 +1488,7 @@ If this field is blank the default test level used is NoTestRun."""
                 return
             if self.clearLogsCheckBox.GetValue():
                 self.consoleOutputTextCtrl.Clear()
-                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.currentWorkspace)
+                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.Parent.currentWorkspace)
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.logList.clear()
             self.consoleOutputTextCtrl.AppendText("Start deployment...")
@@ -1553,7 +1553,7 @@ If this field is blank the default test level used is NoTestRun."""
                 return
             if self.clearLogsCheckBox.GetValue():
                 self.consoleOutputTextCtrl.Clear()
-                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.currentWorkspace)
+                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.Parent.currentWorkspace)
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.logList.clear()
             gitUrlSplit = gitUrl.split("//")
@@ -1612,7 +1612,7 @@ If this field is blank the default test level used is NoTestRun."""
                 return
             if self.clearLogsCheckBox.GetValue():
                 self.consoleOutputTextCtrl.Clear()
-                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.currentWorkspace)
+                self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.Parent.currentWorkspace)
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.logList.clear()
 
@@ -1888,7 +1888,7 @@ If this field is blank the default test level used is NoTestRun."""
         #     shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
-        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp", "git.tmp")
+        outputFileUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "tmp", "git.tmp")
         cmd = ["git", "clone", "--single-branch", "--branch", gitBranch, gitFinalUrl, deployStageUrl]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
@@ -2004,10 +2004,10 @@ If this field is blank the default test level used is NoTestRun."""
         #     shutil.rmtree(deployMetadataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
-        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp")
+        outputFileUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "tmp")
         if not os.path.exists(outputFileUrl):
             os.makedirs(outputFileUrl)
-        outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp", "describeMetadata.tmp")
+        outputFileUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "tmp", "describeMetadata.tmp")
         thread = threading.Thread(
             target=self.DescribeMetadata,
             args=(
@@ -2487,7 +2487,7 @@ If this field is blank the default test level used is NoTestRun."""
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
             return
-        deployUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy")
         deployMetadataUrl = os.path.join(deployUrl, "metadata")
         zipRef = zipfile.ZipFile(pathToZipFile, "r")
         zipName = dtkglobal.PathLeaf(pathToZipFile)
@@ -2615,15 +2615,15 @@ If this field is blank the default test level used is NoTestRun."""
         # shutil.rmtree(deployDataUrl, onerror=dtkglobal.RemoveReadonly)
         if not os.path.exists(deployDataUrl):
             os.makedirs(deployDataUrl)
-        orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
+        orgName = self.Parent.Parent.Parent.Parent.organizationComboBox.GetValue()
         sdbxNameSource = "Config"
         if dtkglobal.advSetting:
-            sdbxNameSource = self.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()
-        sdbxName = self.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
+            sdbxNameSource = self.Parent.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()
+        sdbxName = self.Parent.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
         sourceName = orgName + "_" + sdbxNameSource
         if "_" in sdbxNameSource:
             sourceName = sdbxNameSource
-        targetName = self.Parent.Parent.Parent.currentTarget
+        targetName = self.Parent.Parent.Parent.Parent.currentTarget
         scriptFile = open(scriptUrl, "r", encoding="utf8")
         scriptFull = scriptFile.read()
         if "SOURCE" in scriptFull and len(sdbxNameSource) == 0:
@@ -2854,7 +2854,7 @@ If this field is blank the default test level used is NoTestRun."""
     def ChangeGitUrl(self, event):
         self.stop = False
         gitUrl = self.gitUrlComboBox.GetValue()
-        orgName = self.Parent.Parent.Parent.organizationComboBox.GetValue()
+        orgName = self.Parent.Parent.Parent.Parent.organizationComboBox.GetValue()
         branchFilter = self.gitBranchFilterTextCtrl.GetLineText(0)
 
         if len(gitUrl) > 0:
@@ -2879,10 +2879,10 @@ If this field is blank the default test level used is NoTestRun."""
             gitSuffix = gitUrlSplit[1]
             gitUser = dtkglobal.orgDict[orgName]["gituser"]
             gitPass = dtkglobal.Decode(gitUser, dtkglobal.orgDict[orgName]["gitpass"])
-            outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp")
+            outputFileUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "tmp")
             if not os.path.exists(outputFileUrl):
                 os.makedirs(outputFileUrl)
-            outputFileUrl = os.path.join(self.Parent.Parent.Parent.currentWorkspace, "tmp", "branches.tmp")
+            outputFileUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "tmp", "branches.tmp")
             gitFinalUrl = gitPreffix + gitUser + ":" + gitPass + "@" + gitSuffix
             branches = []
             proc = subprocess.Popen(
