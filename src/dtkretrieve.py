@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import platform
 import shutil
 import subprocess
 import threading
@@ -497,6 +498,8 @@ class RetrieveMetadataPanel(wx.Panel):
             "-w",
             waitMinutes,
         ]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:retrieve" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-r" + " " + retrieveMetadataUrl + " " + "-k" + " " + manifestFileUrl + " " + "-s" + " " + "-w" + " " + waitMinutes]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -600,6 +603,8 @@ class RetrieveMetadataPanel(wx.Panel):
             "-f",
             outputFileUrl,
         ]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:describemetadata" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-f" + " " + outputFileUrl]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -763,6 +768,8 @@ class RetrieveMetadataPanel(wx.Panel):
             "-f",
             outputFileUrl,
         ]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:listmetadata" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-m" + " " + metadataItem + " " + "-f" + " " + outputFileUrl]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -838,6 +845,8 @@ class RetrieveMetadataPanel(wx.Panel):
             "-f",
             outputFileUrl,
         ]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:listmetadata" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-m" + " " + folder + " " + "-f" + " " + outputFileUrl]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -872,6 +881,8 @@ class RetrieveMetadataPanel(wx.Panel):
                 "-f",
                 outputFileFolderUrl,
             ]
+            if (platform.system() != "Windows"):
+                cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:listmetadata" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-m" + " " + metadataItem + " " + "--folder" + " " + metadata["fullName"] + " " + "-f" + " " + outputFileFolderUrl]
             proc = subprocess.Popen(
                 cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
             )
@@ -982,6 +993,8 @@ class RetrieveMetadataPanel(wx.Panel):
                     "-w",
                     waitMinutes,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:retrieve:report" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId + " " + "-r" + " " + pathName + " " + "-w" + " " + waitMinutes]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -1013,6 +1026,8 @@ class RetrieveMetadataPanel(wx.Panel):
                     "-i",
                     jobId,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy:report" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -1031,6 +1046,8 @@ class RetrieveMetadataPanel(wx.Panel):
                     "-b",
                     batchId,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:data:bulk:status" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId + " " +  "-b" + " " + batchId]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -1335,6 +1352,8 @@ class ExportDataPanel(wx.Panel):
                     "-w",
                     waitMinutes,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:retrieve:report" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId + " " + "-r" + " " + pathName + " " + "-w" + " " + waitMinutes]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -1351,6 +1370,8 @@ class ExportDataPanel(wx.Panel):
                     "-i",
                     jobId,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy:report" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -1369,6 +1390,8 @@ class ExportDataPanel(wx.Panel):
                     "-b",
                     batchId,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:data:bulk:status" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId + " " + "-b" + " " + batchId]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -1401,14 +1424,14 @@ class RetrieveFrame(wx.Frame):
         self.organizationComboBox = wx.ComboBox(self.panel, style=wx.CB_READONLY)
         self.organizationComboBox.ToolTip = "List of Organizations available."
         self.organizationComboBox.Items = dtkglobal.orgList
-        self.organizationComboBox.Bind(wx.EVT_TEXT, self.OrganizationSelected)
+        self.organizationComboBox.Bind(wx.EVT_COMBOBOX, self.OrganizationSelected)
 
         if dtkglobal.unlockSetting:
             self.sandboxTypeSourceLbl = wx.StaticText(self.panel, label="Source")
             self.sandboxTypeSourceLbl.ToolTip = "Sandbox Type: Config, QA, UAT or Prod."
             self.sandboxTypeSourceComboBox = wx.ComboBox(self.panel, style=wx.CB_READONLY)
             self.sandboxTypeSourceComboBox.ToolTip = "Sandbox Type: Config, QA, UAT or Prod."
-            self.sandboxTypeSourceComboBox.Bind(wx.EVT_TEXT, self.SourceSelected)
+            self.sandboxTypeSourceComboBox.Bind(wx.EVT_COMBOBOX, self.SourceSelected)
             self.sandboxTypeSourceComboBox.Enable(False)
 
         self.nb = wx.Notebook(self.panel)

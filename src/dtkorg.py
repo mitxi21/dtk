@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 import threading
 
@@ -111,6 +112,8 @@ class AddSandboxPanel(wx.Panel):
 
     def ShowSfdxAliasList(self, event):
         cmd = ["sfdx", "force:alias:list"]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:alias:list"]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -175,6 +178,8 @@ class AddSandboxPanel(wx.Panel):
 
     def RunAddSandbox(self, orgName, sdbxName, sandboxName, serverUrl):
         cmd = ["sfdx", "force:auth:web:login", "-a", sandboxName, "-r", serverUrl]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:auth:web:login" + " " + "-a" + " " + sandboxName + " " + "-r" + " " + serverUrl]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -279,6 +284,8 @@ class ManageSandboxPanel(wx.Panel):
 
     def RunOpenSandbox(self, sandboxName):
         cmd = ["sfdx", "force:org:open", "-u", sandboxName]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:org:open" + " " + "-u" + " " + sandboxName]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -330,6 +337,8 @@ class ManageSandboxPanel(wx.Panel):
 
     def RunDeleteSandbox(self, orgName, sdbxName, sandboxName):
         cmd = ["sfdx", "force:alias:set", sandboxName + "="]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:alias:set" + " " + sandboxName + "="]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )

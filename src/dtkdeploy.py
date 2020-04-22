@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import platform
 import shutil
 import subprocess
 import threading
@@ -469,6 +470,8 @@ class ScriptDataPanel(wx.Panel):
             "-w",
             waitParam
         ]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-l" + " " +  testLevel + " " + "-w" + " " +  waitParam]
         if checkOnly:
             cmd.append("-c")
         if ignoreWarnings:
@@ -594,6 +597,8 @@ class ScriptDataPanel(wx.Panel):
                     "-w",
                     waitMinutes,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:retrieve:report" + " " +  "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId + " " + "-r"+ " " + pathName + " " + "-w" + " " + waitMinutes]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -625,6 +630,8 @@ class ScriptDataPanel(wx.Panel):
                     "-i",
                     jobId,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy:report" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -645,6 +652,8 @@ class ScriptDataPanel(wx.Panel):
                     "-b",
                     batchId,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:data:bulk:status" + " " + "--apiversion"+ " " + dtkglobal.defaultApiVersion+ " " +"-u" + " " + targetName + " " + "-i" + " " + jobId + " " + "-b" + " " + batchId]
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.consoleOutputTextCtrl.AppendText("Script Line: " + scriptLine)
                 proc = subprocess.Popen(
@@ -2091,6 +2100,8 @@ If this field is blank the default test level used is NoTestRun."""
             "-f",
             outputFileUrl,
         ]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:describemetadata" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-f" + " " + outputFileUrl]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -2386,6 +2397,8 @@ If this field is blank the default test level used is NoTestRun."""
             "-w",
             waitParam
         ]
+        if (platform.system() != "Windows"):
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-l" + " " + testLevel + " " + "-w" + " " + waitParam]
         if checkOnly:
             cmd.append("-c")
         if ignoreWarnings:
@@ -2547,6 +2560,8 @@ If this field is blank the default test level used is NoTestRun."""
                     "-w",
                     waitMinutes,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:retrieve:report" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId + " " + "-r" + " " + pathName + " " + "-w" + " " + waitMinutes]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -2578,6 +2593,8 @@ If this field is blank the default test level used is NoTestRun."""
                     "-i",
                     jobId,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy:report" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId]
                 proc = subprocess.Popen(
                     cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
                 )
@@ -2598,6 +2615,8 @@ If this field is blank the default test level used is NoTestRun."""
                     "-b",
                     batchId,
                 ]
+                if (platform.system() != "Windows"):
+                    cmd = ["/usr/local/bin/sfdx" + " " + "force:data:bulk:status" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-i" + " " + jobId + " " + "-b" + " " + batchId]
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.consoleOutputTextCtrl.AppendText("Script Line: " + scriptLine)
                 proc = subprocess.Popen(
@@ -2946,7 +2965,7 @@ class DeployFrame(wx.Frame):
         self.organizationComboBox = wx.ComboBox(self.panel, style=wx.CB_READONLY)
         self.organizationComboBox.ToolTip = "List of Organizations available."
         self.organizationComboBox.Items = dtkglobal.orgList
-        self.organizationComboBox.Bind(wx.EVT_TEXT, self.OrganizationSelected)
+        self.organizationComboBox.Bind(wx.EVT_COMBOBOX, self.OrganizationSelected)
 
         if dtkglobal.unlockSetting:
             self.sandboxTypeSourceLbl = wx.StaticText(self.panel, label="Source")
@@ -2963,7 +2982,7 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
         self.sandboxTypeTargetLbl.ToolTip = "Sandbox Type: Config, QA, UAT or Prod."
         self.sandboxTypeTargetComboBox = wx.ComboBox(self.panel, style=wx.CB_READONLY)
         self.sandboxTypeTargetComboBox.ToolTip = "Sandbox Type: Config, QA, UAT or Prod."
-        self.sandboxTypeTargetComboBox.Bind(wx.EVT_TEXT, self.TargetSelected)
+        self.sandboxTypeTargetComboBox.Bind(wx.EVT_COMBOBOX, self.TargetSelected)
         self.sandboxTypeTargetComboBox.Enable(False)
 
         self.nb = wx.Notebook(self.panel)

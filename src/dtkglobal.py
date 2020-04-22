@@ -1,6 +1,7 @@
 import json
 import ntpath
 import os
+import platform
 import shelve
 import shutil
 import stat
@@ -11,9 +12,9 @@ import io
 import csv
 import wx
 
-advSetting = False
-unlockSetting = False
-unzipSetting = False
+advSetting = True
+unlockSetting = True
+unzipSetting = True
 defaultPackagesToExclude = "et4ae5"
 defaultPreScriptFolder = "data\\scripts\\PreReleaseScript.txt"
 defaultScriptFolder = "data\\scripts\\PostReleaseScript.txt"
@@ -233,6 +234,8 @@ def LoadOrganizations():
 
 def CreateOrgsFromSfdx():
     cmd = ["sfdx", "force:alias:list"]
+    if (platform.system() != "Windows"):
+        cmd = ["/usr/local/bin/sfdx" + " " + "force:alias:list"]
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
     directory = os.path.join(os.path.expanduser("~"), ".dtk", "log")
     if not os.path.exists(directory):
@@ -712,6 +715,15 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 + query
                 + " -r csv"
             )
+            if (platform.system() != "Windows"):
+                cmd = ("/usr/local/bin/sfdx force:data:soql:query --apiversion "
+                + defaultApiVersion
+                + " -u "
+                + target
+                + " -q "
+                + query
+                + " -r csv"
+            )
         if lineSplit[1] == "BULKDELETE":
             if len(lineSplit) < 5:
                 error = True
@@ -747,6 +759,8 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 "-w",
                 waitTime
             ]
+            if (platform.system() != "Windows"):
+                cmd = ["/usr/local/bin/sfdx" + " " + "force:data:bulk:delete" + " " + "--apiversion" + " " + defaultApiVersion + " " + "-u" + " " + target + " " + "-s" + " " + customObject + " " + "-f" + " " + pathString + " " + "-w" + " " + waitTime]
         if lineSplit[1] == "BULKUPSERT":
             if len(lineSplit) < 6:
                 error = True
@@ -785,6 +799,8 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 "-w",
                 waitTime
             ]
+            if (platform.system() != "Windows"):
+                cmd = ["/usr/local/bin/sfdx" + " " + "force:data:bulk:upsert" + " " + "--apiversion" + " " + defaultApiVersion + " " + "-u" + " " + target + " " + "-s" + " " + customObject + " " + "-i" + " " + externalId + " " + "-f" + " " + pathString + " " + "-w" + " " + waitTime]
         if lineSplit[1] == "RECORDCREATE":
             if len(lineSplit) < 4:
                 error = True
@@ -814,6 +830,16 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 + " -q "
                 + values
             )
+            if (platform.system() != "Windows"):
+                cmd = ("/usr/local/bin/sfdx force:data:record:create --apiversion "
+                + defaultApiVersion
+                + " -u "
+                + target
+                + " -s "
+                + customObject
+                + " -q "
+                + values
+            )
         if lineSplit[1] == "RECORDDELETE":
             customObject = lineSplit[2]
             values = lineSplit[3]
@@ -827,7 +853,17 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 + customObject
                 + " -i "
                 + values
-            )
+                )
+            if (platform.system() != "Windows"):
+                cmd = ("/usr/local/bin/sfdx force:data:record:delete --apiversion "
+                + defaultApiVersion
+                + " -u "
+                + target
+                + " -s "
+                + customObject
+                + " -i "
+                + values
+                )
             if externalId == "values":
                 cmd = (
                     "sfdx force:data:record:delete --apiversion "
@@ -839,6 +875,16 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                     + " -w "
                     + values
                 )
+                if (platform.system() != "Windows"):
+                    cmd = ("/usr/local/bin/sfdx force:data:record:delete --apiversion "
+                        + defaultApiVersion
+                        + " -u "
+                        + target
+                        + " -s "
+                        + customObject
+                        + " -w "
+                        + values
+                    )
         if lineSplit[1] == "RECORDUPDATE":
             if len(lineSplit) < 6:
                 error = True
@@ -860,6 +906,18 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 + " -v "
                 + valuesToUpdate
             )
+            if (platform.system() != "Windows"):
+                cmd = ("/usr/local/bin/sfdx force:data:record:update --apiversion "
+                + defaultApiVersion
+                + " -u "
+                + target
+                + " -s "
+                + customObject
+                + " -i "
+                + values
+                + " -v "
+                + valuesToUpdate
+                )
             if externalId == "values":
                 cmd = (
                     "sfdx force:data:record:update --apiversion "
@@ -873,6 +931,18 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                     + " -v "
                     + valuesToUpdate
                 )
+                if (platform.system() != "Windows"):
+                    cmd = ("/usr/local/bin/sfdx force:data:record:update --apiversion "
+                        + defaultApiVersion
+                        + " -u "
+                        + target
+                        + " -s "
+                        + customObject
+                        + " -w "
+                        + values
+                        + " -v "
+                        + valuesToUpdate
+                        )
         if lineSplit[1] == "APEXEXECUTE":
             fileTarget = lineSplit[2]
             fileToReplaceContentUrl = fileTarget
@@ -889,6 +959,8 @@ def ProcessDataScriptLine(lineSplit, lineStr, targetName, sourceName, deployData
                 errorMsg = "File specified not found on line " + str(lineNumber) + ": " + lineStr
                 return error, errorMsg, target, pathString, cmd
             cmd = ["sfdx", "force:apex:execute", "--apiversion", defaultApiVersion, "-u", target, "-f", pathString]
+            if (platform.system() != "Windows"):
+                cmd = ["/usr/local/bin/sfdx" + " " + "force:apex:execute" + " " + "--apiversion" + " " + defaultApiVersion + " " + "-u" + " " + target + " " + "-f" + " " + pathString]
     else:
         error = True
         errorMsg = "Expected more values in script at line " + lineNumber + ": " + lineStr
