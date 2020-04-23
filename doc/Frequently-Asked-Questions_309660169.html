@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DTK: Frequently Asked Questions</title>
+        <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+
+    <body class="theme-default aui-theme-default">
+        <div id="page">
+            <div id="main" class="aui-page-panel">
+                <div id="main-header">
+                    <div id="breadcrumb-section">
+                        <ol id="breadcrumbs">
+                            <li class="first">
+                                <span><a href="index.html">DTK</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Deployment-Tool-Kit_309660126.html">Deployment Tool Kit</a></span>
+                            </li>
+                                                </ol>
+                    </div>
+                    <h1 id="title-heading" class="pagetitle">
+                                                <span id="title-text">
+                            DTK : Frequently Asked Questions
+                        </span>
+                    </h1>
+                </div>
+
+                <div id="content" class="view">
+                    <div id="main-content" class="wiki-content group">
+                    <p><strong><br/></strong></p><p><strong>How can I update DTK. Will I lose any data?</strong></p><p>You can always download the latest DTK version from this Confluence space. It comes in two flavours, one without terminal and other with terminal for debugg purposes. (dtk.py and dtk_ts.py). You can just replace the old dtk.py file with the new one. <u><span style="color: rgb(0,51,102);">All configuration and data will remain untouched and safe</span></u> as it is saved in .dtk and .dtk_config folders in your Users/&lt;Username&gt; folder in your machine.</p><p><br/></p><p><strong>&lt;DTK Feature&gt; is not working, but i don't receive any error feedback or log from it.</strong></p><p>If DTK is now showing any error maybe you can obtain more info on what is happening with the dtk_ts.py version. This version opens a terminal while being used that will display the possible error on it. Please copy that into a text file and send contact us in:</p><p><br/></p><p><strong>I started a deploy but I closed DTK Deploy frame window.</strong></p><p>If you closed the window before the Deploy was in status &quot;Queued&quot; then the deploy will stop before even reaching Salesforce. If <strong><em><br/></em></strong></p><p><br/></p><p><strong>I can see in my log panel that sfdx is not updated. Should I update?</strong></p><p>DTK is based in SFDX CLI, so in order to be sure all functionalities are working as they should, we recommend to update it as soon as possible.</p><p>If you installed sfdx cli directly, then you can run</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"> sfdx update </pre>
+</div></div><p>in CMD,</p><p>If you installed sfdx with NPM you can update with:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">npm install --global sfdx-cli</pre>
+</div></div><p><br/></p><p><br/></p><p><strong>How does API version affects Retrieve/Deploy</strong></p><p>Salesforce is continuously updating the API with their releases. Currently we are on 46 while answering this question. Metadata retrieve and deploy format can change on API versions and this changes can be traced in <a class="external-link" href="https://developer.salesforce.com/docs/atlas.en-us.220.0.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm" rel="nofollow">https://developer.salesforce.com/docs/atlas.en-us.220.0.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm</a></p><p><br/></p><p><strong>How can I receive DTK updates?</strong></p><p>Please subscribe to changes in the Confluence page containing the download links and will be notified when a new version is uploaded editing the page.</p><p><strong><br/></strong></p><p><strong>I receive an error when trying to interact in any way with an Salesforce environment on Retrieve, SOQL, Deploy or Script. ERROR running xxx:xxx:xxx:xxx This org appears to have a problem with its OAuth configuration. Reason: invalid_grant - expired access/refresh token.</strong></p><p>The token that is created first time you add a sandbox into DTK has been expired. This may be related to a change of configuration in the environment. (For example a Refresh from productive environment)</p><p><br/></p>
+                    </div>
+
+                    
+                 
+                </div>             </div> 
+        </div>     </body>
+</html>

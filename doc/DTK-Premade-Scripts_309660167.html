@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DTK : DTK Premade Scripts</title>
+        <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+
+    <body class="theme-default aui-theme-default">
+        <div id="page">
+            <div id="main" class="aui-page-panel">
+                <div id="main-header">
+                    <div id="breadcrumb-section">
+                        <ol id="breadcrumbs">
+                            <li class="first">
+                                <span><a href="index.html">DTK</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Deployment-Tool-Kit_309660126.html">Deployment Tool Kit</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Scripting-on-DTK_309660166.html">Scripting on DTK</a></span>
+                            </li>
+                                                </ol>
+                    </div>
+                    <h1 id="title-heading" class="pagetitle">
+                                                <span id="title-text">
+                            DTK : DTK Premade Scripts
+                        </span>
+                    </h1>
+                </div>
+
+                <div id="content" class="view">
+                    <div id="main-content" class="wiki-content group">
+                    <p><style type='text/css'>/*<![CDATA[*/
+div.rbtoc1587642560356 {padding: 0px;}
+div.rbtoc1587642560356 ul {list-style: disc;margin-left: 0px;}
+div.rbtoc1587642560356 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='toc-macro rbtoc1587642560356'>
+<ul class='toc-indentation'>
+<li><a href='#DTKPremadeScripts-GITCustomSettingsMigrationonDeploy:'>GIT Custom Settings Migration on Deploy:</a></li>
+<li><a href='#DTKPremadeScripts-StandaloneCustomSettingsMigration:'>Standalone Custom Settings Migration:</a></li>
+<li><a href='#DTKPremadeScripts-StandaloneUpdateUniqueIntegrationIdsofRatings:'>Standalone Update UniqueIntegrationIds of Ratings:</a></li>
+<li><a href='#DTKPremadeScripts-Accountfiltersextraction'>Account filters extraction</a></li>
+<li><a href='#DTKPremadeScripts-Accountfiltersintegration'>Account filters integration</a></li>
+<li><a href='#DTKPremadeScripts-CustomScript'>Custom Script</a></li>
+<li><a href='#DTKPremadeScripts-RenamePicklistAPI/Values'>Rename Picklist API/Values</a></li>
+</ul>
+</div></p><p>In this section you can find com scripts templates used for automatization of OCE releases tasks.</p><h2 id="DTKPremadeScripts-GITCustomSettingsMigrationonDeploy:">GIT Custom Settings Migration on Deploy:</h2><p>This script can be added to the <em><strong>PostReleaseScript</strong>. </em>It will deploy the Custom Settings contained in a CustomSettingsMigration.csv file in the GIT repository of the project.</p><p>TARGET refers to sandbox selected in dropdown.</p><p>SOURCE refers to sandbox written in Source textbox, if it's hidden it defaults to Config.</p><p>Before deploying the CustomSettingsMigration.csv file into the TARGET environment, this script will replace the &quot;Ids&quot; in the file searching SOURCE Ids, and replacing them with TARGET Ids.</p><p>CustomSettingsMigration.csv must be in csv comma separated format, with double quotes only when needed.</p><p>In case the route to the csv file changes, just update those references.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>GIT Custom Settings Migration</b></div><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">SOURCE|SOQLQUERY|&quot;select Id, Name from Profile&quot;|ProfileSource.csv
+TARGET|SOQLQUERY|&quot;select Id, Name from Profile&quot;|ProfileTarget.csv
+SOURCE|SOQLQUERY|&quot;select Id, Name from Organization&quot;|OrganizationSource.csv
+TARGET|SOQLQUERY|&quot;select Id, Name from Organization&quot;|OrganizationTarget.csv
+SOURCE|SOQLQUERY|&quot;select Id, DeveloperName, SobjectType from RecordType&quot;|RecordTypeSource.csv
+TARGET|SOQLQUERY|&quot;select Id, DeveloperName, SobjectType from RecordType&quot;|RecordTypeTarget.csv
+TARGET|SOQLQUERY|&quot;select Id from OCE__CustomSettingsMigration__c&quot;|CustomSettingsToDelete.csv
+TARGET|BULKDELETE|OCE__CustomSettingsMigration__c|CustomSettingsToDelete.csv|3
+FILE|REPLACE|{gitroot}CustomSettingsMigration\CustomsettingsMigration.csv|ProfileSource.csv|ProfileTarget.csv|Id|Name
+FILE|REPLACE|{gitroot}CustomSettingsMigration\CustomsettingsMigration.csv|OrganizationSource.csv|OrganizationTarget.csv|Id|Name
+FILE|REPLACE|{gitroot}CustomSettingsMigration\CustomsettingsMigration.csv|RecordTypeSource.csv|RecordTypeTarget.csv|Id|DeveloperName+SobjectType
+TARGET|BULKUPSERT|OCE__CustomSettingsMigration__c|{gitroot}CustomSettingsMigration\CustomSettingsMigration.csv</pre>
+</div></div><div class="confluence-information-macro confluence-information-macro-information"><p class="title">Step by step</p><span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span><div class="confluence-information-macro-body"><ol><li>Query Profile, Organization and RecordType Ids from SOURCE and TARGET environments.</li><li>Query TARGET CustomSettingsMigration table.</li><li>Delete TARGET CustomSettingsMigration table using the csv file in (2).</li><li>Replace SOURCE Ids with TARGET Ids in the CSV File from GIT, using as reference and matching info the one obtained in (1)</li><li>Insert the CustomSettingsMigration csv into TARGET environment.</li></ol></div></div><h2 id="DTKPremadeScripts-StandaloneCustomSettingsMigration:">Standalone Custom Settings Migration:</h2><p>This script is prepared to be used in the Script tab in DTK.</p><p>This script is just the same as GIT Custom Settings Migration but with a route pointing to the root folder of the workspace where DTK is working.</p><p>Before executing it, the file CustomSettingsMigration.csv must be added to the workspace, user can do that with the &quot;File&quot; browse button that is available on the window.</p><p><br/></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Standalone Custom Settings Migration</b></div><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">SOURCE|SOQLQUERY|&quot;select Id, Name from Profile&quot;|ProfileSource.csv
+TARGET|SOQLQUERY|&quot;select Id, Name from Profile&quot;|ProfileTarget.csv
+SOURCE|SOQLQUERY|&quot;select Id, Name from Organization&quot;|OrganizationSource.csv
+TARGET|SOQLQUERY|&quot;select Id, Name from Organization&quot;|OrganizationTarget.csv
+SOURCE|SOQLQUERY|&quot;select Id, DeveloperName, SobjectType from RecordType&quot;|RecordTypeSource.csv
+TARGET|SOQLQUERY|&quot;select Id, DeveloperName, SobjectType from RecordType&quot;|RecordTypeTarget.csv
+TARGET|SOQLQUERY|&quot;select Id from OCE__CustomSettingsMigration__c&quot;|CustomSettingsToDelete.csv
+TARGET|BULKDELETE|OCE__CustomSettingsMigration__c|CustomSettingsToDelete.csv|3
+FILE|REPLACE|CustomsettingsMigration.csv|ProfileSource.csv|ProfileTarget.csv|Id|Name
+FILE|REPLACE|CustomsettingsMigration.csv|OrganizationSource.csv|OrganizationTarget.csv|Id|Name
+FILE|REPLACE|CustomsettingsMigration.csv|RecordTypeSource.csv|RecordTypeTarget.csv|Id|DeveloperName+SobjectType
+TARGET|BULKUPSERT|OCE__CustomSettingsMigration__c|CustomsettingsMigration.csv|Id|3</pre>
+</div></div><p><br/></p><h2 id="DTKPremadeScripts-StandaloneUpdateUniqueIntegrationIdsofRatings:">Standalone Update UniqueIntegrationIds of Ratings:</h2><p>This script will update the UniqueIntegrationIds of the three rating related objects in OCE: OCE__Rating__c, OCE__RatingLayout__c, and OCE__RatingLayoutSource__c, using as values</p><p>OCE__Rating__c → <strong>OCE__FieldName__c or Name (depending which one is filled)<br/></strong></p><p>OCE__RatingLayout__c → <strong>OCE__MetadataName__c</strong></p><p>OCE__RatingLayoutItem__c → OCE__Rating__r.<strong>OCE__FieldName__c</strong> (or <strong>Name</strong>) + OCE__RatingLayout__r.<strong>OCE__MetadataName__c</strong></p><p>This script is prepared to be used in the Script tab in DTK.</p><p>Prior to executing this script in a environment that has been used for develoment, this environment should be cleaned of old non-used ratings versions, etc.</p><p>Save this code in a file called: UpdateUniqueIntegrationIdsOnRatings.apex</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">List&lt;OCE__Rating__c&gt; ratingList = new List&lt;OCE__Rating__c&gt; ([select Id, Name, OCE__FieldName__c, OCE__MetadataName__c, OCE__UniqueIntegrationID__c from OCE__Rating__c]);
+for (OCE__Rating__c record : ratingList) {
+    if (record.OCE__FieldName__c == null)    {
+        record.OCE__UniqueIntegrationID__c = record.OCE__MetadataName__c;
+    }
+    else {
+        string str = record.OCE__FieldName__c + &#39;_&#39; + record.OCE__MetadataName__c;
+        if (str.length() &gt; 99)
+        {
+            str = str.substring(0, 99);
+        }
+        record.OCE__UniqueIntegrationID__c = str;
+    }
+}
+upsert ratingList;
+  
+List&lt;OCE__RatingLayout__c&gt; ratingLayoutList = new List&lt;OCE__RatingLayout__c&gt; ([select Id, OCE__MetadataName__c, OCE__UniqueIntegrationID__c from OCE__RatingLayout__c]);
+for (OCE__RatingLayout__c record : ratingLayoutList) {
+    string str = record.OCE__MetadataName__c;
+    if (str.length() &gt; 99)
+    {
+        str = str.substring(0, 99);
+    }
+    record.OCE__UniqueIntegrationID__c = str;
+}
+upsert ratingLayoutList;
+  
+List&lt;OCE__RatingLayoutItem__c&gt; ratingLayoutItemList = new List&lt;OCE__RatingLayoutItem__c&gt; ([select Id, OCE__Rating__r.OCE__UniqueIntegrationID__c, OCE__RatingLayout__r.OCE__UniqueIntegrationID__c, OCE__UniqueIntegrationID__c from OCE__RatingLayoutItem__c]);
+for (OCE__RatingLayoutItem__c record : ratingLayoutItemList) {
+    string str = record.OCE__Rating__r.OCE__UniqueIntegrationID__c + &#39;_&#39; + record.OCE__RatingLayout__r.OCE__UniqueIntegrationID__c;
+    if (str.length() &gt; 99)
+    {
+        str = str.substring(0, 99);
+    }
+    record.OCE__UniqueIntegrationID__c = str;
+}
+upsert ratingLayoutItemList;</pre>
+</div></div><p>Then run the following script to update the Unique Integration Ids and extract the csv files to be included in the release script:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Update UniqueIntegrationIds of Ratings</b></div><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">--FIRST PROVIDE THE FILE USING THE FILE BROWSE BUTTON: This will copy the apex file into the workspace
+SOURCE|APEXEXECUTE|UpdateUniqueIntegrationIdsOnRatings.apex
+--EXTRACT
+SOURCE|SOQLQUERY|&quot;select Name, OCE__FieldName__c, OCE__MetadataName__c, OCE__JsonData__c, OCE__JsonMetadata__c, OCE__Label__c, OCE__MaxValueField__c, OCE__MetricType__c,  OCE__PotentialField__c, OCE__RatingType__c, OCE__ShowPercentageChange__c, OCE__ShowRelativeDate__c, OCE__UniqueIntegrationID__c from OCE__Rating__c&quot;|Rating.csv
+SOURCE|SOQLQUERY|&quot;select Name, OCE__MetadataName__c, OCE__Status__c, OCE__UniqueIntegrationID__c from OCE__RatingLayout__c&quot;|RatingLayout.csv
+SOURCE|SOQLQUERY|&quot;select OCE__RatingLayout__r.OCE__UniqueIntegrationID__c, OCE__Column__c, OCE__Height__c, OCE__RatingType__c, OCE__Rating__r.OCE__UniqueIntegrationID__c, OCE__Row__c, OCE__UniqueIntegrationID__c, OCE__Width__c from OCE__RatingLayoutItem__c&quot;|RatingLayoutItem.csv</pre>
+</div></div><div class="confluence-information-macro confluence-information-macro-information"><p class="title">Step by step</p><span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span><div class="confluence-information-macro-body"><ol><li>Update Unique Integration Ids using the apex anonymous execution script.</li><li>Extract the csv files to be part of the release.</li></ol></div></div><p><span class="confluence-embedded-file-wrapper"><img class="confluence-embedded-image" src="attachments/309660167/309660168.png" data-image-src="attachments/309660167/309660168.png" data-unresolved-comment-count="0" data-linked-resource-id="309660168" data-linked-resource-version="1" data-linked-resource-type="attachment" data-linked-resource-default-alias="image2019-9-12_17-29-24.png" data-base-url="https://jiraims.rm.imshealth.com/wiki" data-linked-resource-content-type="image/png" data-linked-resource-container-id="309660167" data-linked-resource-container-version="5"></span></p><h2 id="DTKPremadeScripts-Accountfiltersextraction">Account filters extraction</h2><p>The script will update the OCE__UniqueIntegrationID__c and then it will export the different object records in the csv files.</p><p>Save this code in a file called: UpdateUniqueIntegrationIdsOnAccountFilters.apex</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">List&lt;OCE__AccountFilter__c&gt; accountFilterList = new List&lt;OCE__AccountFilter__c&gt; ([select ID,OCE__UniqueIntegrationID__c from OCE__AccountFilter__c where OCE__UniqueIntegrationID__c = &#39;&#39;]);
+for (OCE__AccountFilter__c record : accountFilterList) {
+    record.OCE__UniqueIntegrationID__c = record.ID;
+}
+upsert accountFilterList;
+
+List&lt;OCE__AccountFilterSObject__c&gt; accountFilterSObjectList = new List&lt;OCE__AccountFilterSObject__c&gt; ([select ID,OCE__ACCOUNTFILTER__R.OCE__UNIQUEINTEGRATIONID__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterSObject__c where OCE__ACCOUNTFILTER__R.OCE__UNIQUEINTEGRATIONID__C &lt;&gt; &#39;&#39; and OCE__UNIQUEINTEGRATIONID__C = &#39;&#39;]);
+for (OCE__AccountFilterSObject__c record : accountFilterSObjectList) {
+    record.OCE__UniqueIntegrationID__c = record.ID;
+}
+upsert accountFilterSObjectList;
+
+List&lt;OCE__AccountFilterCriteria__c&gt; accountFilterCriteriaList = new List&lt;OCE__AccountFilterCriteria__c&gt; ([select ID,OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterCriteria__c where OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C &lt;&gt; &#39;&#39; and OCE__UNIQUEINTEGRATIONID__C = &#39;&#39;]);
+for (OCE__AccountFilterCriteria__c record : accountFilterCriteriaList) {
+    record.OCE__UniqueIntegrationID__c = record.ID;
+}
+upsert accountFilterCriteriaList;
+
+List&lt;OCE__AccountFilterColumn__c&gt; accountFilterColumnList = new List&lt;OCE__AccountFilterColumn__c&gt; ([select ID,OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterColumn__c where OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C &lt;&gt; &#39;&#39; and OCE__UNIQUEINTEGRATIONID__C = &#39;&#39;]);
+for (OCE__AccountFilterColumn__c record : accountFilterColumnList) {
+    record.OCE__UniqueIntegrationID__c = record.ID;
+}
+upsert accountFilterColumnList;</pre>
+</div></div><p>Then run the following script to update the Unique Integration Ids and extract the csv files to be included in the release script:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">--FIRST PROVIDE THE FILE USING THE FILE BROWSE BUTTON: This will copy the apex file into the workspace
+SOURCE|APEXEXECUTE|UpdateUniqueIntegrationIdsOnAccountFilters.apex
+--EXTRACT
+SOURCE|SOQLQUERY|&quot;select NAME,OCE__ISROUTE__C,OCE__TIMEZONE__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilter__c where OCE__UniqueIntegrationID__c &lt;&gt; &#39;&#39;&quot;|OCE__AccountFilter__c.csv
+SOURCE|SOQLQUERY|&quot;select OCE__ACCOUNTFILTER__R.OCE__UNIQUEINTEGRATIONID__C,OCE__TYPE__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterSObject__c where OCE__ACCOUNTFILTER__R.OCE__UNIQUEINTEGRATIONID__C &lt;&gt; &#39;&#39;&quot;|OCE__AccountFilterSObject__c.csv
+SOURCE|SOQLQUERY|&quot;select OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C,OCE__COLUMNLABEL__C,OCE__COLUMNNAME__C,OCE__COLUMNTYPE__C,OCE__OPERATOR__C,OCE__POSITION__C,OCE__VALUE__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterCriteria__c where OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C &lt;&gt; &#39;&#39;&quot;|OCE__AccountFilterCriteria__c.csv
+SOURCE|SOQLQUERY|&quot;select OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C,OCE__COLUMNLABEL__C,OCE__COLUMNNAME__C,OCE__POSITION__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterColumn__c where OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C &lt;&gt; &#39;&#39;&quot;|OCE__AccountFilterColumn__c.csv</pre>
+</div></div><p>The filter of the SOQLs can be modified to extract only certain filters. This example is extracting only three account filters and their related data:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">--FIRST PROVIDE THE FILE USING THE FILE BROWSE BUTTON: This will copy the apex file into the workspace
+SOURCE|APEXEXECUTE|UpdateUniqueIntegrationIdsOnAccountFilters.apex
+--EXTRACT
+SOURCE|SOQLQUERY|&quot;select NAME,OCE__ISROUTE__C,OCE__TIMEZONE__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilter__c where Name in (&#39;Alle PFO DACH&#39;,&#39;Besuchsplan PFO DACH&#39;,&#39;Institutionen PFO DACH&#39;)&quot;|OCE__AccountFilter__c.csv
+SOURCE|SOQLQUERY|&quot;select OCE__ACCOUNTFILTER__R.OCE__UNIQUEINTEGRATIONID__C,OCE__TYPE__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterSObject__c where OCE__ACCOUNTFILTER__R.Name in (&#39;Alle PFO DACH&#39;,&#39;Besuchsplan PFO DACH&#39;,&#39;Institutionen PFO DACH&#39;)&quot;|OCE__AccountFilterSObject__c.csv
+SOURCE|SOQLQUERY|&quot;select OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C,OCE__COLUMNLABEL__C,OCE__COLUMNNAME__C,OCE__COLUMNTYPE__C,OCE__OPERATOR__C,OCE__POSITION__C,OCE__VALUE__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterCriteria__c where OCE__ACCOUNTFILTERSOBJECT__R.OCE__ACCOUNTFILTER__R.Name in (&#39;Alle PFO DACH&#39;,&#39;Besuchsplan PFO DACH&#39;,&#39;Institutionen PFO DACH&#39;)&quot;|OCE__AccountFilterCriteria__c.csv
+SOURCE|SOQLQUERY|&quot;select OCE__ACCOUNTFILTERSOBJECT__R.OCE__UNIQUEINTEGRATIONID__C,OCE__COLUMNLABEL__C,OCE__COLUMNNAME__C,OCE__POSITION__C,OCE__UNIQUEINTEGRATIONID__C from OCE__AccountFilterColumn__c where OCE__ACCOUNTFILTERSOBJECT__R.OCE__ACCOUNTFILTER__R.Name in (&#39;Alle PFO DACH&#39;,&#39;Besuchsplan PFO DACH&#39;,&#39;Institutionen PFO DACH&#39;)&quot;|OCE__AccountFilterColumn__c.csv</pre>
+</div></div><div class="confluence-information-macro confluence-information-macro-information"><p class="title">Step by step</p><span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span><div class="confluence-information-macro-body"><ol><li>Update Unique Integration Ids using the apex anonymous execution script.</li><li>Extract the csv files to be part of the release.</li></ol></div></div><h2 id="DTKPremadeScripts-Accountfiltersintegration">Account filters integration</h2><p>The following lines can be added to the PostReleaseScript.txt file to upsert the Account Filters:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">TARGET|BULKUPSERT|OCE__AccountFilter__c|{gitroot}data\AccountFilter\OCE__AccountFilter__c.csv|OCE__UniqueIntegrationID__c|3
+TARGET|BULKUPSERT|OCE__AccountFilterSObject__c|{gitroot}data\AccountFilter\OCE__AccountFilterSObject__c.csv|OCE__UniqueIntegrationID__c|3
+TARGET|BULKUPSERT|OCE__AccountFilterCriteria__c|{gitroot}data\AccountFilter\OCE__AccountFilterCriteria__c.csv|OCE__UniqueIntegrationID__c|3
+TARGET|BULKUPSERT|OCE__AccountFilterColumn__c|{gitroot}data\AccountFilter\OCE__AccountFilterColumn__c.csv|OCE__UniqueIntegrationID__c|35
+TARGET|APEXEXECUTE|{gitroot}apexscript\AccountFilterSharing.apex</pre>
+</div></div><p>The last line of the script is assigning the Account Filters using an anonymous apex execution in the Target Org. This code will assign the account filters to Public Groups (but this can be reused for other Share objects):</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">List&lt;String&gt; externalIds = new List&lt;String&gt;{
+&#39;a1D0E000001yBguUAE&#39;,
+&#39;a1D0E000001yBhTUAU&#39;,
+&#39;a1D0E000001yBhYUAU&#39;,
+&#39;a1D0E000001yC5VUAU&#39;,
+&#39;a1D0E000001yC5LUAU&#39;,
+&#39;a1D0E000001yC5BUAU&#39;
+};
+Map&lt;String, String&gt; groupExternalMap = new Map&lt;String, String&gt;();
+
+
+List&lt;String&gt; groupNames = new List&lt;String&gt;{&#39;PF AT PFO HO Reports&#39;, &#39;PF CH PFO HO Reports&#39;, &#39;PF DE PFO HO Reports&#39;,&#39;PF AT PFO Manager Reports&#39;, &#39;PF CH PFO Manager Reports&#39;, &#39;PF DE PFO Manager Reports&#39;,&#39;PF AT PFO Rep Reports&#39;, &#39;PF CH PFO Rep Reports&#39;, &#39;PF DE PFO Rep Reports&#39;};
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF AT PFO HO Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF AT PFO HO Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF AT PFO HO Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF CH PFO HO Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF CH PFO HO Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF CH PFO HO Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF DE PFO HO Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF DE PFO HO Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF DE PFO HO Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF AT PFO Manager Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF AT PFO Manager Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF AT PFO Manager Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF CH PFO Manager Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF CH PFO Manager Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF CH PFO Manager Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF DE PFO Manager Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF DE PFO Manager Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF DE PFO Manager Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF AT PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF AT PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF AT PFO Rep Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF CH PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF CH PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF CH PFO Rep Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yBguUAE&#39;,&#39;PF DE PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhTUAU&#39;,&#39;PF DE PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yBhYUAU&#39;,&#39;PF DE PFO Rep Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yC5VUAU&#39;,&#39;PF AT PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yC5LUAU&#39;,&#39;PF AT PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yC5BUAU&#39;,&#39;PF AT PFO Rep Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yC5VUAU&#39;,&#39;PF CH PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yC5LUAU&#39;,&#39;PF CH PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yC5BUAU&#39;,&#39;PF CH PFO Rep Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+groupExternalMap = new Map&lt;String, String&gt;();
+groupExternalMap.put(&#39;a1D0E000001yC5LUAU&#39;,&#39;PF DE PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yC5VUAU&#39;,&#39;PF DE PFO Rep Reports&#39;);
+groupExternalMap.put(&#39;a1D0E000001yC5BUAU&#39;,&#39;PF DE PFO Rep Reports&#39;);
+CreateShareRecords(externalIds, groupNames, groupExternalMap);
+
+
+
+void CreateShareRecords(List&lt;String&gt; externalIds, List&lt;String&gt; groupNames, Map&lt;String, String&gt; groupExternalMap)
+{
+    List&lt;OCE__AccountFilter__c&gt; accountFilterList = new List&lt;OCE__AccountFilter__c&gt; ([SELECT ID, OCE__UniqueIntegrationID__c FROM OCE__AccountFilter__c WHERE OCE__UniqueIntegrationID__c in :externalIds ]);
+    Map&lt;String, ID&gt; accountFilterMap = new Map&lt;String, ID&gt;();
+
+    for(OCE__AccountFilter__c acc : accountFilterList)
+    {
+        accountFilterMap.put(acc.OCE__UniqueIntegrationID__c, acc.ID);
+    }
+
+    List&lt;Group&gt; groupList = new List&lt;Group&gt;([SELECT ID, Name FROM Group WHERE Name in :groupNames ]);
+    Map&lt;String, ID&gt; groupMap = new Map&lt;String, ID&gt;();
+
+    for(Group grp : groupList)
+    {
+        groupMap.put(grp.Name, grp.ID);
+    }
+
+    List&lt;OCE__AccountFilter__Share&gt; sharesToInsert = new List&lt;OCE__AccountFilter__Share&gt;();
+
+    for(String external : externalIds)
+    {
+        if(groupExternalMap.containsKey(external))
+        {
+            // Create new sharing object
+            OCE__AccountFilter__Share newShare = new OCE__AccountFilter__Share();
+
+            // Set the Id of record being shared
+            newShare.ParentId = accountFilterMap.get(external);
+
+            // Set the Id of user or group being granted access
+            newShare.UserOrGroupId = groupMap.get(groupExternalMap.get(external));
+
+            // Set the access level
+            newShare.AccessLevel = &#39;Read&#39;;
+
+            // Set RowCause to Manual (enables automatic deletion/refresh)
+            newShare.RowCause = &#39;Manual&#39;;
+
+            sharesToInsert.add(newShare);
+        }
+    }
+
+    Database.SaveResult[] saveResultList = Database.insert(sharesToInsert, false);
+}</pre>
+</div></div><p>In order to know exactly the manual sharing done on account filters the following SOQL could be used:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">select parent.OCE__UniqueIntegrationID__c, UserOrGroup.Name, RowCause from OCE__AccountFilter__Share where Parent.Name in (&#39;Alle PFO DACH&#39;,&#39;Besuchsplan PFO DACH&#39;,&#39;Institutionen PFO DACH&#39;) and RowCause = &#39;Manual</pre>
+</div></div><h2 id="DTKPremadeScripts-CustomScript">Custom Script</h2><p>Store in the source control the custom script to be maintained:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">TARGET|SOQLQUERY|&quot;select Name, OCE__IsActive__c, OCE__Type__c, OCE__UniqueIntegrationID__c, OCE__code__c from OCE__CustomScript__c &quot;|CustomScript.csv</pre>
+</div></div><p>This script will delete the custom script in the Target Org and insert the csv stored in the source control to the Target Org:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">TARGET|SOQLQUERY|&quot;SELECT id from OCE__CustomScript__c&quot;|CustomScriptToDelete.csv
+TARGET|BULKDELETE|{gitroot}data\CustomScript\OCE__CustomScript__c|CustomScriptToDelete.csv
+TARGET|BULKUPSERT|{gitroot}data\CustomScript\OCE__CustomScript__c|CustomScript.csv|Id</pre>
+</div></div><h2 id="DTKPremadeScripts-RenamePicklistAPI/Values">Rename Picklist API/Values</h2><p>Save the apex script and provide it to DTK:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>RenamePickListValues.apex</b></div><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">//Anonymous apex to rename picklist values and api names to be disabled when importing the correct ones.
+String picklistapiname = &#39;Account.OCE__Specialty__c&#39;;
+MetadataService.MetadataPort service = new MetadataService.MetadataPort();   
+service.SessionHeader = new MetadataService.SessionHeader_element();
+service.SessionHeader.sessionId = UserInfo.getSessionId();
+service.timeout_x = 120000;
+
+
+MetadataService.CustomField customField = (MetadataService.CustomField) service.readMetadata(&#39;CustomField&#39;, new String[] { picklistapiname}).getRecords()[0];
+
+// For each on: customField &gt; Get valueset &gt; Get valueSetDefinition &gt; get values
+Integer i = 0;
+for(MetadataService.CustomValue objCustomValue : customField.valueSet.valueSetDefinition.value){
+    objCustomValue.fullName = &#39;ZZ&#39; + String.valueOf(i) + objCustomValue.fullName;
+    objCustomValue.label = &#39;ZZ&#39; + String.valueOf(i) + objCustomValue.label;
+    objCustomValue.default_x = false;
+    objCustomValue.isActive = true;
+    i++;
+}
+// Update 
+List&lt;MetadataService.Metadata&gt; batchFields = new List&lt;MetadataService.Metadata&gt;();
+batchFields.add(customField);
+List&lt;MetadataService.SaveResult&gt; lstResults = service.updateMetadata(batchFields);
+
+for (MetadataService.SaveResult objResult : lstResults) {
+    if (objResult.success) {
+        System.debug(&#39;Successfully updated&#39;);
+    }
+    else {                       
+        if(objResult.errors.size() &gt; 0){
+        System.debug(&#39;eror : &#39; + objResult.errors[0].message);
+        }
+    }
+}
+
+
+</pre>
+</div></div><p>This script will update the picklist api names and values of the desired field:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">TARGET|APEXEXECUTE|RenamePickListValues.apex</pre>
+</div></div><p><br/><br/></p><p><br/></p><p><br/></p>
+                    </div>
+
+                                        <div class="pageSection group">
+                        <div class="pageSectionHeader">
+                            <h2 id="attachments" class="pageSectionTitle">Attachments:</h2>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/309660167/309660168.png">image2019-9-12_17-29-24.png</a> (image/png)
+                                <br/>
+                                                    </div>
+                    </div>
+                    
+                 
+                </div>             </div> 
+        </div>     </body>
+</html>
