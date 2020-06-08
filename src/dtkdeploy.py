@@ -1898,7 +1898,7 @@ If this field is blank the default test level used is NoTestRun."""
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
         outputFileUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "tmp", "git.tmp")
-        cmd = ["git", "clone", "--single-branch", "--branch", gitBranch, gitFinalUrl, deployStageUrl]
+        cmd = "git  clone --single-branch --branch " + gitBranch + " " + gitFinalUrl + " " + deployStageUrl
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
