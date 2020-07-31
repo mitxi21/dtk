@@ -129,11 +129,36 @@ testLevels = ["NoTestRun", "RunSpecifiedTests", "RunLocalTests", "RunAllTestsInO
 metadataTemplatesFileName = "metadataTemplates.json"
 SOQLTemplatesFileName = "SOQLTemplates.json"
 
+#Accelerate Integration: Global Variables
+accelerateEnableSetting = False
+accelerateDevEnableSetting = False
+accelerateGitURL = "https://gitlab.ims.io/accelerators/oce_accelerate.git"
+accelerateGitUser = ""
+accelerateGitPassword = ""
+dtkAccelerateCfg = dict()
+accelerateGitBranch = ""
+accelerateMetadataGitFolder = ""
+acceleratePreDeployScriptFile = ""
+acceleratePostDeployScriptFile = ""
+accelerateVersion = ""
+confluenceURL = ""
+activationScriptName = ""
+postMasterDataFolder = ""
+postMasterDataScript = ""
+accelerateModulesAvailable = dict()
+acceleratedeploymentTypes = ["Folder", "Git"]
+gitPreffix = "https://"
+gitSuffix = "gitlab.ims.io/accelerators/oce_accelerate.git"
 
 def SaveSettings(
     advSettingIn,
     unlockSettingIn,
     unzipSettingIn,
+    accelerateEnableSettingIn,
+    accelerateDevEnableSettingIn,
+    accelerateGitURLIn,
+    accelerateGitUserIn,
+    accelerateGitPasswordIn,
     metadataTypesSettingIn,
     defaultPackagesToExcludeIn,
     defaultMetadataFolderIn,
@@ -155,6 +180,22 @@ def SaveSettings(
     global unzipSetting
     unzipSetting = unzipSettingIn
     shelfFile["unzipSetting"] = unzipSettingIn
+    global accelerateEnableSetting
+    accelerateEnableSetting = accelerateEnableSettingIn
+    shelfFile["accelerateEnableSetting"] = accelerateEnableSettingIn
+    global accelerateDevEnableSetting
+    accelerateDevEnableSetting = accelerateDevEnableSettingIn
+    shelfFile["accelerateDevEnableSetting"] = accelerateDevEnableSettingIn
+
+    global accelerateGitURL
+    accelerateGitURL = accelerateGitURLIn
+    shelfFile["accelerateGitURL"] = accelerateGitURLIn
+    global accelerateGitUser
+    accelerateGitUser = accelerateGitUserIn
+    shelfFile["accelerateGitUser"] = accelerateGitUserIn
+    global accelerateGitPassword
+    accelerateGitPassword = accelerateGitPasswordIn
+    shelfFile["accelerateGitPassword"] = accelerateGitPasswordIn
     global metadataTypes
     metadataTypes = metadataTypesSettingIn.split(",")
     metadataTypes.sort()
@@ -192,6 +233,21 @@ def LoadSettings():
     if "unzipSetting" in shelfFile:
         global unzipSetting
         unzipSetting = shelfFile["unzipSetting"]
+    if "accelerateEnableSetting" in shelfFile:
+        global accelerateEnableSetting
+        accelerateEnableSetting = shelfFile["accelerateEnableSetting"]
+    if "accelerateDevEnableSetting" in shelfFile:
+        global accelerateDevEnableSetting
+        accelerateDevEnableSetting = shelfFile["accelerateDevEnableSetting"]
+    if "accelerateGitURL" in shelfFile:
+        global accelerateGitURL
+        accelerateGitURL = shelfFile["accelerateGitURL"]
+    if "accelerateGitUser" in shelfFile:
+        global accelerateGitUser
+        accelerateGitUser = shelfFile["accelerateGitUser"]
+    if "accelerateGitPassword" in shelfFile:
+        global accelerateGitPassword
+        accelerateGitPassword = shelfFile["accelerateGitPassword"]
     if "metadataTypes" in shelfFile:
         global metadataTypes
         metadataTypes = shelfFile["metadataTypes"]
@@ -353,6 +409,24 @@ def CopyDir(src, dest, ignore=None):
     else:
         shutil.copyfile(src, dest)
 
+def ProcessCommandScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl):
+    error = False
+    errorMsg = ""
+    cmd = []
+    if len(lineSplit) > 1:
+        if lineSplit[0] == "CMDEXECUTE":
+            if lineSplit[1] != "":
+
+                if "{gitroot}" in lineSplit[1]:
+                    lineSplit[1] = lineSplit[1].replace("{gitroot}",deployStageUrl)
+                cmd = lineSplit[1].split()
+            else:
+                error = True
+                errorMsg = "Expected more values in command column " + str(lineNumber) + ": " + lineStr
+    else:
+        error = True
+        errorMsg = "Expected more values in script at line " + str(lineNumber) + ": " + lineStr
+    return error, errorMsg, cmd 
 
 def ProcessFileScriptLine(lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl):
     error = False
@@ -1155,3 +1229,77 @@ def CreateSOQLTemplatesDefault():
     fileOutput = open(outputFileUrl, "r", encoding="utf8")
     fileOutput.close()
     ReadSOQLTemplates()
+
+#Accelerate Integration: Load Configuration
+def LoadAccelerateConfiguration():
+    directory = os.path.join(os.path.expanduser("~"), ".dtkconfig")
+    AccelerateDeployConfiguration = os.path.join(directory, "AccelerateDeployConfiguration")
+    if os.path.exists(AccelerateDeployConfiguration):
+        shutil.rmtree(AccelerateDeployConfiguration,onerror=RemoveReadonly)
+
+    global gitPreffix
+    global gitSuffix
+    accelerateGitURLSptl = accelerateGitURL.split("//")
+    if len(accelerateGitURLSptl) > 1:
+            gitPreffix = accelerateGitURLSptl[0] + "//"
+            gitSuffix = accelerateGitURLSptl[1]
+
+    gitAcceleratelUrl = gitPreffix + accelerateGitUser + ":" + accelerateGitPassword + "@" + gitSuffix
+
+    if accelerateDevEnableSetting:
+        gitBranch = 'dtkConfiguration4Developers'
+    else:
+        gitBranch = 'dtkConfiguration'
+
+    cmd = ["git", "clone", "--single-branch", "--branch", gitBranch, gitAcceleratelUrl, AccelerateDeployConfiguration]
+    proc = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+    )
+    proc.wait()
+    return ReadAccelerateDtkCfg(AccelerateDeployConfiguration)
+
+def ReadAccelerateDtkCfg(directory):
+    completeName = "dtkConfiguration.json"
+    orgFileUrl = os.path.join(directory, completeName)
+    if not os.path.exists(orgFileUrl):
+        return False
+    orgFile = open(orgFileUrl, "r", encoding="utf8")
+    global dtkAccelerateCfg
+    dtkAccelerateCfg = json.loads(orgFile.read())
+    orgFile.close()
+
+    global accelerateGitBranch
+    global accelerateMetadataGitFolder
+    global acceleratePreDeployScriptFile
+    global acceleratePostDeployScriptFile
+    global accelerateVersion
+    global confluenceURL
+    global activationScriptName
+    global postMasterDataFolder
+    global postMasterDataScript
+    global accelerateModulesAvailable
+
+    for config in dtkAccelerateCfg:    
+        if config == 'gitBranch':
+            accelerateGitBranch = dtkAccelerateCfg[config]
+        elif config == 'metadataGitFolder':
+            accelerateMetadataGitFolder = dtkAccelerateCfg[config]
+        elif config == 'preDeployScriptFile':
+            acceleratePreDeployScriptFile = dtkAccelerateCfg[config]
+        elif config == 'postDeployScriptFile':
+            acceleratePostDeployScriptFile = dtkAccelerateCfg[config]
+        elif config == 'version':
+            accelerateVersion = dtkAccelerateCfg[config]
+        elif config == 'confluenceURL':
+            confluenceURL = dtkAccelerateCfg[config]
+        elif config == 'activationScriptName':
+            activationScriptName = dtkAccelerateCfg[config]
+        elif config == 'postMasterDataFolder':
+            postMasterDataFolder = dtkAccelerateCfg[config]
+        elif config == 'postMasterDataScript':
+            postMasterDataScript = dtkAccelerateCfg[config]
+        elif config == 'modulesAvailable':
+            accelerateModulesAvailable = dtkAccelerateCfg[config]
+        else:
+            print(dtkAccelerateCfg[config])
+    return True

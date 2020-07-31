@@ -11,6 +11,14 @@ import wx
 import wx.lib.scrolledpanel as scrolled
 import zipfile
 
+import wx.lib.agw.ultimatelistctrl as ULC #Accelerate Integration
+import wx.lib.agw.hyperlink as hl
+
+MODULE_NAME_COL=0
+DESCRIPTION_COL=1
+MODULE_KEY_COL=2
+DEPENDENCIES_COL=3
+ADDITIONAL_INFO_COL=4
 
 class ScriptDataPanel(wx.Panel):
     def __init__(self, parent):
@@ -24,19 +32,25 @@ class ScriptDataPanel(wx.Panel):
 
         self.fileNameLbl = wx.StaticText(self, label="File")
         self.fileNameLbl.ToolTip = "File to add to workspace."
-        self.fileNameTextCtrl = wx.TextCtrl(self)
+        #Accelerate Integration
+        self.fileNameTextCtrl = wx.TextCtrl(self,style=wx.TE_READONLY)
         self.fileNameTextCtrl.ToolTip = "File to add to workspace."
 
         self.btnUploadFile = wx.Button(self, label="Browse")
-        self.btnUploadFile.Bind(wx.EVT_BUTTON, self.UploadFile)
+        #Accelerate Integration
+        #self.btnUploadFile.Bind(wx.EVT_BUTTON, self.UploadFile)
+        self.btnUploadFile.Hide()
 
         self.scriptFileNameLbl = wx.StaticText(self, label="Script File")
         self.scriptFileNameLbl.ToolTip = "File to load script."
-        self.scriptFileNameTextCtrl = wx.TextCtrl(self)
+        #Accelerate Integration
+        self.scriptFileNameTextCtrl = wx.TextCtrl(self, style=wx.TE_READONLY)
         self.scriptFileNameTextCtrl.ToolTip = "File to load script."
 
         self.btnUploadScript = wx.Button(self, label="Browse")
-        self.btnUploadScript.Bind(wx.EVT_BUTTON, self.UploadScript)
+        #Accelerate Integration
+        #self.btnUploadScript.Bind(wx.EVT_BUTTON, self.UploadScript)
+        self.btnUploadScript.Hide()
 
         self.clearLogsLbl = wx.StaticText(self, label="Clear Logs")
         self.clearLogsLbl.ToolTip = "Clear log output and asynchronous jobs."
@@ -170,7 +184,35 @@ class ScriptDataPanel(wx.Panel):
             self.btnRunScript.Disable()
             self.btnRefreshLog.Disable()
 
-    def UploadFile(self, event):
+    #Accelerate Integration
+    def UploadFile(self):
+        postMasterDataFolder = os.path.join(os.path.expanduser("~"), ".dtkconfig", "AccelerateDeployConfiguration", dtkglobal.postMasterDataFolder)
+        if not os.path.exists(postMasterDataFolder):
+            self.consoleOutputTextCtrl.AppendText("Post Master Data Script cannot be loaded...")
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+            return
+
+        self.consoleOutputTextCtrl.AppendText("Loading Accelerate Post Master Data Script & Files...")
+        self.consoleOutputTextCtrl.AppendText(os.linesep)
+
+        deployUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployDataUrl = os.path.join(deployUrl, "data")
+
+        if not os.path.exists(deployDataUrl):
+            os.makedirs(deployDataUrl)
+
+        self.fileNameTextCtrl.Clear()
+        pathnames = os.listdir(postMasterDataFolder)
+        for pathname in pathnames:
+            self.fileNameTextCtrl.AppendText(os.path.join(postMasterDataFolder,pathname))
+            self.fileNameTextCtrl.AppendText(";")
+            shutil.copy(os.path.join(postMasterDataFolder,pathname), deployDataUrl)
+            self.consoleOutputTextCtrl.AppendText(
+                "File copied into workspace data folder: " + dtkglobal.PathLeaf(os.path.join(postMasterDataFolder,pathname))
+            )
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+
+        """
         if len(self.Parent.Parent.Parent.Parent.currentWorkspace) == 0:
             dlg = wx.MessageDialog(self, "Workspace not set yet.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
@@ -199,8 +241,35 @@ class ScriptDataPanel(wx.Panel):
                 "File copied into workspace data folder: " + dtkglobal.PathLeaf(pathname)
             )
             self.consoleOutputTextCtrl.AppendText(os.linesep)
+        """
 
-    def UploadScript(self, event):
+    #Accelerate Integration
+    def UploadScript(self):
+
+        postMasterDataScript = os.path.join(os.path.expanduser("~"), ".dtkconfig", "AccelerateDeployConfiguration", dtkglobal.postMasterDataFolder,dtkglobal.postMasterDataScript)
+        if not os.path.exists(postMasterDataScript):
+            self.consoleOutputTextCtrl.AppendText("Post Master Data Script cannot be loaded...")
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+            return
+
+        deployUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy")
+        deployDataUrl = os.path.join(deployUrl, "data")
+
+        if not os.path.exists(deployDataUrl):
+            os.makedirs(deployDataUrl)
+
+        self.scriptFileNameTextCtrl.Clear()
+        self.scriptFileNameTextCtrl.AppendText(postMasterDataScript)
+        fileScript = open(postMasterDataScript, "r", encoding="utf8")
+        self.scriptTextCtrl.Clear()
+        self.scriptTextCtrl.AppendText(fileScript.read())
+        self.consoleOutputTextCtrl.AppendText("Script loaded: " + dtkglobal.PathLeaf(postMasterDataScript))
+        self.consoleOutputTextCtrl.AppendText(os.linesep)
+
+        self.consoleOutputTextCtrl.AppendText("Success!!!")
+        self.consoleOutputTextCtrl.AppendText(os.linesep)  
+
+        """
         dlg = wx.FileDialog(
             self, "Select script file", wildcard="All files (*.*)|*.*", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
         )
@@ -214,6 +283,7 @@ class ScriptDataPanel(wx.Panel):
         self.scriptTextCtrl.AppendText(fileScript.read())
         self.consoleOutputTextCtrl.AppendText("Script loaded: " + dtkglobal.PathLeaf(pathname))
         self.consoleOutputTextCtrl.AppendText(os.linesep)
+        """
 
     def RunScriptButton(self, event):
         self.stop = False
@@ -261,8 +331,10 @@ class ScriptDataPanel(wx.Panel):
         # deployType = self.deploymentTypeComboBox.GetValue()
         orgName = self.Parent.Parent.Parent.Parent.organizationComboBox.GetValue()
         sdbxNameSource = "Config"
-        if dtkglobal.advSetting:
-            sdbxNameSource = self.Parent.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()
+        #Accelerate Integration
+        """if dtkglobal.advSetting:
+            sdbxNameSource = self.Parent.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()"""
+        #Accelerate Integration
         sdbxName = self.Parent.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
         sourceName = orgName + "_" + sdbxNameSource
         if "_" in sdbxNameSource:
@@ -310,7 +382,7 @@ class ScriptDataPanel(wx.Panel):
         i += 1
         scriptFile.close()
         wx.CallAfter(self.SetButtonState, True)
-
+        
     def ProcessCommandScriptLine(
         self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
     ):
@@ -688,7 +760,6 @@ class ScriptDataPanel(wx.Panel):
                     wx.CallAfter(self.OnText, line)
         wx.CallAfter(self.SetButtonState, True)
 
-
 class DeployMetadataPanel(wx.Panel):
     def __init__(self, parent, deployType):
         super(DeployMetadataPanel, self).__init__(parent)
@@ -705,15 +776,23 @@ class DeployMetadataPanel(wx.Panel):
         self.deploymentTypeLbl.ToolTip = "Deployment Type: Git, Zip, Folder."
         self.deploymentTypeComboBox = wx.ComboBox(self, style=wx.CB_READONLY)
         self.deploymentTypeComboBox.ToolTip = "Deployment Type: Git, Zip, Folder."
-        self.deploymentTypeComboBox.Items = dtkglobal.deploymentTypes
+        self.deploymentTypeComboBox.Items = dtkglobal.acceleratedeploymentTypes
         self.deploymentTypeComboBox.Bind(wx.EVT_COMBOBOX, self.ChangeDeploymentType)
         self.deploymentTypeComboBox.SetValue(self.deployTypeSelected)
 
-        self.gitUrlLbl = wx.StaticText(self, label="Git Url")
-        self.gitUrlLbl.ToolTip = "Git Url set on Organization."
-        self.gitUrlComboBox = wx.ComboBox(self, style=wx.CB_READONLY)
+        #Accelerate Integration
+        self.gitUrlLbl = wx.StaticText(self, label = "Accelerate Git URL")
+        self.gitUrlLbl.ToolTip = "Git URL where Accelerate configuration is"
+        self.gitUrlTextCtrl = wx.TextCtrl(self, value = "", style = wx.CB_READONLY)
+        self.gitUrlTextCtrl.ToolTip = "Git URL where Accelerate configuration is"
+        self.organizationGitUrlLbl = wx.StaticText(self, label = "Organization Git URL")
+        self.organizationGitUrlLbl.ToolTip = "Organization Git URL where Accelerate configuration is going to be pushed"
+        self.organizationGitUrlTextCtrl = wx.TextCtrl(self, value = "", style = wx.CB_READONLY)
+        self.organizationGitUrlTextCtrl.ToolTip = "Organization Git URL where Accelerate configuration is going to be pushed"
+        """self.gitUrlComboBox = wx.ComboBox(self, style=wx.CB_READONLY)
         self.gitUrlComboBox.ToolTip = "Git Url set on Organization."
-        self.gitUrlComboBox.Bind(wx.EVT_COMBOBOX, self.ChangeGitUrl)
+        self.gitUrlComboBox.Bind(wx.EVT_COMBOBOX, self.ChangeGitUrl)"""
+        #Accelerate Integration
 
         self.gitBranchFilterLbl = wx.StaticText(self, label="Git Branch Filter")
         self.gitBranchFilterLbl.ToolTip = "Filter branch by this, wildcards allowed."
@@ -723,16 +802,20 @@ class DeployMetadataPanel(wx.Panel):
         self.btnFilterBranch = wx.Button(self, label="Filter")
         self.btnFilterBranch.Bind(wx.EVT_BUTTON, self.ChangeGitUrl)
 
-        self.gitBranchLbl = wx.StaticText(self, label="Git Branch")
-        self.gitBranchLbl.ToolTip = "Git branch to retrieve the contents from the git repository."
-        self.gitBranchComboBox = wx.ComboBox(self, style=wx.CB_READONLY)
-        self.gitBranchComboBox.ToolTip = "Git branch to retrieve the contents from the git repository."
-        self.gitBranchComboBox.Enable(False)
+        #Accelerate Integration
+        self.gitBranchLbl = wx.StaticText(self, label="Accelerate Git Branch")
+        self.gitBranchLbl.ToolTip = "Git branch where the Accelerate version is going to be applied from"
+        self.gitBranchTextCtrl = wx.TextCtrl(self, value = "", style = wx.CB_READONLY)
+        self.gitBranchTextCtrl.ToolTip = "Git branch where the Accelerate version is going to be applied from"
+        """self.gitBranchComboBox = wx.ComboBox(self, style=wx.CB_READONLY)
+        self.gitBranchComboBox.ToolTip = "Git branch where the Accelerate version is going to be applied from" #Accelerate Integration
+        self.gitBranchComboBox.Enable(False)"""
+        #Accelerate Integration
 
-        self.metadataGitFolderLbl = wx.StaticText(self, label="Metadata Git Folder")
-        self.metadataGitFolderLbl.ToolTip = "Specifies the folder in the git repository containing the metadata to be deployed. Manifest package will be overriten here if Generate Manifest is checked."
-        self.metadataGitFolderTextCtrl = wx.TextCtrl(self)
-        self.metadataGitFolderTextCtrl.ToolTip = "Specifies the folder in the git repository containing the metadata to be deployed. Manifest package will be overriten here if Generate Manifest is checked."
+        self.metadataGitFolderLbl = wx.StaticText(self, label="Accelerate Metadata Git Folder") #Accelerate Integration
+        self.metadataGitFolderLbl.ToolTip = "Specifies the folder in the git repository containing the metadata to be deployed" #Accelerate Integration
+        self.metadataGitFolderTextCtrl = wx.TextCtrl(self, value = "sfdc\src\\", style = wx.CB_READONLY) #Accelerate Integration
+        self.metadataGitFolderTextCtrl.ToolTip = "Specifies the folder in the git repository containing the metadata to be deployed" #Accelerate Integration
 
         self.zipFileLbl = wx.StaticText(self, label="Zip File")
         self.zipFileLbl.ToolTip = (
@@ -747,28 +830,41 @@ class DeployMetadataPanel(wx.Panel):
         self.btnZipFile.Bind(wx.EVT_BUTTON, self.SelectZipFile)
 
         self.metadataFolderLbl = wx.StaticText(self, label="Metadata Folder")
-        self.metadataFolderLbl.ToolTip = "Specifies the folder containing the metadata to be deployed. Manifest package will be overriten here if Generate Manifest is checked."
+        self.metadataFolderLbl.ToolTip = "Specifies the folder containing the metadata to be deployed. Manifest package will be overwritten" #Accelerate Integration
         self.metadataFolderTextCtrl = wx.TextCtrl(self)
-        self.metadataFolderTextCtrl.ToolTip = "Specifies the folder containing the metadata to be deployed. Manifest package will be overriten here if Generate Manifest is checked."
+        self.metadataFolderTextCtrl.ToolTip = "Specifies the folder containing the metadata to be deployed. Manifest package will be overwritten" #Accelerate Integration
 
         self.btnMetadataFolder = wx.Button(self, label="Browse")
         self.btnMetadataFolder.Bind(wx.EVT_BUTTON, self.SelectMetadataFolder)
 
-        self.preScriptFolderLbl = wx.StaticText(self, label="Pre Deploy Script File")
-        self.preScriptFolderLbl.ToolTip = "Script file to be executed before metadata deployment."
-        self.preScriptFolderTextCtrl = wx.TextCtrl(self)
-        self.preScriptFolderTextCtrl.ToolTip = "Script file to be executed before metadata deployment."
+        self.preScriptFolderLbl = wx.StaticText(self, label="PreDeploy Script File") #Accelerate Integration
+        self.preScriptFolderLbl.ToolTip = "Script file to be executed before metadata deployment" #Accelerate Integration
+        self.preScriptFolderTextCtrl = wx.TextCtrl(self, value = "", style = wx.CB_READONLY) #Accelerate Integration
+        self.preScriptFolderTextCtrl.ToolTip = "Script file to be executed before metadata deployment" #Accelerate Integration
 
-        self.scriptFolderLbl = wx.StaticText(self, label="Post Deploy Script File")
-        self.scriptFolderLbl.ToolTip = "Script file to be executed after metadata deployment."
-        self.scriptFolderTextCtrl = wx.TextCtrl(self)
-        self.scriptFolderTextCtrl.ToolTip = "Script file to be executed after metadata deployment."
+        self.scriptFolderLbl = wx.StaticText(self, label="PostDeploy Script File") #Accelerate Integration
+        self.scriptFolderLbl.ToolTip = "Script file to be executed after metadata deployment" #Accelerate Integration
+        self.scriptFolderTextCtrl = wx.TextCtrl(self, value = "", style = wx.CB_READONLY) #Accelerate Integration
+        self.scriptFolderTextCtrl.ToolTip = "Script file to be executed after metadata deployment" #Accelerate Integration
 
         self.btnPreScriptFolder = wx.Button(self, label="Browse")
         self.btnPreScriptFolder.Bind(wx.EVT_BUTTON, self.selectPreScriptFolder)
 
         self.btnScriptFolder = wx.Button(self, label="Browse")
         self.btnScriptFolder.Bind(wx.EVT_BUTTON, self.SelectScriptFolder)
+
+        #Accelerate Integration
+        self.moduleWidget = wx.ListCtrl(self, size = wx.Size(510,-1), style = wx.LC_REPORT | wx.LC_HRULES | wx.LC_VRULES)
+        self.moduleWidget.EnableCheckBoxes(True)
+
+        self.moduleWidget.Bind(wx.EVT_LIST_ITEM_CHECKED,self.OnListItemChecked)
+        
+        self.moduleWidget.InsertColumn(MODULE_NAME_COL, 'Module Name', width = 150)
+        self.moduleWidget.InsertColumn(DESCRIPTION_COL, 'Description', width = 290)
+        self.moduleWidget.InsertColumn(MODULE_KEY_COL, 'Module Key', width = -2)
+        self.moduleWidget.InsertColumn(DEPENDENCIES_COL, 'Dependencies', width = -2)
+        self.moduleWidget.InsertColumn(ADDITIONAL_INFO_COL, 'Additional Info', width = 150)
+        #Accelerate Integration
 
         self.metadataTemplateLbl = wx.StaticText(self, label="Metadata Template")
         self.metadataTemplateLbl.ToolTip = "Template to autoselect Metadata Types."
@@ -790,6 +886,19 @@ class DeployMetadataPanel(wx.Panel):
             self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_AUTO_URL | wx.VSCROLL | wx.TE_WORDWRAP
         )
         self.selectedMetadataTypesTextCtrl.ToolTip = "Selected Metadata Types."
+
+        #Accelerate Integration
+        self.btnCheckAll = wx.Button(self, label="Check All")
+        self.btnCheckAll.Bind(wx.EVT_BUTTON, self.CheckAll)
+        self.btnUnCheckAll = wx.Button(self, label="Uncheck All")
+        self.btnUnCheckAll.Bind(wx.EVT_BUTTON, self.UnCheckAll)
+
+        self.pushToGitLbl = wx.StaticText(self, label = "Push to Organization Git")
+        self.pushToGitLbl.ToolTip = "If checked, Accelerate configuration will be pushed to your organization Git in a new branch"
+        self.pushToGitCheckBox = wx.CheckBox(self)
+        self.pushToGitCheckBox.Value = True
+        self.pushToGitCheckBox.ToolTip = "If checked, Accelerate configuration will be pushed to your organization Git in a new branch"
+        #Accelerate Integration
 
         self.checkOnlyLbl = wx.StaticText(self, label="Check Only")
         self.checkOnlyLbl.ToolTip = "If checked the deployment will be only validated. No changes will be applied."
@@ -846,27 +955,27 @@ class DeployMetadataPanel(wx.Panel):
         self.testLevelsLbl = wx.StaticText(self, label="Test Levels")
         self.testLevelsLbl.ToolTip = """Specifies which level of deployment tests to run. Valid values are:
 
-NoTestRun—No tests are run. This test level applies only to deployments to development environments, such as sandbox, Developer Edition, or trial orgs. This test level is the default for development environments.
+        NoTestRun—No tests are run. This test level applies only to deployments to development environments, such as sandbox, Developer Edition, or trial orgs. This test level is the default for development environments.
 
-RunSpecifiedTests—Runs only the tests that you specify in the --runtests option. Code coverage requirements differ from the default coverage requirements when using this test level. Executed tests must comprise a minimum of 75% code coverage for each class and trigger in the deployment package. This coverage is computed for each class and trigger individually and is different than the overall coverage percentage.
+        RunSpecifiedTests—Runs only the tests that you specify in the --runtests option. Code coverage requirements differ from the default coverage requirements when using this test level. Executed tests must comprise a minimum of 75% code coverage for each class and trigger in the deployment package. This coverage is computed for each class and trigger individually and is different than the overall coverage percentage.
 
-RunLocalTests—All tests in your org are run, except the ones that originate from installed managed packages. This test level is the default for production deployments that include Apex classes or triggers.
+        RunLocalTests—All tests in your org are run, except the ones that originate from installed managed packages. This test level is the default for production deployments that include Apex classes or triggers.
 
-RunAllTestsInOrg—All tests in your org are run, including tests of managed packages.
+        RunAllTestsInOrg—All tests in your org are run, including tests of managed packages.
 
-If this field is blank the default test level used is NoTestRun."""
+        If this field is blank the default test level used is NoTestRun."""
         self.testLevelsComboBox = wx.ComboBox(self, style=wx.CB_READONLY)
         self.testLevelsComboBox.ToolTip = """Specifies which level of deployment tests to run. Valid values are:
 
-NoTestRun—No tests are run. This test level applies only to deployments to development environments, such as sandbox, Developer Edition, or trial orgs. This test level is the default for development environments.
+        NoTestRun—No tests are run. This test level applies only to deployments to development environments, such as sandbox, Developer Edition, or trial orgs. This test level is the default for development environments.
 
-RunSpecifiedTests—Runs only the tests that you specify in the --runtests option. Code coverage requirements differ from the default coverage requirements when using this test level. Executed tests must comprise a minimum of 75% code coverage for each class and trigger in the deployment package. This coverage is computed for each class and trigger individually and is different than the overall coverage percentage.
+        RunSpecifiedTests—Runs only the tests that you specify in the --runtests option. Code coverage requirements differ from the default coverage requirements when using this test level. Executed tests must comprise a minimum of 75% code coverage for each class and trigger in the deployment package. This coverage is computed for each class and trigger individually and is different than the overall coverage percentage.
 
-RunLocalTests—All tests in your org are run, except the ones that originate from installed managed packages. This test level is the default for production deployments that include Apex classes or triggers.
+        RunLocalTests—All tests in your org are run, except the ones that originate from installed managed packages. This test level is the default for production deployments that include Apex classes or triggers.
 
-RunAllTestsInOrg—All tests in your org are run, including tests of managed packages.
+        RunAllTestsInOrg—All tests in your org are run, including tests of managed packages.
 
-If this field is blank the default test level used is NoTestRun."""
+        If this field is blank the default test level used is NoTestRun."""
         self.testLevelsComboBox.Items = dtkglobal.testLevels
         self.testLevelsComboBox.SetStringSelection("NoTestRun")
         self.testLevelsComboBox.Bind(wx.EVT_COMBOBOX, self.ChangeTestLevels)
@@ -895,6 +1004,10 @@ If this field is blank the default test level used is NoTestRun."""
 
         self.btnRefreshLog = wx.Button(self, label="Refresh Log")
         self.btnRefreshLog.Bind(wx.EVT_BUTTON, self.RefreshLog)
+        
+        #Accelerate Integration
+        self.btnRefreshLog.Hide()
+        #End Accelerate Integration
 
         row = 0
         col = 0
@@ -930,7 +1043,8 @@ If this field is blank the default test level used is NoTestRun."""
             self.gitUrlLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
         )
         self.deploySizer.Add(
-            self.gitUrlComboBox,
+            #self.gitUrlComboBox,
+            self.gitUrlTextCtrl,
             pos=(row, col + 1),
             span=(0, spanH + 15),
             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
@@ -964,7 +1078,8 @@ If this field is blank the default test level used is NoTestRun."""
             self.gitBranchLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
         )
         self.deploySizer.Add(
-            self.gitBranchComboBox,
+            #self.gitBranchComboBox,
+            self.gitBranchTextCtrl,
             pos=(row, col + 1),
             span=(0, spanH + 15),
             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
@@ -1022,15 +1137,14 @@ If this field is blank the default test level used is NoTestRun."""
             border=0,
         )
         row += 1
-        self.deploySizer.Add(
-            self.preScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM , border=5
-        )        
+        self.deploySizer.Add(self.preScriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM , border=5)        
         row += 1
-        self.deploySizer.Add(
-            self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM , border=5
-        )
+        self.deploySizer.Add(self.scriptFolderLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM , border=5)
+
+
         self.preScriptFolderSizer = wx.GridBagSizer(1, 1)
         self.scriptFolderSizer = wx.GridBagSizer(1, 1)
+        self.organizationGitSizer = wx.GridBagSizer(1, 1) #Accelerate Integration
 
         self.preScriptFolderSizer.Add(
             self.preScriptFolderTextCtrl, pos=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5
@@ -1058,9 +1172,45 @@ If this field is blank the default test level used is NoTestRun."""
             flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.RIGHT,
             border=0,
         )
+        
+
+        #Accelerate Integration
+        self.deploySizer.Add(self.organizationGitUrlLbl, pos = (row+1, col), flag = wx.EXPAND | wx.LEFT | wx.TOP | wx.BOTTOM, border = 5)
+        self.organizationGitSizer.Add(self.organizationGitUrlTextCtrl, pos = (1,0), flag = wx.EXPAND | wx.LEFT | wx.TOP | wx.BOTTOM | wx.RIGHT, border = 5) #Accelerate Integration
+        self.organizationGitSizer.AddGrowableCol(0)
+        self.organizationGitSizer.SetEmptyCellSize((0, 0))
+        self.deploySizer.Add(self.organizationGitSizer, pos = (row+1, col + 1), span = (1, spanH + 15), flag = wx.EXPAND | wx.LEFT | wx.TOP | wx.BOTTOM | wx.RIGHT, border = 0)
+        #Accelerate Integration
 
         self.deploySizer.AddGrowableCol(col + 1)
         self.deploySizer.SetEmptyCellSize((0, 0))
+
+        #Accelerate Integration
+        self.moduleSizer = wx.GridBagSizer(1, 1)
+        self.btnCheckSizer = wx.GridBagSizer(1, 1)
+        col = 0
+        row = 0
+        self.moduleSizer.Add(self.moduleWidget, pos = (row,col), span = (0, spanH + 15), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border = 5)
+        row += 1
+        self.moduleSizer.Add(self.btnCheckSizer, pos = (row,col), flag = wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_LEFT, border = 1)
+        self.btnCheckSizer.Add(self.btnCheckAll, pos = (row-1,col), flag = wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_LEFT, border = 1)
+        self.btnCheckSizer.Add(self.btnUnCheckAll, pos=(row-1, col + 1), flag = wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_LEFT, border = 1)
+
+        self.moduleSizer.Add(self.pushToGitLbl, pos = (row, col + 17), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border = 5)
+        self.moduleSizer.Add(self.pushToGitCheckBox, pos = (row, col + 18), span = (0,0), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border = 5)
+
+        row += 1
+        self.moduleSizer.Add(self.checkOnlyLbl, pos = (row, col + 17), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border = 5)
+        self.moduleSizer.Add(self.checkOnlyCheckBox, pos=(row, col + 18), span=(0, 0), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border = 5)
+        row += 1
+        self.moduleSizer.Add(self.clearLogsLbl, pos = (row, col + 17), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT, border = 5)
+        self.moduleSizer.Add(self.clearLogsCheckBox, pos=(row, col + 18), span=(0, 0), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border = 5)
+
+        row += 1
+        self.moduleSizer.Add(self.generateManifestLbl, pos = (row, col + 17), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT, border = 5)
+        self.moduleSizer.Add(self.generateManifestCheckBox, pos=(row, col + 18), span=(0, 0), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border = 5)
+
+        #Accelerate Integration
 
         self.optionsSizer = wx.GridBagSizer(1, 1)
 
@@ -1120,16 +1270,11 @@ If this field is blank the default test level used is NoTestRun."""
         self.checkBoxesOptionsSizer = wx.GridBagSizer(1, 1)
         col = 0
         row = 0
-        self.checkBoxesOptionsSizer.Add(
+        #Accelerate Integration
+        """self.checkBoxesOptionsSizer.Add(
             self.checkOnlyLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
         )
-        self.checkBoxesOptionsSizer.Add(
-            self.checkOnlyCheckBox,
-            pos=(row, col + 1),
-            span=(0, spanH),
-            flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
-            border=5,
-        )
+        self.checkBoxesOptionsSizer.Add(self.checkOnlyCheckBox, pos = (row, col + 1), span=(0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border=5)""" #Accelerate Integration
         row += 1
         self.checkBoxesOptionsSizer.Add(
             self.ignoreWarningsLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
@@ -1164,6 +1309,8 @@ If this field is blank the default test level used is NoTestRun."""
             border=5,
         )
         row += 1
+        #Accelerate Integration
+        """
         self.checkBoxesOptionsSizer.Add(
             self.generateManifestLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
         )
@@ -1176,9 +1323,7 @@ If this field is blank the default test level used is NoTestRun."""
         )
         row += 1
         self.checkBoxesOptionsSizer.Add(self.clearLogsLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT , border=5)
-        self.checkBoxesOptionsSizer.Add(
-            self.clearLogsCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
-        )
+        self.checkBoxesOptionsSizer.Add(self.clearLogsCheckBox, pos=(row, col + 1), span = (0, 0), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)""" #Accelerate Integration
 
         self.checkBoxesOptionsSizer.SetEmptyCellSize((0, 0))
         self.waitTimeSizer = wx.GridBagSizer(1, 1)
@@ -1195,8 +1340,14 @@ If this field is blank the default test level used is NoTestRun."""
             self.selectedMetadataSizer, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
         )
         self.optionsSizer.Add(
-            self.checkBoxesOptionsSizer, pos=(row, col + 2), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5
+            self.checkBoxesOptionsSizer, pos=(row, col + 3), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5
         )
+
+        self.moduleSizer.AddGrowableCol(1)
+        self.moduleSizer.AddGrowableCol(0)
+        self.moduleSizer.AddGrowableCol(2)
+        self.moduleSizer.AddGrowableRow(row)
+        self.moduleSizer.SetEmptyCellSize((0, 0))
 
         self.optionsSizer.AddGrowableCol(1)
         self.optionsSizer.AddGrowableCol(0)
@@ -1227,7 +1378,7 @@ If this field is blank the default test level used is NoTestRun."""
                 border=10,
         )
         self.btnDeploySizer.Add(self.btnDeploy, pos=(row, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT | wx.ALIGN_RIGHT, border=10)
-
+        
         row = 0
         self.mainSizer.Add(
             self.typeSizer,
@@ -1244,6 +1395,8 @@ If this field is blank the default test level used is NoTestRun."""
             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT,
             border=5,
         )
+        row += 1
+        self.mainSizer.Add(self.moduleSizer, pos = (row, 0), span = (0, 5), flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT, border = 5)
         row += 1
         self.mainSizer.Add(
             self.optionsSizer,
@@ -1273,16 +1426,19 @@ If this field is blank the default test level used is NoTestRun."""
             self.deploymentTypeLbl.Hide()
             self.deploymentTypeComboBox.Hide()
 
+        #Accelerate Integration
         if self.deployTypeSelected == "Zip":
 
             self.selectedMetadataTypesLbl.Hide()
             self.selectedMetadataTypesTextCtrl.Hide()
             self.gitBranchLbl.Hide()
-            self.gitBranchComboBox.Hide()
+            #self.gitBranchComboBox.Hide()
+            self.gitBranchTextCtrl.Hide()
             self.gitBranchFilterLbl.Hide()
             self.btnFilterBranch.Hide()
             self.gitUrlLbl.Hide()
-            self.gitUrlComboBox.Hide()
+            #self.gitUrlComboBox.Hide()
+            self.gitUrlTextCtrl.Hide() #Accelerate Integration
             self.gitBranchFilterTextCtrl.Hide()
             self.metadataFolderLbl.Hide()
             self.metadataFolderTextCtrl.Hide()
@@ -1301,7 +1457,42 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataFolderTextCtrl.Hide()
             self.btnMetadataFolder.Hide()
 
+        #Accelerate Integration
         if self.deployTypeSelected == "Git":
+            self.gitBranchFilterLbl.Hide()
+            self.gitBranchFilterTextCtrl.Hide()
+            self.btnFilterBranch.Hide()
+
+            self.btnPreScriptFolder.Hide()
+            self.btnScriptFolder.Hide()
+
+            self.testLevelsLbl.Hide()
+            self.testLevelsComboBox.Hide()
+
+            self.metadataTemplateLbl.Hide()
+            self.metadataTemplateComboBox.Hide()
+
+            self.metadataTypesLbl.Hide()
+            self.metadataTypesListBox.Hide()
+
+            self.selectedMetadataTypesLbl.Hide()
+            self.selectedMetadataTypesTextCtrl.Hide()
+
+            self.ignoreWarningsLbl.Hide()
+            self.ignoreWarningsCheckBox.Hide()
+
+            self.ignoreErrorsLbl.Hide()
+            self.ignoreErrorsCheckBox.Hide()
+
+            self.confirmDeployLbl.Hide()
+            self.confirmDeployCheckBox.Hide()
+
+            self.generateManifestLbl.Hide()
+            self.generateManifestCheckBox.Hide()
+
+            self.waitParamLbl.Hide()
+            self.waitParamNumCtrl.Hide()
+
             self.zipFileLbl.Hide()
             self.zipFileTextCtrl.Hide()
             self.btnZipFile.Hide()
@@ -1310,16 +1501,34 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataFolderTextCtrl.Hide()
             self.btnMetadataFolder.Hide()
 
+        #Accelerate Integration
         if self.deployTypeSelected == "Folder":
             self.gitBranchLbl.Hide()
-            self.gitBranchComboBox.Hide()
+            #self.gitBranchComboBox.Hide()
+            self.gitBranchTextCtrl.Hide()
             self.gitBranchFilterLbl.Hide()
             self.btnFilterBranch.Hide()
             self.gitUrlLbl.Hide()
-            self.gitUrlComboBox.Hide()
+            #self.gitUrlComboBox.Hide()
+            self.gitUrlTextCtrl.Hide()
             self.gitBranchFilterTextCtrl.Hide()
             self.metadataFolderLbl.Hide()
             self.metadataFolderTextCtrl.Hide()
+
+            self.metadataTemplateLbl.Hide()
+            self.metadataTemplateComboBox.Hide()
+
+            self.metadataTypesLbl.Hide()
+            self.metadataTypesListBox.Hide()
+
+            self.selectedMetadataTypesLbl.Hide()
+            self.selectedMetadataTypesTextCtrl.Hide()
+
+            self.confirmDeployLbl.Hide()
+            self.confirmDeployCheckBox.Hide()
+
+            self.generateManifestLbl.Hide()
+            self.generateManifestCheckBox.Hide()
 
             self.zipFileLbl.Hide()
             self.zipFileTextCtrl.Hide()
@@ -1331,7 +1540,63 @@ If this field is blank the default test level used is NoTestRun."""
         self.Layout()
         self.Fit()
         self.SetSizer(self.mainSizer)
+        self.LoadAccelerateSettings() #Accelerate Integration
 
+    #Accelerate Integration
+    def LoadAccelerateSettings(self):
+        self.gitUrlTextCtrl.SetValue(dtkglobal.accelerateGitURL)
+        self.gitBranchTextCtrl.SetValue(dtkglobal.accelerateGitBranch)
+        self.metadataGitFolderTextCtrl.SetValue(dtkglobal.accelerateMetadataGitFolder)
+        self.preScriptFolderTextCtrl.SetValue(dtkglobal.acceleratePreDeployScriptFile)
+        self.scriptFolderTextCtrl.SetValue(dtkglobal.acceleratePostDeployScriptFile)
+        index = 0
+        for module in dtkglobal.accelerateModulesAvailable:
+            numCol = 0
+            for settingModule in module:
+                if (settingModule == "ModuleName"):
+                    self.moduleWidget.InsertItem(index, module[settingModule])
+                else:
+                    self.moduleWidget.SetItem(index, numCol, module[settingModule])
+                numCol += 1
+            
+            if index % 2:
+                self.moduleWidget.SetItemBackgroundColour(index, wx.Colour(242,238,238,0))
+
+            index += 1
+        index += 1
+    #Accelerate Integration
+    def CheckAll(self, event):
+        for row in range(self.moduleWidget.GetItemCount()):
+            self.moduleWidget.CheckItem(row,True)
+        self.consoleOutputTextCtrl.AppendText("All modules have been checked.")
+        self.consoleOutputTextCtrl.AppendText(os.linesep)
+
+    def UnCheckAll(self, event):
+        for row in range(self.moduleWidget.GetItemCount()):
+            self.moduleWidget.CheckItem(row,False)
+        self.consoleOutputTextCtrl.AppendText("All modules have been unchecked.")
+        self.consoleOutputTextCtrl.AppendText(os.linesep)
+
+    def OnListItemChecked (self,event):
+        dependentModules = self.moduleWidget.GetItemText(event.Index,col=DEPENDENCIES_COL)
+        if (dependentModules != ""):
+            ltsModules = dependentModules.split(";")
+            for Module in ltsModules:
+                for row in range(self.moduleWidget.GetItemCount()):
+                    if (self.moduleWidget.GetItemText(row,col=MODULE_KEY_COL) == Module and not self.moduleWidget.IsItemChecked(self.moduleWidget.GetItem(row).GetId())):
+                        self.moduleWidget.CheckItem(row,True)
+                        self.consoleOutputTextCtrl.AppendText("Dependent module has been included ("+self.moduleWidget.GetItemText(row,col=MODULE_NAME_COL)+").")
+                        self.consoleOutputTextCtrl.AppendText(os.linesep)
+
+    def GetModulesChecked(self):
+        selection = ""
+        for row in range(self.moduleWidget.GetItemCount()):
+            if (self.moduleWidget.IsItemChecked(self.moduleWidget.GetItem(row).GetId())):
+                selection = selection + self.moduleWidget.GetItemText(row,col=MODULE_KEY_COL) + ","
+        if (selection != ""):
+            selection = selection[:-1]
+        return selection
+    
     def StopButton(self, event):
         self.stop = True
         self.SetButtonState(True)
@@ -1348,16 +1613,27 @@ If this field is blank the default test level used is NoTestRun."""
         self.deployTypeSelected = self.deploymentTypeComboBox.GetValue()
         if self.deployTypeSelected == "Git":
             self.gitBranchLbl.Show()
-            self.gitBranchComboBox.Show()
-            self.gitBranchFilterLbl.Show()
-            self.btnFilterBranch.Show()
+            #Accelerate Integration self.gitBranchComboBox.Show()
+            self.gitBranchTextCtrl.Show()
+            #Accelerate Integration self.gitBranchFilterLbl.Show()
+            #Accelerate Integration self.btnFilterBranch.Show()
             self.gitUrlLbl.Show()
-            self.gitUrlComboBox.Show()
-            self.gitBranchFilterTextCtrl.Show()
+            #Accelerate Integration self.gitUrlComboBox.Show()
+            self.gitUrlTextCtrl.Show()
+            #Accelerate Integration self.gitBranchFilterTextCtrl.Show()
             self.metadataGitFolderLbl.Show()
             self.metadataGitFolderTextCtrl.Show()
 
-            self.generateManifestLbl.Show()
+            #Accelerate Integration
+            self.btnPreScriptFolder.Hide()
+            self.btnScriptFolder.Hide()
+            self.preScriptFolderTextCtrl.SetValue(dtkglobal.acceleratePreDeployScriptFile)
+            self.scriptFolderTextCtrl.SetValue(dtkglobal.acceleratePostDeployScriptFile)
+
+            self.generateManifestCheckBox.Value = True
+            self.generateManifestLbl.Hide()
+            self.generateManifestCheckBox.Hide()
+            """self.generateManifestLbl.Show()
             self.generateManifestCheckBox.Show()
             self.confirmDeployLbl.Show()
             self.confirmDeployCheckBox.Show()
@@ -1368,8 +1644,8 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataTypesListBox.Show()
 
             self.selectedMetadataTypesLbl.Show()
-            self.selectedMetadataTypesTextCtrl.Show()
-
+            self.selectedMetadataTypesTextCtrl.Show()"""
+            
             self.zipFileLbl.Hide()
             self.zipFileTextCtrl.Hide()
             self.btnZipFile.Hide()
@@ -1380,16 +1656,24 @@ If this field is blank the default test level used is NoTestRun."""
             self.Layout()
 
         if self.deployTypeSelected == "Zip":
+            #Accelerate Integration
+            self.btnPreScriptFolder.Show()
+            self.btnScriptFolder.Show()
+            self.preScriptFolderTextCtrl.Clear()
+            self.scriptFolderTextCtrl.Clear()
+
             self.zipFileLbl.Show()
             self.zipFileTextCtrl.Show()
             self.btnZipFile.Show()
 
             self.gitBranchLbl.Hide()
-            self.gitBranchComboBox.Hide()
+            #Accelerate Integration self.gitBranchComboBox.Hide()
+            self.gitBranchTextCtrl.Hide() #Accelerate Integration
             self.gitBranchFilterLbl.Hide()
             self.btnFilterBranch.Hide()
             self.gitUrlLbl.Hide()
-            self.gitUrlComboBox.Hide()
+            #Accelerate Integration self.gitUrlComboBox.Hide()
+            self.gitUrlTextCtrl.Hide()
             self.gitBranchFilterTextCtrl.Hide()
             self.metadataGitFolderLbl.Hide()
             self.metadataGitFolderTextCtrl.Hide()
@@ -1413,11 +1697,20 @@ If this field is blank the default test level used is NoTestRun."""
             self.Layout()
 
         if self.deployTypeSelected == "Folder":
+            #Accelerate Integration
+            self.btnPreScriptFolder.Show()
+            self.btnScriptFolder.Show()
+
             self.metadataFolderLbl.Show()
             self.metadataFolderTextCtrl.Show()
             self.btnMetadataFolder.Show()
 
+            #Accelerate Integration
+            self.preScriptFolderTextCtrl.Clear()
+            self.scriptFolderTextCtrl.Clear()
             self.generateManifestLbl.Show()
+            self.generateManifestCheckBox.Show()
+            """self.generateManifestLbl.Show()
             self.generateManifestCheckBox.Show()
             self.confirmDeployLbl.Show()
             self.confirmDeployCheckBox.Show()
@@ -1425,20 +1718,22 @@ If this field is blank the default test level used is NoTestRun."""
             self.metadataTemplateLbl.Show()
             self.metadataTemplateComboBox.Show()
             self.metadataTypesLbl.Show()
-            self.metadataTypesListBox.Show()
+            self.metadataTypesListBox.Show()"""
 
             self.gitBranchLbl.Hide()
-            self.gitBranchComboBox.Hide()
+            #Accelerate Integration self.gitBranchComboBox.Hide()
+            self.gitBranchTextCtrl.Hide()
             self.gitBranchFilterLbl.Hide()
             self.btnFilterBranch.Hide()
             self.gitUrlLbl.Hide()
-            self.gitUrlComboBox.Hide()
+            #Accelerate Integration self.gitUrlComboBox.Hide()
+            self.gitUrlTextCtrl.Hide()
             self.gitBranchFilterTextCtrl.Hide()
             self.metadataGitFolderLbl.Hide()
             self.metadataGitFolderTextCtrl.Hide()
 
-            self.selectedMetadataTypesLbl.Show()
-            self.selectedMetadataTypesTextCtrl.Show()
+            #Accelerate Integration self.selectedMetadataTypesLbl.Show()
+            #Accelerate Integration self.selectedMetadataTypesTextCtrl.Show()
 
             self.zipFileLbl.Hide()
             self.zipFileTextCtrl.Hide()
@@ -1452,6 +1747,15 @@ If this field is blank the default test level used is NoTestRun."""
             dlg.Destroy()
             return
         self.stop = False
+
+        #Accelerate Integration: Deploy Settings
+        moduleList = self.GetModulesChecked()
+        organizationGitURL = self.organizationGitUrlTextCtrl.GetValue()
+        activationModuleScriptUrl = os.path.join(os.path.join(os.path.expanduser("~"), ".dtkconfig"), "AccelerateDeployConfiguration")
+        gitUrl = self.organizationGitUrlTextCtrl.GetLineText(0)
+        pushToGit = self.pushToGitCheckBox.GetValue()
+        metadataTypes = dtkglobal.metadataTypes
+        #End Accelerate Integration
 
         deployType = self.deploymentTypeComboBox.GetValue()
         orgName = self.Parent.Parent.Parent.Parent.organizationComboBox.GetValue()
@@ -1468,8 +1772,9 @@ If this field is blank the default test level used is NoTestRun."""
         generateManifest = self.generateManifestCheckBox.GetValue()
         testLevel = self.testLevelsComboBox.GetValue()
         specifiedTests = self.specifiedTestTextCtrl.GetLineText(0)
-        gitUrl = self.gitUrlComboBox.GetValue()
-        gitBranch = self.gitBranchComboBox.GetValue()
+        #Accelerate Integration:  gitUrl = self.gitUrlComboBox.GetValue() 
+        #Accelerate Integration:  gitBranch = self.gitBranchComboBox.GetValue()
+        gitBranch = self.gitBranchTextCtrl.GetLineText(0)
         metadataGitFolder = self.metadataGitFolderTextCtrl.GetLineText(0)
         preScriptFile = self.preScriptFolderTextCtrl.GetLineText(0)
         scriptFile = self.scriptFolderTextCtrl.GetLineText(0)
@@ -1484,9 +1789,23 @@ If this field is blank the default test level used is NoTestRun."""
         if len(scriptFileSource) == 0:
             scriptFileWorkspace = deployStageUrl
         metadataFolderSource = self.metadataFolderTextCtrl.GetLineText(0)
-        metadataTypes = self.metadataTypesListBox.GetSelections()
+        #Accelerate Integration:  metadataTypes = self.metadataTypesListBox.GetSelections()
         waitParam = self.waitParamNumCtrl.GetLineText(0)
         fromScript = False
+
+        #Accelerate Integration: Preparing ORG Git URL
+        gitPreffix = ''
+        gitSuffix = ''
+        gitUser = ''
+        gitPass = ''
+        gitFinalUrl = ''
+        gitUrlSplit = gitUrl.split("//")
+        if len(gitUrlSplit) > 1:
+            gitPreffix = gitUrlSplit[0] + "//"
+            gitSuffix = gitUrlSplit[1]
+            gitUser = dtkglobal.orgDict[orgName]["gituser"]
+            gitPass = dtkglobal.Decode(gitUser, dtkglobal.orgDict[orgName]["gitpass"])
+            gitFinalUrl = gitPreffix + gitUser + ":" + gitPass + "@" + gitSuffix
 
         if len(orgName) == 0:
             dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
@@ -1558,7 +1877,12 @@ If this field is blank the default test level used is NoTestRun."""
                     scriptFileWorkspace,
                     metadataTypes,
                     fromScript,
-                    waitParam
+                    waitParam,
+                    moduleList,
+                    organizationGitURL,
+                    activationModuleScriptUrl,
+                    pushToGit,
+                    gitFinalUrl
                 ),
             )
             thread.setDaemon(True)
@@ -1575,11 +1899,12 @@ If this field is blank the default test level used is NoTestRun."""
                 if result == wx.ID_NO:
                     dlg.Destroy()
                     return
-            if len(gitUrl) == 0:
-                dlg = wx.MessageDialog(self, "No git repository selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
+            if (len(gitUrl) == 0 and pushToGit):
+                dlg = wx.MessageDialog(self, "No target git repository selected to push the changes.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
                 dlg.ShowModal()
                 dlg.Destroy()
                 return
+
             if len(gitBranch) == 0:
                 dlg = wx.MessageDialog(self, "No git branch selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
                 dlg.ShowModal()
@@ -1590,54 +1915,52 @@ If this field is blank the default test level used is NoTestRun."""
                 self.consoleOutputTextCtrl.AppendText("Workspace: " + self.Parent.Parent.Parent.Parent.currentWorkspace)
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
                 self.logList.clear()
-            gitUrlSplit = gitUrl.split("//")
-            if len(gitUrlSplit) > 1:
-                gitPreffix = gitUrlSplit[0] + "//"
-                gitSuffix = gitUrlSplit[1]
-                gitUser = dtkglobal.orgDict[orgName]["gituser"]
-                gitPass = dtkglobal.Decode(gitUser, dtkglobal.orgDict[orgName]["gitpass"])
-                gitFinalUrl = gitPreffix + gitUser + ":" + gitPass + "@" + gitSuffix
-                self.consoleOutputTextCtrl.AppendText("Start deployment...")
-                self.consoleOutputTextCtrl.AppendText(os.linesep)
-                self.SetButtonState(False)
-                thread = threading.Thread(
-                    target=self.RetrieveGitBranch,
-                    args=(
-                        deployType,
-                        orgName,
-                        sdbxName,
-                        targetName,
-                        deployUrl,
-                        deployMetadataUrl,
-                        deployDataUrl,
-                        deployStageUrl,
-                        checkOnly,
-                        ignoreWarnings,
-                        ignoreErrors,
-                        confirmDeploy,
-                        generateManifest,
-                        testLevel,
-                        specifiedTests,
-                        gitUrl,
-                        gitBranch,
-                        metadataGitFolder,
-                        metadataFolderSource,
-                        preScriptFile,
-                        scriptFile,
-                        zipFileUrlSource,
-                        zipFileUrlWorkspace,                        
-                        preScriptFileWorkspace,
-                        scriptFileWorkspace,
-                        metadataTypes,
-                        gitUser,
-                        gitPass,
-                        gitFinalUrl,
-                        fromScript,
-                        waitParam
-                    ),
-                )
-                thread.setDaemon(True)
-                thread.start()
+
+            self.consoleOutputTextCtrl.AppendText("Start deployment...")
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+            self.SetButtonState(False)
+            thread = threading.Thread(
+                target=self.RetrieveGitBranch,
+                args=(
+                    deployType,
+                    orgName,
+                    sdbxName,
+                    targetName,
+                    deployUrl,
+                    deployMetadataUrl,
+                    deployDataUrl,
+                    deployStageUrl,
+                    checkOnly,
+                    ignoreWarnings,
+                    ignoreErrors,
+                    confirmDeploy,
+                    generateManifest,
+                    testLevel,
+                    specifiedTests,
+                    gitUrl,
+                    gitBranch,
+                    metadataGitFolder,
+                    metadataFolderSource,
+                    preScriptFile,
+                    scriptFile,
+                    zipFileUrlSource,
+                    zipFileUrlWorkspace,                        
+                    preScriptFileWorkspace,
+                    scriptFileWorkspace,
+                    metadataTypes,
+                    gitUser,
+                    gitPass,
+                    gitFinalUrl,
+                    fromScript,
+                    waitParam,
+                    moduleList,
+                    organizationGitURL,
+                    activationModuleScriptUrl,
+                    pushToGit
+                ),
+            )
+            thread.setDaemon(True)
+            thread.start()
         if deployType == "Folder":
             if len(metadataTypes) == 0:
                 dlg = wx.MessageDialog(self, "No metadata types selected.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
@@ -1683,7 +2006,12 @@ If this field is blank the default test level used is NoTestRun."""
                     scriptFileWorkspace,
                     metadataTypes,
                     fromScript,
-                    waitParam
+                    waitParam,
+                    moduleList,
+                    organizationGitURL,
+                    activationModuleScriptUrl,
+                    pushToGit,
+                    gitFinalUrl
                 ),
             )
             thread.setDaemon(True)
@@ -1719,6 +2047,11 @@ If this field is blank the default test level used is NoTestRun."""
         metadataTypes,
         fromScript,
         waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit,
+        gitFinalUrl
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -1766,7 +2099,12 @@ If this field is blank the default test level used is NoTestRun."""
                     scriptFileWorkspace,
                     metadataTypes,
                     fromScript,
-                    waitParam
+                    waitParam,
+                    moduleList,
+                    organizationGitURL,
+                    activationModuleScriptUrl,
+                    pushToGit,
+                    gitFinalUrl
                 ),
             )
             thread.setDaemon(True)
@@ -1801,7 +2139,12 @@ If this field is blank the default test level used is NoTestRun."""
                     scriptFileWorkspace,
                     metadataTypes,
                     fromScript,
-                    waitParam
+                    waitParam,
+                    moduleList,
+                    organizationGitURL,
+                    activationModuleScriptUrl,
+                    pushToGit,
+                    gitFinalUrl
                 )
 
     def DeployZip(
@@ -1834,6 +2177,11 @@ If this field is blank the default test level used is NoTestRun."""
         metadataTypes,
         fromScript,
         waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit,
+        gitFinalUrl
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -1873,7 +2221,12 @@ If this field is blank the default test level used is NoTestRun."""
             scriptFileWorkspace,
             metadataTypes,
             fromScript,
-            waitParam
+            waitParam,
+            moduleList,
+            organizationGitURL,
+            activationModuleScriptUrl,
+            pushToGit,
+            gitFinalUrl
         )
 
     def RetrieveGitBranch(
@@ -1909,6 +2262,10 @@ If this field is blank the default test level used is NoTestRun."""
         gitFinalUrl,
         fromScript,
         waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -1923,7 +2280,9 @@ If this field is blank the default test level used is NoTestRun."""
         if not os.path.exists(deployMetadataUrl):
             os.makedirs(deployMetadataUrl)
         outputFileUrl = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "tmp", "git.tmp")
-        cmd = "git  clone --single-branch --branch " + gitBranch + " " + gitFinalUrl + " " + deployStageUrl
+        #Accelerate Integration: Use Accelerate repository to get the configuration UPDATE WITH GLOBAL PARAMETER
+        accelerateGitURL = dtkglobal.gitPreffix + dtkglobal.accelerateGitUser + ":" + dtkglobal.accelerateGitPassword + "@" + dtkglobal.gitSuffix
+        cmd = ["git", "clone", "--single-branch", "--branch", gitBranch, accelerateGitURL, deployStageUrl]
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
@@ -1960,7 +2319,12 @@ If this field is blank the default test level used is NoTestRun."""
                     scriptFileWorkspace,
                     metadataTypes,
                     fromScript,
-                    waitParam
+                    waitParam,
+                    moduleList,
+                    organizationGitURL,
+                    activationModuleScriptUrl,
+                    pushToGit,
+                    gitFinalUrl
                 ),
             )
             thread.setDaemon(True)
@@ -1996,7 +2360,12 @@ If this field is blank the default test level used is NoTestRun."""
                     scriptFileWorkspace,
                     metadataTypes,
                     fromScript,
-                    waitParam
+                    waitParam,
+                    moduleList,
+                    organizationGitURL,
+                    activationModuleScriptUrl,
+                    pushToGit,
+                    gitFinalUrl
                 )
 
     def GenerateManifestFirst(
@@ -2028,7 +2397,12 @@ If this field is blank the default test level used is NoTestRun."""
         scriptFileWorkspace,
         metadataTypes,
         fromScript,
-        waitParam
+        waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit,
+        gitFinalUrl
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -2073,7 +2447,12 @@ If this field is blank the default test level used is NoTestRun."""
                 metadataTypes,
                 outputFileUrl,
                 fromScript,
-                waitParam
+                waitParam,
+                moduleList,
+                organizationGitURL,
+                activationModuleScriptUrl,
+                pushToGit,
+                gitFinalUrl
             ),
         )
         thread.setDaemon(True)
@@ -2109,7 +2488,12 @@ If this field is blank the default test level used is NoTestRun."""
         metadataTypes,
         outputFileUrl,
         fromScript,
-        waitParam
+        waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit,
+        gitFinalUrl
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -2163,7 +2547,12 @@ If this field is blank the default test level used is NoTestRun."""
                 metadataTypes,
                 outputFileUrl,
                 fromScript,
-                waitParam
+                waitParam,
+                moduleList,
+                organizationGitURL,
+                activationModuleScriptUrl,
+                pushToGit,
+                gitFinalUrl
             ),
         )
         thread.setDaemon(True)
@@ -2199,7 +2588,12 @@ If this field is blank the default test level used is NoTestRun."""
         metadataTypes,
         outputFileUrl,
         fromScript,
-        waitParam
+        waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit,
+        gitFinalUrl
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -2216,8 +2610,7 @@ If this field is blank the default test level used is NoTestRun."""
         strContent += '<Package xmlns="http://soap.sforce.com/2006/04/metadata">\n'
         metadataTypesSelected = []
         oneIncluded = False
-        for i in metadataTypes:
-            metadataTypesSelected.append(self.metadataTypesListBox.GetString(i))
+        metadataTypesSelected = metadataTypes
         for item in describeMetadataDict["metadataObjects"]:
             if self.stop:
                 self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -2255,6 +2648,112 @@ If this field is blank the default test level used is NoTestRun."""
         manifestFile.close()
         wx.CallAfter(self.OnText, "Manifest file generated.")
         wx.CallAfter(self.OnText, os.linesep)
+        #Accelerate Integration
+        if confirmDeploy:
+            self.ActivateAccelerateModules(
+                deployType,
+                orgName,
+                sdbxName,
+                targetName,
+                deployUrl,
+                deployMetadataUrl,
+                deployDataUrl,
+                deployStageUrl,
+                checkOnly,
+                ignoreWarnings,
+                ignoreErrors,
+                confirmDeploy,
+                generateManifest,
+                testLevel,
+                specifiedTests,
+                gitUrl,
+                gitBranch,
+                metadataGitFolder,
+                metadataFolderSource,
+                preScriptFile,
+                scriptFile,
+                zipFileUrlSource,
+                zipFileUrlWorkspace,
+                preScriptFileWorkspace,
+                scriptFileWorkspace,
+                metadataTypes,
+                fromScript,
+                waitParam,
+                moduleList,
+                organizationGitURL,
+                activationModuleScriptUrl,
+                pushToGit,
+                gitFinalUrl
+            )
+    #Accelerate Integration
+    def ActivateAccelerateModules(
+        self,
+        deployType,
+        orgName,
+        sdbxName,
+        targetName,
+        deployUrl,
+        deployMetadataUrl,
+        deployDataUrl,
+        deployStageUrl,
+        checkOnly,
+        ignoreWarnings,
+        ignoreErrors,
+        confirmDeploy,
+        generateManifest,
+        testLevel,
+        specifiedTests,
+        gitUrl,
+        gitBranch,
+        metadataGitFolder,
+        metadataFolderSource,
+        preScriptFile,
+        scriptFile,
+        zipFileUrlSource,
+        zipFileUrlWorkspace,
+        preScriptFileWorkspace,
+        scriptFileWorkspace,
+        metadataTypes,
+        fromScript,
+        waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit,
+        gitFinalUrl
+    ):
+        if self.stop:
+            self.consoleOutputTextCtrl.AppendText("Process stopped.")
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+            return
+
+        activationModuleScriptFileUrl = os.path.join(activationModuleScriptUrl, dtkglobal.activationScriptName)
+
+        if (os.path.exists(activationModuleScriptFileUrl) and os.path.exists(deployMetadataUrl)):
+            if (moduleList!=""):
+                if (platform.system() == "Windows"):
+                    cmd = ["powershell", activationModuleScriptFileUrl, deployMetadataUrl, moduleList]
+                    proc = subprocess.Popen(
+                        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+                    )
+                    try:
+                        for line in proc.stdout:
+                            wx.CallAfter(self.OnText, line)
+                    except:
+                        self.consoleOutputTextCtrl.AppendText("Executed Succesfully")
+                        self.consoleOutputTextCtrl.AppendText(os.linesep)
+                else:
+                    #IMPLEMENT ACTIVATION SCRIPT FOR OTHER SYSTEMS.
+                    self.consoleOutputTextCtrl.AppendText("Modules activation function is available only on Windows platforms for the moment.")
+                    self.consoleOutputTextCtrl.AppendText(os.linesep)
+                    return
+            else:
+                self.consoleOutputTextCtrl.AppendText("No Modules will be activated.")
+                self.consoleOutputTextCtrl.AppendText(os.linesep)
+        else:
+            self.consoleOutputTextCtrl.AppendText("Activation Script not found or metadata folder does not exists.")
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+
         if confirmDeploy:
             self.NewThreadRunDeploy(
                 deployType,
@@ -2284,8 +2783,14 @@ If this field is blank the default test level used is NoTestRun."""
                 scriptFileWorkspace,
                 metadataTypes,
                 fromScript,
-                waitParam
+                waitParam,
+                moduleList,
+                organizationGitURL,
+                activationModuleScriptUrl,
+                pushToGit,
+                gitFinalUrl
             )
+
 
     def NewThreadRunDeploy(
         self,
@@ -2317,6 +2822,11 @@ If this field is blank the default test level used is NoTestRun."""
         metadataTypes,
         fromScript,
         waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit,
+        gitFinalUrl
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -2352,7 +2862,12 @@ If this field is blank the default test level used is NoTestRun."""
                 scriptFileWorkspace,
                 metadataTypes,
                 fromScript,
-                waitParam
+                waitParam,
+                moduleList,
+                organizationGitURL,
+                activationModuleScriptUrl,
+                pushToGit,
+                gitFinalUrl
             ),
         )
         thread.setDaemon(True)
@@ -2388,6 +2903,11 @@ If this field is blank the default test level used is NoTestRun."""
         metadataTypes,
         fromScript,
         waitParam,
+        moduleList,
+        organizationGitURL,
+        activationModuleScriptUrl,
+        pushToGit,
+        gitFinalUrl
     ):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
@@ -2397,11 +2917,11 @@ If this field is blank the default test level used is NoTestRun."""
             preScriptProcessed = False
             if os.path.exists(preScriptFile) and preScriptFile != deployStageUrl:
                 shutil.copy(preScriptFile, deployDataUrl)
-                self.ProcessScript(deployDataUrl, preScriptFile, deployStageUrl)
+                self.ProcessScript(deployDataUrl, preScriptFile, deployStageUrl,moduleList,organizationGitURL,activationModuleScriptUrl,pushToGit,gitFinalUrl)
                 preScriptProcessed = True
             if os.path.exists(preScriptFileWorkspace) and preScriptFileWorkspace != deployStageUrl:
                 shutil.copy(preScriptFileWorkspace, deployDataUrl)
-                self.ProcessScript(deployDataUrl, preScriptFileWorkspace, deployStageUrl)
+                self.ProcessScript(deployDataUrl, preScriptFileWorkspace, deployStageUrl,moduleList,organizationGitURL,activationModuleScriptUrl,pushToGit,gitFinalUrl)
                 preScriptProcessed = True
             if not preScriptProcessed and preScriptFile != deployStageUrl and len(preScriptFile) > 0:
                 wx.CallAfter(self.OnText, "Script file not found on: " + preScriptFile)
@@ -2443,6 +2963,11 @@ If this field is blank the default test level used is NoTestRun."""
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE
         )
+
+        #Accelerate Integration
+        deployError = False
+        #End Accelerate Integration
+
         for line in proc.stdout:
             lineStr = line.decode()
             if "jobid:  " in lineStr:
@@ -2460,23 +2985,148 @@ If this field is blank the default test level used is NoTestRun."""
                     logEntry["pathname"] = deployMetadataUrl
                     self.logList[jobIdStrip] = logEntry
             wx.CallAfter(self.OnText, lineStr)
+
+            #Accelerate Integration
+            if "Component errors:  " in lineStr:
+                lineSplit = lineStr.split("Component errors: ")
+                if len(lineSplit) > 1:
+                    numErrors = int(lineSplit[1].strip("\r\n"))
+                    if numErrors > 0:
+                        deployError = True
+            #End Accelerate Integration
+
         if not fromScript:
-            scriptProcessed = False
-            if os.path.exists(scriptFile) and scriptFile != deployStageUrl:
-                shutil.copy(scriptFile, deployDataUrl)
-                self.ProcessScript(deployDataUrl, scriptFile, deployStageUrl)
-                scriptProcessed = True
-            if os.path.exists(scriptFileWorkspace) and scriptFileWorkspace != deployStageUrl:
-                shutil.copy(scriptFileWorkspace, deployDataUrl)
-                self.ProcessScript(deployDataUrl, scriptFileWorkspace, deployStageUrl)
-                scriptProcessed = True
-            if not scriptProcessed and scriptFile != deployStageUrl and len(scriptFile) > 0:
-                wx.CallAfter(self.OnText, "Script file not found on: " + scriptFile)
+            #Accelerate Integration
+            if not deployError:
+            #End Accelerate Integration
+                scriptProcessed = False
+                if os.path.exists(scriptFile) and scriptFile != deployStageUrl:
+                    shutil.copy(scriptFile, deployDataUrl)
+                    self.ProcessScript(deployDataUrl, scriptFile, deployStageUrl,moduleList,organizationGitURL,activationModuleScriptUrl,pushToGit,gitFinalUrl)
+                    scriptProcessed = True
+                if os.path.exists(scriptFileWorkspace) and scriptFileWorkspace != deployStageUrl:
+                    shutil.copy(scriptFileWorkspace, deployDataUrl)
+                    self.ProcessScript(deployDataUrl, scriptFileWorkspace, deployStageUrl,moduleList,organizationGitURL,activationModuleScriptUrl,pushToGit,gitFinalUrl)
+                    scriptProcessed = True
+                if not scriptProcessed and scriptFile != deployStageUrl and len(scriptFile) > 0:
+                    wx.CallAfter(self.OnText, "Script file not found on: " + scriptFile)
+                    wx.CallAfter(self.OnText, os.linesep)
+                if not scriptProcessed and scriptFileWorkspace != deployStageUrl and len(scriptFileWorkspace) > 0:
+                    wx.CallAfter(self.OnText, "Script file not found on: " + scriptFileWorkspace)
+                    wx.CallAfter(self.OnText, os.linesep)
+                wx.CallAfter(self.SetButtonState, True)
+            #Accelerate Integration: Push to ORG Git
+                if (pushToGit):
+                    self.PushToOrgGit(deployMetadataUrl,gitFinalUrl,deployUrl)
+            else:
                 wx.CallAfter(self.OnText, os.linesep)
-            if not scriptProcessed and scriptFileWorkspace != deployStageUrl and len(scriptFileWorkspace) > 0:
-                wx.CallAfter(self.OnText, "Script file not found on: " + scriptFileWorkspace)
                 wx.CallAfter(self.OnText, os.linesep)
-            wx.CallAfter(self.SetButtonState, True)
+                wx.CallAfter(self.OnText, "---------------------------------------------------------------------------------")
+                wx.CallAfter(self.OnText, os.linesep)
+                wx.CallAfter(self.OnText, "Errors during deploy phase, Post Script and Push to Org Git won't be executed")
+                wx.CallAfter(self.OnText, os.linesep)
+                wx.CallAfter(self.OnText, "---------------------------------------------------------------------------------")
+                wx.CallAfter(self.OnText, os.linesep)
+            #End Accelerate Integration
+    
+    #Accelerate Integration
+    def PushToOrgGit(self,deployMetadataUrl,gitFinalUrl,deployUrl):
+
+        if self.stop:
+            self.consoleOutputTextCtrl.AppendText("Process stopped.")
+            self.consoleOutputTextCtrl.AppendText(os.linesep)
+            return
+        #Prepare local git folder, if exists -> recreate
+        pushToOrgGitURL = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy","pushRemoteOrg")
+        if os.path.exists(pushToOrgGitURL):
+           shutil.rmtree(pushToOrgGitURL, onerror=dtkglobal.RemoveReadonly) 
+        os.makedirs(pushToOrgGitURL)
+
+        #Starting the process
+        wx.CallAfter(self.OnText, "Pushing Accelerate Configuration to Git Organization...")
+        wx.CallAfter(self.OnText, os.linesep)
+
+        #Clone master
+        cmd = ["git", "clone", "--single-branch", "--branch", "master", gitFinalUrl, pushToOrgGitURL]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        for line in proc.stdout:
+            wx.CallAfter(self.OnText, line)
+
+        #Create and checkout Accelerate Branch
+        orgRemoteBranch = dtkglobal.accelerateVersion.replace(" ", "_")+"_"+datetime.datetime.now().strftime("%d/%m/%Y_%H_%M_%S")
+        cmd = ["git", "-C", pushToOrgGitURL, "checkout", "-b", orgRemoteBranch]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        for line in proc.stdout:
+            wx.CallAfter(self.OnText, line)
+
+        #Preparing all files to push to remote org git
+        metadataFiles = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy","metadata")
+        if os.path.exists(metadataFiles):
+            shutil.copytree(metadataFiles, pushToOrgGitURL+"\\sfdc\\src")
+        else:
+            wx.CallAfter(self.OnText, metadataFiles + " does not exist, it won't be copied.")
+            wx.CallAfter(self.OnText, os.linesep)
+
+        customSettings = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy","stage","CustomSettings")
+        if os.path.exists(customSettings):
+            shutil.copytree(customSettings, pushToOrgGitURL+"\\CustomSettings")
+        else:
+            wx.CallAfter(self.OnText, customSettings + " does not exist, it won't be copied.")
+            wx.CallAfter(self.OnText, os.linesep)
+
+        data = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy","stage","data")
+        if os.path.exists(data):
+            shutil.copytree(data, pushToOrgGitURL+"\\data")
+        else:
+            wx.CallAfter(self.OnText, data + " does not exist, it won't be copied.")
+            wx.CallAfter(self.OnText, os.linesep)
+
+        okMapping = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy","stage","Mapping")
+        if os.path.exists(okMapping):
+            shutil.copytree(okMapping, pushToOrgGitURL+"\\Mapping")
+        else:
+            wx.CallAfter(self.OnText, okMapping + " does not exist, it won't be copied.")
+            wx.CallAfter(self.OnText, os.linesep)
+
+        masterData = os.path.join(self.Parent.Parent.Parent.Parent.currentWorkspace, "deploy","stage","Master Data")
+        if os.path.exists(masterData):
+            shutil.copytree(masterData, pushToOrgGitURL+"\\Master Data")
+        else:
+            wx.CallAfter(self.OnText, masterData + " does not exist, it won't be copied.")
+            wx.CallAfter(self.OnText, os.linesep)
+
+        #Stash all files
+        cmd = ["git", "-C", pushToOrgGitURL, "add", "--all"]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        for line in proc.stdout:
+            wx.CallAfter(self.OnText, line)
+
+        #Commit all changes
+        cmd = ["git", "-C", pushToOrgGitURL, "commit", "-am", "Initial configuration: "+dtkglobal.accelerateVersion]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        for line in proc.stdout:
+            wx.CallAfter(self.OnText, line)
+
+        #Push the branch
+        cmd = ["git", "-C", pushToOrgGitURL, "push", "--set-upstream", "origin", orgRemoteBranch]
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
+        )
+        for line in proc.stdout:
+            wx.CallAfter(self.OnText, line)
+
+        wx.CallAfter(self.OnText, "Finished!!! O> bvio!!!")
+        wx.CallAfter(self.OnText, os.linesep)
+
+        #End Accelerate Integration
 
     def OnText(self, text):
         self.consoleOutputTextCtrl.AppendText(text)
@@ -2651,7 +3301,7 @@ If this field is blank the default test level used is NoTestRun."""
                     wx.CallAfter(self.OnText, line)
         wx.CallAfter(self.SetButtonState, True)
 
-    def ProcessScript(self, deployDataUrl, scriptUrl, deployStageUrl):
+    def ProcessScript(self, deployDataUrl, scriptUrl, deployStageUrl,moduleList,organizationGitURL,activationModuleScriptUrl,pushToGit,gitFinalUrl):
         if self.stop:
             self.consoleOutputTextCtrl.AppendText("Process stopped.")
             self.consoleOutputTextCtrl.AppendText(os.linesep)
@@ -2661,8 +3311,10 @@ If this field is blank the default test level used is NoTestRun."""
             os.makedirs(deployDataUrl)
         orgName = self.Parent.Parent.Parent.Parent.organizationComboBox.GetValue()
         sdbxNameSource = "Config"
-        if dtkglobal.advSetting:
-            sdbxNameSource = self.Parent.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()
+        #Accelerate Integration
+        """if dtkglobal.advSetting:
+            sdbxNameSource = self.Parent.Parent.Parent.Parent.sandboxTypeSourceTextCtrl.GetValue()"""
+        #Accelerate Integration
         sdbxName = self.Parent.Parent.Parent.Parent.sandboxTypeTargetComboBox.GetValue()
         sourceName = orgName + "_" + sdbxNameSource
         if "_" in sdbxNameSource:
@@ -2705,7 +3357,7 @@ If this field is blank the default test level used is NoTestRun."""
                     )
                 if (lineSplit[0] == "SOURCE" or lineSplit[0] == "TARGET") and (lineSplit[1] == "DEPLOYZIP" or lineSplit[1] == "DEPLOYFOLDER"):
                     self.ProcessMetadataScriptLine(
-                        lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl
+                        lineSplit, lineStr, targetName, sourceName, deployDataUrl, i, deployStageUrl,moduleList,organizationGitURL,activationModuleScriptUrl,pushToGit,gitFinalUrl
                     )
         i += 1
         scriptFile.close()
@@ -2730,7 +3382,7 @@ If this field is blank the default test level used is NoTestRun."""
             except:
                 self.consoleOutputTextCtrl.AppendText("Error processing stdout...")
                 self.consoleOutputTextCtrl.AppendText(os.linesep)
-           
+
     def ProcessFileScriptLine(
         self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
     ):
@@ -2761,7 +3413,7 @@ If this field is blank the default test level used is NoTestRun."""
             self.RunDataCmd(lineSplit, lineStr, target, pathString, cmd)
     
     def ProcessMetadataScriptLine(
-            self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl
+            self, lineSplit, lineStr, targetName, sourceName, deployDataUrl, lineNumber, deployStageUrl,moduleList,organizationGitURL,activationModuleScriptUrl,pushToGit,gitFinalUrl
         ):  
             deployType = None,
             orgName = None,
@@ -2840,9 +3492,12 @@ If this field is blank the default test level used is NoTestRun."""
                             metadataTypes,
                             fromScript,
                             waitParam,
-                        
+                            moduleList,
+                            organizationGitURL,
+                            activationModuleScriptUrl,
+                            pushToGit,
+                            gitFinalUrl
                     )
-
 
     def SelectZipFile(self, event):
         dlg = wx.FileDialog(
@@ -2984,10 +3639,9 @@ If this field is blank the default test level used is NoTestRun."""
         self.consoleOutputTextCtrl.AppendText("Fetching branches finished.")
         self.consoleOutputTextCtrl.AppendText(os.linesep)
 
-
 class DeployFrame(wx.Frame):
     def __init__(self, parent=None):
-        super(DeployFrame, self).__init__(parent, title="Deploy")
+        super(DeployFrame, self).__init__(parent, title="Deploy Accelerate")
         myStream = dtkglobal.getImageStream()
         myImage = wx.Image(myStream)
         myBitmap = wx.Bitmap(myImage)
@@ -3017,16 +3671,21 @@ class DeployFrame(wx.Frame):
         self.organizationComboBox.Items = dtkglobal.orgList
         self.organizationComboBox.Bind(wx.EVT_COMBOBOX, self.OrganizationSelected)
 
-        if dtkglobal.unlockSetting:
-            self.sandboxTypeSourceLbl = wx.StaticText(self.panel, label="Source")
-            self.sandboxTypeSourceLbl.ToolTip = """Sandbox Source: Add the sandbox name to be used as Source when executing data scripts.
-The Organization set will be set as preffix. Ex: Organization=MyOrg | Source=MySand >> MyOrg_MySand
-If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: Organization=MyOrg | Source=MyOtherOrg_My_Sand >> MyOtherOrg_My_Sand"""
-            self.sandboxTypeSourceTextCtrl = wx.TextCtrl(self.panel)
-            self.sandboxTypeSourceTextCtrl.ToolTip = """Sandbox Source: Add the sandbox name to be used as Source when executing data scripts.
-The Organization set will be set as preffix. Ex: Organization=MyOrg | Source=MySand >> MyOrg_MySand
-If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: Organization=MyOrg | Source=MyOtherOrg_My_Sand >> MyOtherOrg_My_Sand"""
-            self.sandboxTypeSourceTextCtrl.AppendText("Config")
+        self.accelerateURL = hl.HyperLinkCtrl(self.panel, -1, dtkglobal.accelerateVersion, pos=(100, 100), URL=dtkglobal.confluenceURL)
+        self.accelerateURL.SetBold(True)
+        self.accelerateURL.SetUnderlines(False, False, True)
+        self.accelerateURL.EnableRollover(True)
+        self.accelerateURL.UpdateLink()
+        #Accelerate Integration:         if dtkglobal.unlockSetting:
+        #Accelerate Integration:         self.sandboxTypeSourceLbl = wx.StaticText(self.panel, label="Source")
+        #Accelerate Integration:         self.sandboxTypeSourceLbl.ToolTip = """Sandbox Source: Add the sandbox name to be used as Source when executing data scripts.
+        #Accelerate Integration:         The Organization set will be set as preffix. Ex: Organization=MyOrg | Source=MySand >> MyOrg_MySand
+        #Accelerate Integration:         If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: Organization=MyOrg | Source=MyOtherOrg_My_Sand >> MyOtherOrg_My_Sand"""
+        #Accelerate Integration:         self.sandboxTypeSourceTextCtrl = wx.TextCtrl(self.panel)
+        #Accelerate Integration:         self.sandboxTypeSourceTextCtrl.ToolTip = """Sandbox Source: Add the sandbox name to be used as Source when executing data scripts.
+        #Accelerate Integration:         The Organization set will be set as preffix. Ex: Organization=MyOrg | Source=MySand >> MyOrg_MySand
+        #Accelerate Integration:         If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: Organization=MyOrg | Source=MyOtherOrg_My_Sand >> MyOtherOrg_My_Sand"""
+        #Accelerate Integration:         self.sandboxTypeSourceTextCtrl.AppendText("Config")
 
         self.sandboxTypeTargetLbl = wx.StaticText(self.panel, label="Target")
         self.sandboxTypeTargetLbl.ToolTip = "Sandbox Type: Config, QA, UAT or Prod."
@@ -3037,7 +3696,7 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
 
         self.nb = wx.Notebook(self.panel)
         self.nb.AddPage(DeployMetadataPanel(self.nb, deployType="Git"), "Metadata")
-        self.nb.AddPage(ScriptDataPanel(self.nb), "Script Data")
+        self.nb.AddPage(ScriptDataPanel(self.nb), "Post Master Data Script")
 
         self.mainSizer.Add(self.organizationLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         self.mainSizer.Add(
@@ -3047,9 +3706,16 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
             flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
             border=5,
         )
-        row += 1
 
-        if dtkglobal.unlockSetting:
+        self.mainSizer.Add(
+            self.accelerateURL,
+            pos = (row, col + 5),
+            flag = wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT | wx.ALIGN_TOP | wx.ALIGN_RIGHT,
+            border = 5,
+        )
+        row += 1
+        #Accelerate Integration: 
+        """if dtkglobal.unlockSetting:
             self.mainSizer.Add(self.sandboxTypeSourceLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
             self.mainSizer.Add(
                 self.sandboxTypeSourceTextCtrl,
@@ -3058,7 +3724,8 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
                 flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
                 border=5,
             )
-            row += 1
+            row += 1"""
+        #End Accelerate Integration
 
         self.mainSizer.Add(self.sandboxTypeTargetLbl, pos=(row, col), flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         self.mainSizer.Add(
@@ -3092,10 +3759,10 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
 
     def OrganizationSelected(self, event):
         orgName = self.organizationComboBox.GetValue()
-        self.nb.GetPage(0).gitUrlComboBox.Clear()
+        """self.nb.GetPage(0).gitUrlComboBox.Clear()
         self.nb.GetPage(0).metadataGitFolderTextCtrl.Clear()        
         self.nb.GetPage(0).preScriptFolderTextCtrl.Clear()
-        self.nb.GetPage(0).scriptFolderTextCtrl.Clear()
+        self.nb.GetPage(0).scriptFolderTextCtrl.Clear()"""
         self.sandboxTypeTargetComboBox.Enable(False)
         if len(orgName) == 0:
             self.sandboxTypeTargetComboBox.Clear()
@@ -3103,25 +3770,30 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
             sandboxList = dtkglobal.orgDict[orgName]["sandboxes"]
             sandboxList.sort()
             self.sandboxTypeTargetComboBox.Items = sandboxList
-            if dtkglobal.unlockSetting:
+            #Accelerate Integration
+            """if dtkglobal.unlockSetting:
                 self.sandboxTypeSourceTextCtrl.Clear()
-                self.sandboxTypeSourceTextCtrl.AppendText("Config")
-            gitList = [dtkglobal.orgDict[orgName]["giturl"]]
-            self.nb.GetPage(0).gitUrlComboBox.Items = gitList
+                self.sandboxTypeSourceTextCtrl.AppendText("Config")"""
+            #Accelerate Integration
+            
+            #Accelerate Integration
+            self.nb.GetPage(0).organizationGitUrlTextCtrl.SetValue([dtkglobal.orgDict[orgName]["giturl"]][0])
+            #self.nb.GetPage(0).organizationGitUrlLbl.SetLabel(orgName + " Git URL")self.nb.GetPage(0).organizationGitUrlLbl.SetLabel(orgName + " Git URL")
+
+            """self.nb.GetPage(0).gitUrlComboBox.Items = gitList
             self.nb.GetPage(0).metadataGitFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["metadatafolder"])
             if "preScript" in dtkglobal.orgDict[orgName]:
                 self.nb.GetPage(0).preScriptFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["preScript"])
-            self.nb.GetPage(0).scriptFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["script"])
-            self.Title = "Deploy: " + orgName
+            self.nb.GetPage(0).scriptFolderTextCtrl.AppendText(dtkglobal.orgDict[orgName]["script"])"""
+            #Accelerate Integration
+            self.Title = "Deploy Accelerate: " + orgName
             self.sandboxTypeTargetComboBox.Enable(True)
 
     def TargetSelected(self, event):
         orgName = self.organizationComboBox.GetValue()
         sdbxName = self.sandboxTypeTargetComboBox.GetValue()
-        if sdbxName == "Prod" or sdbxName == "UAT":
-            self.nb.GetPage(0).testLevelsComboBox.SetStringSelection("RunLocalTests")
-        else:
-            self.nb.GetPage(0).testLevelsComboBox.SetStringSelection("NoTestRun")
+        ## Accelerate deploy always in Prod, Local test must be executed
+        self.nb.GetPage(0).testLevelsComboBox.SetStringSelection("RunLocalTests")
         if len(orgName) == 0:
             dlg = wx.MessageDialog(self, "Please select an organization.", "DTK - Deploy", wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
@@ -3160,9 +3832,12 @@ If the Sandbox includes any '_' the Organization set will not be preffixed. Ex: 
             os.makedirs(self.currentWorkspace)
         self.nb.GetPage(0).consoleOutputTextCtrl.AppendText("Workspace changed to: " + self.currentWorkspace)
         self.nb.GetPage(0).consoleOutputTextCtrl.AppendText(os.linesep)
+        self.nb.GetPage(1).consoleOutputTextCtrl.Clear()
         self.nb.GetPage(1).consoleOutputTextCtrl.AppendText("Workspace changed to: " + self.currentWorkspace)
-        self.nb.GetPage(1).consoleOutputTextCtrl.AppendText(os.linesep)
-        self.Title = "Deploy: " + orgName + " - " + sdbxName
+        self.nb.GetPage(1).consoleOutputTextCtrl.AppendText(os.linesep) 
+        self.nb.GetPage(1).UploadFile()
+        self.nb.GetPage(1).UploadScript()
+        self.Title = "Deploy Accelerate: " + orgName + " - " + sdbxName
 
     def OnCloseWindow(self, event):
         if self.currentTarget in dtkglobal.targets:
