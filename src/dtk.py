@@ -135,7 +135,7 @@ class MainFrame(wx.Frame):
 
     def OnAbout(self, e):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
-        dlg = wx.MessageDialog(self, "Version 3.0\n\nCreators:\nMiguel Perales - miguelperalesbermejo@gmail.com\nJose Manuel Caballero - jcaballeromunoz4@gmail.com\nJose Antonio Martin - ja.martin.esteban@gmail.com\nMiguel Diaz - migueldiazgil92@gmail.com\n\nPraise The Sun!", "About DTK", wx.OK)
+        dlg = wx.MessageDialog(self, "Version 3.1\n\nCreators:\nMiguel Perales - miguelperalesbermejo@gmail.com\nJose Manuel Caballero - jcaballeromunoz4@gmail.com\nJose Antonio Martin - ja.martin.esteban@gmail.com\nMiguel Diaz - migueldiazgil92@gmail.com\n\nPraise The Sun!", "About DTK", wx.OK)
         dlg.ShowModal()  # Show it
         dlg.Destroy()  # finally destroy it when finished.
 
@@ -212,38 +212,40 @@ class EditSettingsFrame(wx.Dialog):
         self.defaultApiVersionCtrl = wx.TextCtrl(self.panel)
         self.defaultApiVersionCtrl.ToolTip = "Default API version to be used in the retrieve and deploy. Execute 'sfdx force' in a terminal to see your latest version installed."
 
-        if dtkglobal.advSetting:
-            self.accelerateEnableLbl = wx.StaticText(self.panel, label="Enable Accelerate Deployment")
-            self.accelerateEnableLbl.ToolTip = "Check this to enable Accelerate deployment."
-            self.accelerateEnableCheckBox = wx.CheckBox(self.panel)
-            self.accelerateEnableCheckBox.ToolTip = "Check this to enable Accelerate deployment."
-            self.accelerateGitURLLbl = wx.StaticText(self.panel, label="Accelerate Git URL")
-            self.accelerateGitURLLbl.ToolTip = "Accelerate Git URL"
-            self.accelerateGitURL = wx.TextCtrl(self.panel)
-            self.accelerateGitURL.ToolTip = "Accelerate Git URL - Do not change the default value if you don't know what are you doing..."
-            self.accelerateGitUserLbl = wx.StaticText(self.panel, label="Git User")
-            self.accelerateGitUserLbl.ToolTip = "IQVIA GitLab user to download Accelerate configuration"
-            self.accelerateGitUser = wx.TextCtrl(self.panel)
-            self.accelerateGitUser.ToolTip = "IQVIA GitLab user to download Accelerate configuration"
-            self.gitPasswordLbl = wx.StaticText(self.panel, label="Git Password")
-            self.gitPasswordLbl.ToolTip = "IQVIA GitLab Password. If you have a 2 factor authentication git server then you need to set here the granted token generated."
-            self.accelerateGitPassword = wx.TextCtrl(self.panel, style=wx.TE_PASSWORD)
-            self.accelerateGitPassword.ToolTip = "IQVIA GitLab Password. If you have a 2 factor authentication git server then you need to set here the granted token generated."
-            self.accelerateDevEnableLbl = wx.StaticText(self.panel, label="Download Accelerate Settings for developers")
-            self.accelerateDevEnableLbl.ToolTip = "Check this to download Accelerate Settings for developers. Do not change if you dont know what you are doing."
-            self.accelerateDevEnableCheckBox = wx.CheckBox(self.panel)
-            self.accelerateDevEnableCheckBox.ToolTip = "Check this to download Accelerate Settings for developers. Do not enable it if you don't know what you are doing!!!"
-
-        else:
-            self.accelerateEnableCheckBox = wx.CheckBox()
-            self.accelerateGitURL = wx.TextCtrl(self.panel)
-            self.accelerateGitUser = wx.TextCtrl(self.panel)
-            self.accelerateGitPassword = wx.TextCtrl(self.panel, style=wx.TE_PASSWORD)
-            self.accelerateDevEnableCheckBox = wx.CheckBox()
-            self.accelerateEnableCheckBox.Hide()
-            self.accelerateGitURL.Hide()
-            self.accelerateGitUser.Hide()
-            self.accelerateGitPassword.Hide()
+        #Accelerate start
+        #if dtkglobal.advSetting:
+        #    self.accelerateEnableLbl = wx.StaticText(self.panel, label="Enable Accelerate Deployment")
+        #    self.accelerateEnableLbl.ToolTip = "Check this to enable Accelerate deployment."
+        #    self.accelerateEnableCheckBox = wx.CheckBox(self.panel)
+        #    self.accelerateEnableCheckBox.ToolTip = "Check this to enable Accelerate deployment."
+        #    self.accelerateGitURLLbl = wx.StaticText(self.panel, label="Accelerate Git URL")
+        #    self.accelerateGitURLLbl.ToolTip = "Accelerate Git URL"
+        #    self.accelerateGitURL = wx.TextCtrl(self.panel)
+        #    self.accelerateGitURL.ToolTip = "Accelerate Git URL - Do not change the default value if you don't know what are you doing..."
+        #    self.accelerateGitUserLbl = wx.StaticText(self.panel, label="Git User")
+        #    self.accelerateGitUserLbl.ToolTip = "IQVIA GitLab user to download Accelerate configuration"
+        #    self.accelerateGitUser = wx.TextCtrl(self.panel)
+        #    self.accelerateGitUser.ToolTip = "IQVIA GitLab user to download Accelerate configuration"
+        #    self.gitPasswordLbl = wx.StaticText(self.panel, label="Git Password")
+        #    self.gitPasswordLbl.ToolTip = "IQVIA GitLab Password. If you have a 2 factor authentication git server then you need to set here the granted token generated."
+        #    self.accelerateGitPassword = wx.TextCtrl(self.panel, style=wx.TE_PASSWORD)
+        #    self.accelerateGitPassword.ToolTip = "IQVIA GitLab Password. If you have a 2 factor authentication git server then you need to set here the granted token generated."
+        #    self.accelerateDevEnableLbl = wx.StaticText(self.panel, label="Download Accelerate Settings for developers")
+        #    self.accelerateDevEnableLbl.ToolTip = "Check this to download Accelerate Settings for developers. Do not change if you dont know what you are doing."
+        #    self.accelerateDevEnableCheckBox = wx.CheckBox(self.panel)
+        #    self.accelerateDevEnableCheckBox.ToolTip = "Check this to download Accelerate Settings for developers. Do not enable it if you don't know what you are doing!!!"
+#
+        #else:
+        #    self.accelerateEnableCheckBox = wx.CheckBox()
+        #    self.accelerateGitURL = wx.TextCtrl(self.panel)
+        #    self.accelerateGitUser = wx.TextCtrl(self.panel)
+        #    self.accelerateGitPassword = wx.TextCtrl(self.panel, style=wx.TE_PASSWORD)
+        #    self.accelerateDevEnableCheckBox = wx.CheckBox()
+        #    self.accelerateEnableCheckBox.Hide()
+        #    self.accelerateGitURL.Hide()
+        #    self.accelerateGitUser.Hide()
+        #    self.accelerateGitPassword.Hide()
+        #Accelerate end
 
         self.btnSaveSettings = wx.Button(self.panel, label="Save")
         self.btnSaveSettings.Bind(wx.EVT_BUTTON, self.SaveSettings)
@@ -342,37 +344,39 @@ class EditSettingsFrame(wx.Dialog):
         )
         row += 1
 
-        if dtkglobal.advSetting:
-            self.mainSizer.Add(self.accelerateEnableLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-            self.mainSizer.Add(
-                self.accelerateEnableCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
-            )
-            row += 1
-
-
-            self.mainSizer.Add(self.accelerateGitURLLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-            self.mainSizer.Add(
-                self.accelerateGitURL, pos=(row, col + 1), span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
-            )
-            row += 1
-
-            self.mainSizer.Add(self.accelerateGitUserLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-            self.mainSizer.Add(
-                self.accelerateGitUser, pos=(row, col + 1), span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
-            )
-            row += 1
-
-            self.mainSizer.Add(self.gitPasswordLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-            self.mainSizer.Add(
-                self.accelerateGitPassword, pos=(row, col + 1),span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
-            )
-            row += 1
-
-            self.mainSizer.Add(self.accelerateDevEnableLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-            self.mainSizer.Add(
-                self.accelerateDevEnableCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
-            )
-            row += 1
+        #Accelerate start
+        #if dtkglobal.advSetting:
+        #    self.mainSizer.Add(self.accelerateEnableLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        #    self.mainSizer.Add(
+        #        self.accelerateEnableCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        #    )
+        #    row += 1
+#
+#
+        #    self.mainSizer.Add(self.accelerateGitURLLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        #    self.mainSizer.Add(
+        #        self.accelerateGitURL, pos=(row, col + 1), span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        #    )
+        #    row += 1
+#
+        #    self.mainSizer.Add(self.accelerateGitUserLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        #    self.mainSizer.Add(
+        #        self.accelerateGitUser, pos=(row, col + 1), span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        #    )
+        #    row += 1
+#
+        #    self.mainSizer.Add(self.gitPasswordLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        #    self.mainSizer.Add(
+        #        self.accelerateGitPassword, pos=(row, col + 1),span=(1, 4), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        #    )
+        #    row += 1
+#
+        #    self.mainSizer.Add(self.accelerateDevEnableLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        #    self.mainSizer.Add(
+        #        self.accelerateDevEnableCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
+        #    )
+        #    row += 1
+        #Accelerate end
 
         self.mainSizer.Add(self.btnSaveSettings, pos=(row, col + 2), span=(1, 1), flag=wx.BOTTOM | wx.RIGHT, border=5)
         self.mainSizer.Add(self.btnCancel, pos=(row, col + 3), span=(1, 1), flag=wx.BOTTOM | wx.RIGHT, border=5)
@@ -391,11 +395,14 @@ class EditSettingsFrame(wx.Dialog):
         self.defaultPreScriptFolderTextCtrl.write(dtkglobal.defaultPreScriptFolder)
         self.defaultScriptFolderTextCtrl.write(dtkglobal.defaultScriptFolder)
         self.defaultApiVersionCtrl.write(dtkglobal.defaultApiVersion)
-        self.accelerateEnableCheckBox.SetValue(dtkglobal.accelerateEnableSetting)
-        self.accelerateGitURL.write(dtkglobal.accelerateGitURL)
-        self.accelerateGitUser.write(dtkglobal.accelerateGitUser)
-        self.accelerateGitPassword.write(dtkglobal.accelerateGitPassword)
-        self.accelerateDevEnableCheckBox.SetValue(dtkglobal.accelerateDevEnableSetting)
+        
+        #Accelerate start
+        #self.accelerateEnableCheckBox.SetValue(dtkglobal.accelerateEnableSetting)
+        #self.accelerateGitURL.write(dtkglobal.accelerateGitURL)
+        #self.accelerateGitUser.write(dtkglobal.accelerateGitUser)
+        #self.accelerateGitPassword.write(dtkglobal.accelerateGitPassword)
+        #self.accelerateDevEnableCheckBox.SetValue(dtkglobal.accelerateDevEnableSetting)
+        #Accelerate end
 
 
         self.mainSizer.SetEmptyCellSize((0, 0))

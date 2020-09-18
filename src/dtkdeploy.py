@@ -543,11 +543,23 @@ class ScriptDataPanel(wx.Panel):
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
+        WINDOWS_LINE_ENDING = b'\r\n'
+        UNIX_LINE_ENDING = b'\n'
         if "SOQLQUERY" in lineSplit:
-            fileOutput = open(pathString, "wb")
-            fileOutput.write(proc.stdout.read())
+            fileOutput = open(pathString, "w", encoding="utf8")
             for line in proc.stdout:
-                wx.CallAfter(self.OnText, line)
+                lnStr = line.decode()
+                if "Querying Data" not in lnStr:
+                    if "sfdx-cli update available from" not in lnStr:
+                        fileOutput.write(lnStr)
+            fileOutput.close()
+            fileRead = open(pathString, "rb")
+            content = fileRead.read()
+            content = content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+            fileRead.close()
+            fileOutput = open(pathString, "wb")
+            fileOutput.write(content)
+            fileOutput.close()
             wx.CallAfter(self.OnText, "Exported data to " + pathString + "\n")
         else:
             for line in proc.stdout:
@@ -2490,11 +2502,23 @@ If this field is blank the default test level used is NoTestRun."""
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
+        WINDOWS_LINE_ENDING = b'\r\n'
+        UNIX_LINE_ENDING = b'\n'
         if "SOQLQUERY" in lineSplit:
-            fileOutput = open(pathString, "wb")
-            fileOutput.write(proc.stdout.read())
+            fileOutput = open(pathString, "w", encoding="utf8")
             for line in proc.stdout:
-                wx.CallAfter(self.OnText, line)
+                lnStr = line.decode()
+                if "Querying Data" not in lnStr:
+                    if "sfdx-cli update available from" not in lnStr:
+                        fileOutput.write(lnStr)
+            fileOutput.close()
+            fileRead = open(pathString, "rb")
+            content = fileRead.read()
+            content = content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+            fileRead.close()
+            fileOutput = open(pathString, "wb")
+            fileOutput.write(content)
+            fileOutput.close()
             wx.CallAfter(self.OnText, "Exported data to " + pathString + "\n")
         else:
             for line in proc.stdout:
