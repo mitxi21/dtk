@@ -1,3 +1,30 @@
+# MIT License
+# 
+# Copyright (c) 2019
+# Miguel Perales - miguelperalesbermejo@gmail.com 
+# Jose Manuel Caballero - jcaballeromunoz4@gmail.com
+# Jose Antonio Martin - ja.martin.esteban@gmail.com
+# Miguel Diaz - migueldiazgil92@gmail.com
+# Jesus Blanco Garrido - jesusblancogarrido@gmail.com
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import datetime
 import json
 import os
@@ -615,11 +642,23 @@ class ScriptDataPanel(wx.Panel):
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
+        WINDOWS_LINE_ENDING = b'\r\n'
+        UNIX_LINE_ENDING = b'\n'
         if "SOQLQUERY" in lineSplit:
-            fileOutput = open(pathString, "wb")
-            fileOutput.write(proc.stdout.read())
+            fileOutput = open(pathString, "w", encoding="utf8")
             for line in proc.stdout:
-                wx.CallAfter(self.OnText, line)
+                lnStr = line.decode()
+                if "Querying Data" not in lnStr:
+                    if "sfdx-cli update available from" not in lnStr:
+                        fileOutput.write(lnStr)
+            fileOutput.close()
+            fileRead = open(pathString, "rb")
+            content = fileRead.read()
+            content = content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+            fileRead.close()
+            fileOutput = open(pathString, "wb")
+            fileOutput.write(content)
+            fileOutput.close()
             wx.CallAfter(self.OnText, "Exported data to " + pathString + "\n")
         else:
             for line in proc.stdout:
@@ -3140,11 +3179,23 @@ class DeployMetadataPanel(wx.Panel):
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
+        WINDOWS_LINE_ENDING = b'\r\n'
+        UNIX_LINE_ENDING = b'\n'
         if "SOQLQUERY" in lineSplit:
-            fileOutput = open(pathString, "wb")
-            fileOutput.write(proc.stdout.read())
+            fileOutput = open(pathString, "w", encoding="utf8")
             for line in proc.stdout:
-                wx.CallAfter(self.OnText, line)
+                lnStr = line.decode()
+                if "Querying Data" not in lnStr:
+                    if "sfdx-cli update available from" not in lnStr:
+                        fileOutput.write(lnStr)
+            fileOutput.close()
+            fileRead = open(pathString, "rb")
+            content = fileRead.read()
+            content = content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+            fileRead.close()
+            fileOutput = open(pathString, "wb")
+            fileOutput.write(content)
+            fileOutput.close()
             wx.CallAfter(self.OnText, "Exported data to " + pathString + "\n")
         else:
             for line in proc.stdout:

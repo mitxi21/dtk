@@ -1,3 +1,30 @@
+# MIT License
+# 
+# Copyright (c) 2019
+# Miguel Perales - miguelperalesbermejo@gmail.com 
+# Jose Manuel Caballero - jcaballeromunoz4@gmail.com
+# Jose Antonio Martin - ja.martin.esteban@gmail.com
+# Miguel Diaz - migueldiazgil92@gmail.com
+# Jesus Blanco Garrido - jesusblancogarrido@gmail.com
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import dtkdeploy
 import dtkdeployAccelerate
 import dtkglobal
@@ -135,7 +162,7 @@ class MainFrame(wx.Frame):
 
     def OnAbout(self, e):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
-        dlg = wx.MessageDialog(self, "Version 3.1\n\nCreators:\nMiguel Perales - miguelperalesbermejo@gmail.com\nJose Manuel Caballero - jcaballeromunoz4@gmail.com\nJose Antonio Martin - ja.martin.esteban@gmail.com\nMiguel Diaz - migueldiazgil92@gmail.com\n\nPraise The Sun!", "About DTK", wx.OK)
+        dlg = wx.MessageDialog(self, "Version 3.2\n\nPraise The Sun!\n\nMIT License\n\nCopyright (c) 2019\n\nMiguel Perales - miguelperalesbermejo@gmail.com \nJose Manuel Caballero - jcaballeromunoz4@gmail.com\nJose Antonio Martin - ja.martin.esteban@gmail.com\nMiguel Diaz - migueldiazgil92@gmail.com\nJesus Blanco Garrido - jesusblancogarrido@gmail.com\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the 'Software'), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.", "About DTK", wx.OK)
         dlg.ShowModal()  # Show it
         dlg.Destroy()  # finally destroy it when finished.
 
@@ -256,15 +283,18 @@ class EditSettingsFrame(wx.Dialog):
         row = 0
         col = 0
 
-        self.mainSizer.Add(self.advSettingLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(self.advCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        row += 1
+        self.advSettingLbl.Hide()
+        self.advCheckBox.Hide()
+        self.unlockLbl.Hide()
+        self.unlockCheckBox.Hide()
 
-        self.mainSizer.Add(self.unlockLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
-        self.mainSizer.Add(
-            self.unlockCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5
-        )
-        row += 1
+        # self.mainSizer.Add(self.advSettingLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        # self.mainSizer.Add(self.advCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        # row += 1
+
+        # self.mainSizer.Add(self.unlockLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        # self.mainSizer.Add(self.unlockCheckBox, pos=(row, col + 1), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
+        # row += 1
 
         self.mainSizer.Add(self.unzipLbl, pos=(row, col), flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=5)
         self.mainSizer.Add(
