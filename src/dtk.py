@@ -404,7 +404,7 @@ class EditSettingsFrame(wx.Dialog):
         #self.accelerateDevEnableCheckBox.SetValue(dtkglobal.accelerateDevEnableSetting)
         #Accelerate end
 
-
+        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.mainSizer.SetEmptyCellSize((0, 0))
         self.Layout()
         self.Fit()
