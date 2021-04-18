@@ -543,6 +543,9 @@ class ScriptDataPanel(wx.Panel):
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE
         )
+        for line in proc.stderr:
+            lineStr = line.decode()
+            wx.CallAfter(self.OnText, lineStr)
         for line in proc.stdout:
             lineStr = line.decode()
             if "jobid:  " in lineStr:
@@ -2482,6 +2485,9 @@ If this field is blank the default test level used is NoTestRun."""
         proc = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE
         )
+        for line in proc.stderr:
+            lineStr = line.decode()
+            wx.CallAfter(self.OnText, lineStr)
         for line in proc.stdout:
             lineStr = line.decode()
             if "jobid:  " in lineStr:
