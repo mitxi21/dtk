@@ -181,11 +181,6 @@ def SaveSettings(
     advSettingIn,
     unlockSettingIn,
     unzipSettingIn,
-    accelerateEnableSettingIn,
-    accelerateDevEnableSettingIn,
-    accelerateGitURLIn,
-    accelerateGitUserIn,
-    accelerateGitPasswordIn,
     metadataTypesSettingIn,
     defaultPackagesToExcludeIn,
     defaultMetadataFolderIn,
@@ -209,22 +204,6 @@ def SaveSettings(
     global unzipSetting
     unzipSetting = unzipSettingIn
     shelfFile["unzipSetting"] = unzipSettingIn
-    global accelerateEnableSetting
-    accelerateEnableSetting = accelerateEnableSettingIn
-    shelfFile["accelerateEnableSetting"] = accelerateEnableSettingIn
-    global accelerateDevEnableSetting
-    accelerateDevEnableSetting = accelerateDevEnableSettingIn
-    shelfFile["accelerateDevEnableSetting"] = accelerateDevEnableSettingIn
-
-    global accelerateGitURL
-    accelerateGitURL = accelerateGitURLIn
-    shelfFile["accelerateGitURL"] = accelerateGitURLIn
-    global accelerateGitUser
-    accelerateGitUser = accelerateGitUserIn
-    shelfFile["accelerateGitUser"] = accelerateGitUserIn
-    global accelerateGitPassword
-    accelerateGitPassword = accelerateGitPasswordIn
-    shelfFile["accelerateGitPassword"] = accelerateGitPasswordIn
     global metadataTypes
     metadataTypes = metadataTypesSettingIn.split(",")
     metadataTypes.sort()

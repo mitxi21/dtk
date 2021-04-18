@@ -451,11 +451,6 @@ class EditSettingsFrame(wx.Dialog):
             defaultMetadataFolderIn=self.defaultMetadataFolderTextCtrl.GetLineText(0),
             defaultScriptFolderIn=self.defaultScriptFolderTextCtrl.GetLineText(0),
             defaultApiVersionIn=self.defaultApiVersionCtrl.GetLineText(0),
-            accelerateEnableSettingIn=self.accelerateEnableCheckBox.GetValue(),
-            accelerateDevEnableSettingIn=self.accelerateDevEnableCheckBox.GetValue(),
-            accelerateGitURLIn=self.accelerateGitURL.GetLineText(0),
-            accelerateGitUserIn=self.accelerateGitUser.GetLineText(0),
-            accelerateGitPasswordIn=self.accelerateGitPassword.GetLineText(0),
             defaultPreScriptFolderIn=self.defaultPreScriptFolderTextCtrl.GetLineText(0),
         )
         self.Destroy()
