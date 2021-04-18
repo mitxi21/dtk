@@ -595,10 +595,7 @@ class ScriptDataPanel(wx.Panel):
             waitParam
         ]
         if (platform.system() != "Windows"):
-            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-l" + " " +  testLevel + " " + "-w" + " " +  waitParam]
-        if (testLevel == 'NoTestRun' and sdbxName == 'Prod'):
-            cmd.remove("-l")
-            cmd.remove(testLevel)    
+            cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-l" + " " +  testLevel + " " + "-w" + " " +  waitParam]  
         if checkOnly:
             cmd.append("-c")
         if ignoreWarnings:
@@ -2986,9 +2983,6 @@ class DeployMetadataPanel(wx.Panel):
         ]
         if (platform.system() != "Windows"):
             cmd = ["/usr/local/bin/sfdx" + " " + "force:mdapi:deploy" + " " + "--apiversion" + " " + dtkglobal.defaultApiVersion + " " + "-u" + " " + targetName + " " + "-l" + " " + testLevel + " " + "-w" + " " + waitParam]
-        if (testLevel == 'NoTestRun' and sdbxName == 'Prod'):
-            cmd.remove("-l")
-            cmd.remove(testLevel)
         if checkOnly:
             cmd.append("-c")
         if ignoreWarnings:
